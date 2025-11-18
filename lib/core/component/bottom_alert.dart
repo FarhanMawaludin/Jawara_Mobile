@@ -60,6 +60,8 @@ class BottomAlert extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
 
+              const SizedBox(height: 20),
+
               /// ===== ICON / IMAGE / GIF =====
               if (icon != null) ...[
                 icon!,

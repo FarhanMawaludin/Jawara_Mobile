@@ -16,7 +16,7 @@ class _MainShellState extends State<MainShell> {
     '/homepage',
     '/keuangan',
     '/warga',
-    '/komunikasi',
+    '/kegiatan',
     '/pengaturan',
   ];
 
@@ -56,8 +56,8 @@ class _MainShellState extends State<MainShell> {
               label: "Warga",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              label: "Komunikasi",
+              icon: Icon(Icons.event_note_outlined),
+              label: "Kegiatan",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings),
