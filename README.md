@@ -40,7 +40,7 @@ Aplikasi ini dibuat menggunakan **Flutter** dan terintegrasi dengan **Supabase**
 - **Flutter 3.x**
 - **Supabase (Auth, Database, Storage)**
 - Clean Architecture (presentation, domain, data)
-- State management (Provider / Riverpod / Bloc — sesuaikan)
+- State management ( Riverpod )
 - Integration & Unit Testing
 
 ---
