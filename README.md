@@ -1,20 +1,54 @@
-<<<<<<< HEAD
 # Jawara Mobile App
-=======
-# jawaramobile
 
-A new Flutter project.
+Jawara Mobile adalah aplikasi manajemen warga untuk sebuah perumahan.  
+Aplikasi ini mempermudah pengelolaan data warga, rumah, riwayat penghuni, mutasi keluarga, dan berbagai kebutuhan administrasi lingkungan.
 
-## Getting Started
+Aplikasi ini dibuat menggunakan **Flutter** dan terintegrasi dengan **Supabase** sebagai backend untuk autentikasi, database, dan manajemen data.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## Fitur Utama
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Manajemen Warga**
+  - Tambah, edit, dan lihat data warga
+  - Informasi lengkap seperti NIK, alamat, tanggal lahir, dan status keluarga
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
->>>>>>> 51d60dc727375eaf3f9033a6d80686cdf046c9fa
+- **Manajemen Rumah**
+  - Data rumah per blok dan nomor
+  - Relasi antara rumah dan penghuni
+
+- **Riwayat Penghuni**
+  - Tracking mutasi masuk/keluar warga
+  - Histori perpindahan (family movement log)
+
+- **Manajemen Keluarga**
+  - Data kepala keluarga
+  - Anggota keluarga
+  - Riwayat perubahan keluarga
+
+- **Autentikasi Supabase**
+  - Login, register, dan sign out
+  - Role-based access (admin / warga)
+
+- **Notifikasi & Informasi Lingkungan** 
+  - Pengumuman, kegiatan, dan berita perumahan
+
+---
+
+## 🛠️ Teknologi yang Digunakan
+
+- **Flutter 3.x**
+- **Supabase (Auth, Database, Storage)**
+- Clean Architecture (presentation, domain, data)
+- State management (Provider / Riverpod / Bloc — sesuaikan)
+- Integration & Unit Testing
+
+---
+
+## 📦 Instalasi
+
+Clone project:
+
+```bash
+git clone https://github.com/username/jawaramobile.git
+cd jawaramobile
