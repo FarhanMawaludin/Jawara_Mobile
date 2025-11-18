@@ -50,5 +50,5 @@ Aplikasi ini dibuat menggunakan **Flutter** dan terintegrasi dengan **Supabase**
 Clone project:
 
 ```bash
-git clone https://github.com/username/jawaramobile.git
+git clone https://github.com/FarhanMawaludin/Jawara_Mobile.git
 cd jawaramobile
