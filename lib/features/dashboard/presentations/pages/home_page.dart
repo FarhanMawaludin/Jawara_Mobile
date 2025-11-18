@@ -1,0 +1,35 @@
+import 'package:flutter/material.dart';
+import '../widgets/ActivitiesSection.dart';
+import '../widgets/FinanceSection.dart';
+import '../widgets/HeaderSection.dart';
+import '../widgets/PopulationCard.dart';
+import '../widgets/ResponsiblePersons.dart';
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: const [
+              HeaderSection(),
+              SizedBox(height: 20),
+              PopulationCard(),
+              SizedBox(height: 20),
+              ActivitiesSection(),
+              SizedBox(height: 20),
+              FinanceSection(),
+              SizedBox(height: 20),
+              ResponsiblePersons(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,163 @@
+// lib/route.dart (updated with register flow)
+import 'package:go_router/go_router.dart';
+import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration.dart';
+import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/pages/settings_page.dart';
+
+// Warga imports
+import 'package:jawaramobile/features/warga/presentations/pages/keluarga/detail_keluarga/keluarga_detail.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/lainnya/lainnya.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/mutasi/daftar_mutasi/daftar_mutasi_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/mutasi/detail_mutasi/detail_mutasi_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/mutasi/tambah_mutasi/tambah_mutasi_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/penerimaan_warga/penerimaan_warga_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/rumah/daftar_rumah/daftar_rumah_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/rumah/detail_rumah/detail_rumah_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/rumah/tambah_rumah/tambah_rumah_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/statistik/statistik_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/warga/daftar_warga/daftar_warga_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/warga/detail_warga/detail_warga_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/warga/tambah_warga/tambah_warga_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/dashboard/warga_page.dart';
+
+// Dashboard
+import '../features/dashboard/presentations/pages/home_page.dart';
+
+// Auth
+import '../features/auth/presentations/pages/login_page.dart';
+
+// Main
+import 'package:jawaramobile/features/main_shell.dart';
+
+
+
+// Register 
+import '../features/register/presentations/pages/register_step1_account.dart';
+import '../features/register/presentations/pages/register_step2_warga.dart';
+import '../features/register/presentations/pages/register_step3_rumah.dart';
+import '../features/register/presentations/pages/register_complete.dart';
+
+// Warga
+import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_keluarga/daftar_keluarga_page.dart';
+
+
+final GoRouter router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => const OnboardingPage()),
+    GoRoute(path: '/login', builder: (context, state) => LoginPage()),
+    // Register flow
+    GoRoute(
+      path: '/register/step1',
+      builder: (context, state) => RegisterStep1Account(),
+    ),
+    GoRoute(
+      path: '/register/step2',
+      builder: (context, state) => RegisterStep2Warga(),
+    ),
+    GoRoute(
+      path: '/register/step3',
+      builder: (context, state) => RegisterStep3Rumah(),
+    ),
+    GoRoute(
+      path: '/register/complete',
+      builder: (context, state) => const RegisterComplete(),
+    ),
+    // Shell route for bottom nav or persistent layout
+    ShellRoute(
+      builder: (context, state, child) => MainShell(child: child),
+      routes: [
+        GoRoute(
+          path: '/homepage',
+          name: 'home',
+          builder: (context, state) => const HomePage(),
+        ),
+        GoRoute(
+          path: '/keuangan',
+          name: 'keuangan',
+          builder: (context, state) => const WargaPage(),
+        ),
+        GoRoute(
+          path: '/warga',
+          name: 'warga',
+          builder: (context, state) => const WargaPage(),
+        ),
+        GoRoute(
+          path: '/kegiatan',
+          name: 'kegiatan',
+          builder: (context, state) => const WargaPage(),
+        ),
+        GoRoute(
+          path: '/pengaturan',
+          name: 'pengaturan',
+          builder: (context, state) => const SettingsPage(),
+        ),
+
+      ],
+    ),
+
+
+    // Menu Warga Routes
+    GoRoute(
+      path: '/warga/keluarga',
+      builder: (context, state) => const DaftarKeluargaPage(),
+    ),
+    GoRoute(
+      path: '/warga/keluarga/detail',
+      builder: (context, state) => const KeluargaDetail(),
+    ),
+    GoRoute(
+      path: '/warga/lainnya',
+      builder: (context, state) => const Lainnya(),
+    ),
+    GoRoute(
+      path: '/warga/statistik',
+      builder: (context, state) => const StatistikPage(),
+    ),
+    GoRoute(
+      path: '/warga/daftar-warga',
+      builder: (context, state) => const DaftarWargaPage(),
+    ),
+    GoRoute(
+      path: '/warga/daftar-warga/detail',
+      builder: (context, state) => const DetailWargaPage(),
+    ),
+    GoRoute(
+      path: '/warga/daftar-rumah',
+      builder: (context, state) => const DaftarRumahPage(),
+    ),
+    GoRoute(
+      path: '/warga/daftar-rumah/detail',
+      builder: (context, state) => const DetailRumahPage(),
+    ),
+    GoRoute(
+      path: '/warga/tambah-rumah',
+      builder: (context, state) => const TambahRumahPage(),
+    ),
+    GoRoute(
+      path: '/warga/daftar-mutasi',
+      builder: (context, state) => const DaftarMutasiPage(),
+    ),
+    GoRoute(
+      path: '/warga/daftar-mutasi/detail',
+      builder: (context, state) => const DetailMutasiPage(),
+    ),
+    GoRoute(
+      path: '/warga/tambah-mutasi',
+      builder: (context, state) => const TambahMutasiPage(),
+    ),
+    GoRoute(
+      path: '/warga/penerimaan-warga',
+      builder: (context, state) => const PenerimaanWargaPage(),
+    ),
+
+    GoRoute(
+      path: '/warga/tambah-warga',
+      builder: (context, state) => const TambahWargaPage(),
+    ),
+    GoRoute(
+      path: '/warga/aspirasi',
+      builder: (context, state) => const AspirationPage(),
+    ),
+  ],
+);
