@@ -1,6 +1,6 @@
 // lib/data/datasources/supabase_remote_datasource.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/supabase_client.dart'; 
+import '../../../../core/supabase_client.dart';
 import '../models/user_app_model.dart';
 import '../models/keluarga_model.dart';
 import '../models/warga_model.dart';
@@ -38,7 +38,9 @@ class SupabaseRemoteDatasource {
       'nama_keluarga': namaKeluarga,
     }).select();
 
-    final keluarga = KeluargaModel.fromJson(keluargaData.first as Map<String, dynamic>);
+    final keluarga = KeluargaModel.fromJson(
+      keluargaData.first as Map<String, dynamic>,
+    );
 
     final wargaData = await client.from('warga').insert({
       'keluarga_id': keluarga.id,
@@ -60,6 +62,7 @@ class SupabaseRemoteDatasource {
     String? nomorRumah,
     String? alamatLengkap,
   ) async {
+    // 1. Insert rumah
     final rumahData = await client.from('rumah').insert({
       'keluarga_id': keluargaId,
       'blok': blok,
@@ -67,6 +70,16 @@ class SupabaseRemoteDatasource {
       'alamat_lengkap': alamatLengkap,
     }).select();
 
-    return RumahModel.fromJson(rumahData.first as Map<String, dynamic>);
+    final rumahJson = rumahData.first as Map<String, dynamic>;
+    final rumah = RumahModel.fromJson(rumahJson);
+
+    // 2. UPDATE warga → set alamat_rumah_id untuk kepala keluarga
+    await client
+        .from('warga')
+        .update({'alamat_rumah_id': rumah.id})
+        .eq('keluarga_id', keluargaId)
+        .eq('role_keluarga', 'kepala_keluarga');
+
+    return rumah;
   }
 }
