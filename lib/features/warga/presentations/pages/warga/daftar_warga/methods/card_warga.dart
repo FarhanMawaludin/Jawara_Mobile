@@ -3,7 +3,18 @@ import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 class CardWarga extends StatelessWidget {
-  const CardWarga({super.key});
+  final String nama;
+  final String keluargaNama;
+  final bool isVerified;
+  final int wargaId;
+
+  const CardWarga({
+    super.key,
+    required this.nama,
+    required this.keluargaNama,
+    required this.isVerified,
+    required this.wargaId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +29,7 @@ class CardWarga extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Raudhil Firdaus Naufal",
+                nama,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -26,40 +37,33 @@ class CardWarga extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(
-                HeroiconsOutline.checkBadge,
-                size: 18,
-                color: Colors.green[600],
-              ),
+              if (isVerified)
+                Icon(
+                  HeroiconsOutline.checkBadge,
+                  size: 18,
+                  color: Colors.green[600],
+                ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Row(
-                children: [
-                  Icon(
-                    HeroiconsOutline.user,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Keluarga Raudhil Firdaus Naufal",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              Icon(HeroiconsOutline.user, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 4),
+              Text(
+                keluargaNama,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           TextButton(
             onPressed: () {
-              context.push('/warga/daftar-warga/detail');
+              context.push('/warga/daftar-warga/detail/$wargaId');
             },
             style: TextButton.styleFrom(
               backgroundColor: Colors.deepPurpleAccent[400],

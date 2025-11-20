@@ -2,16 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
-import 'package:jawaramobile/features/warga/presentations/providers/warga_providers.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
 import 'methods/card_keluarga.dart';
 import 'methods/search.dart';
 
-class DaftarKeluargaPage extends ConsumerWidget {
+class DaftarKeluargaPage extends ConsumerStatefulWidget {
   const DaftarKeluargaPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final wargaAsync = ref.watch(wargaListProvider);
+  ConsumerState<DaftarKeluargaPage> createState() =>
+      _DaftarKeluargaPageState();
+}
+
+class _DaftarKeluargaPageState extends ConsumerState<DaftarKeluargaPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.read(searchInputProvider.notifier).state = "";
+      ref.read(searchKeywordProvider.notifier).state = "";
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final keyword = ref.watch(searchKeywordProvider);
+
+    final wargaAsync = ref.watch(
+      keyword.isEmpty ? wargaListProvider : searchWargaProvider,
+    );
 
     return SafeArea(
       child: Scaffold(
@@ -25,12 +45,11 @@ class DaftarKeluargaPage extends ConsumerWidget {
             'Daftar Keluarga',
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
-          titleSpacing: 0,
-          backgroundColor: Colors.white,
           elevation: 0,
+          backgroundColor: Colors.white,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
-            child: Container(color: Colors.grey[300], height: 1),
+            child: Container(height: 1, color: Colors.grey[300]),
           ),
         ),
 
@@ -44,19 +63,21 @@ class DaftarKeluargaPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Search(),
+                    const Search(),
                     const SizedBox(height: 20),
 
-                    // === Render list warga (keluarga) ===
+                    if (keyword.isNotEmpty && list.isEmpty)
+                      const Text("Tidak ditemukan...",
+                          style: TextStyle(color: Colors.grey)),
+
                     ...list.map(
                       (w) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: CardKeluarga(
-                          namaKeluarga:
-                              w.keluarga?['nama_keluarga'] ??
+                          keluargaId: w.keluargaId,
+                          namaKeluarga: w.keluarga?['nama_keluarga'] ??
                               'Tidak ada nama keluarga',
-                          alamat:
-                              w.rumah?['alamat_lengkap'] ??
+                          alamat: w.rumah?['alamat_lengkap'] ??
                               'Alamat tidak ada',
                           role: w.roleKeluarga ?? 'Tidak diketahui',
                         ),

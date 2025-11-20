@@ -108,7 +108,10 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/warga/keluarga/detail',
-      builder: (context, state) => const KeluargaDetail(),
+      builder: (context, state) {
+        final keluargaId = state.extra as int;
+        return KeluargaDetail(keluargaId: keluargaId);
+      },
     ),
     GoRoute(
       path: '/warga/lainnya',
@@ -123,17 +126,25 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const DaftarWargaPage(),
     ),
     GoRoute(
-      path: '/warga/daftar-warga/detail',
-      builder: (context, state) => const DetailWargaPage(),
+      path: '/warga/daftar-warga/detail/:id',
+      builder: (context, state) {
+        final wargaId = int.parse(state.pathParameters['id']!);
+        return DetailWargaPage(wargaId: wargaId);
+      },
     ),
+
     GoRoute(
       path: '/warga/daftar-rumah',
       builder: (context, state) => const DaftarRumahPage(),
     ),
     GoRoute(
-      path: '/warga/daftar-rumah/detail',
-      builder: (context, state) => const DetailRumahPage(),
+      path: '/warga/daftar-rumah/detail/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return DetailRumahPage(rumahId: id);
+      },
     ),
+
     GoRoute(
       path: '/warga/tambah-rumah',
       builder: (context, state) => const TambahRumahPage(),

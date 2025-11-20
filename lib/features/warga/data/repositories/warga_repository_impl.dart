@@ -19,6 +19,15 @@ class WargaRepositoryImpl implements WargaRepository {
   }
 
   @override
+  Future<List<Warga>> searchWarga(String keyword) async {
+    final result = await remoteDataSource.searchWarga(keyword);
+
+    // result = List<WargaModel>
+    // Domain butuh List<Warga>, tapi WargaModel extends Warga
+    return result;
+  }
+
+  @override
   Future<void> createWarga(Warga warga) async {
     final model = WargaModel(
       id: warga.id,

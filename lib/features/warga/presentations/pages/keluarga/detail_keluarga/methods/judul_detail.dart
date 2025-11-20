@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 class JudulDetail extends StatelessWidget {
-  const JudulDetail({super.key});
+  final String namaKeluarga;
+  final String alamat;
+  final String status;
+
+
+  const JudulDetail({
+    super.key,
+    required this.namaKeluarga,
+    required this.alamat,
+    required this.status,
+
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +28,7 @@ class JudulDetail extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Keluarga Raudhil Firdaus Naufal",
+                namaKeluarga,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -39,7 +50,7 @@ class JudulDetail extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    "Blok A No.12",
+                    alamat,
                     style: TextStyle(
                       color: Colors.deepPurpleAccent[400],
                       fontWeight: FontWeight.w400,
@@ -54,13 +65,17 @@ class JudulDetail extends StatelessWidget {
                   Icon(
                     HeroiconsOutline.checkBadge,
                     size: 18,
-                    color: Colors.green[600],
+                    color: status.toLowerCase() == 'aktif'
+                        ? Colors.green[600]
+                        : Colors.grey,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    "Aktif",
+                    status,
                     style: TextStyle(
-                      color: Colors.green[600],
+                      color: status.toLowerCase() == 'aktif'
+                          ? Colors.green[600]
+                          : Colors.grey,
                       fontWeight: FontWeight.w400,
                       fontSize: 12,
                     ),
@@ -68,24 +83,6 @@ class JudulDetail extends StatelessWidget {
                 ],
               ),
               const SizedBox(width: 12),
-              Row(
-                children: [
-                  Icon(
-                    HeroiconsOutline.user,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Pemilik",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ],

@@ -7,6 +7,7 @@ abstract class WargaRemoteDataSource {
   Future<void> createWarga(WargaModel warga);
   Future<void> updateWarga(WargaModel warga);
   Future<void> deleteWarga(int id);
+  Future<List<WargaModel>> searchWarga(String keyword);
 }
 
 class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
@@ -29,16 +30,15 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             blok,
             nomor_rumah
           )
-        '''); 
+        ''');
 
-        print(data);
+      print(data);
 
       return data.map((json) => WargaModel.fromMap(json)).toList();
     } catch (e) {
       throw Exception("Gagal mengambil data Warga: $e");
     }
   }
-
 
   @override
   Future<WargaModel?> getWargaById(int id) async {
@@ -89,5 +89,31 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
   Future<void> deleteWarga(int id) async {
     final response = await client.from('warga').delete().eq('id', id);
     if (response.error != null) throw response.error!;
+  }
+
+  @override
+  Future<List<WargaModel>> searchWarga(String keyword) async {
+    try {
+      final List<dynamic> data = await client
+          .from('warga')
+          .select('''
+          *,
+          keluarga:keluarga_id (
+            id,
+            nama_keluarga
+          ),
+          rumah:alamat_rumah_id (
+            id,
+            alamat_lengkap,
+            blok,
+            nomor_rumah
+          )
+        ''')
+          .ilike('nama', '%$keyword%'); // search by nama (case-insensitive)
+
+      return data.map((json) => WargaModel.fromMap(json)).toList();
+    } catch (e) {
+      throw Exception("Gagal mencari warga: $e");
+    }
   }
 }

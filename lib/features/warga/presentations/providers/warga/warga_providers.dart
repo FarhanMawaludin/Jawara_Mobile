@@ -5,32 +5,33 @@ import 'package:jawaramobile/features/warga/data/models/warga_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Datasource + Repository
-import '../../data/datasources/warga_remote_datasource.dart';
-import '../../data/repositories/warga_repository_impl.dart';
+import '../../../data/datasources/warga_remote_datasource.dart';
+import '../../../data/repositories/warga_repository_impl.dart';
 
 // Usecases
-import '../../domain/usecases/get_all_warga.dart';
-import '../../domain/usecases/get_warga_by_id.dart';
-import '../../domain/usecases/create_warga.dart';
-import '../../domain/usecases/update_warga.dart';
-import '../../domain/usecases/delete_warga.dart';
+import '../../../domain/usecases/warga/get_all_warga.dart';
+import '../../../domain/usecases/warga/get_warga_by_id.dart';
+import '../../../domain/usecases/warga/create_warga.dart';
+import '../../../domain/usecases/warga/update_warga.dart';
+import '../../../domain/usecases/warga/delete_warga.dart';
+import '../../../domain/usecases/warga/search_warga.dart'; // <-- TAMBAHAN
 
 // =========================================================
-// SUPABASE CLIENT PROVIDER (jika pakai singleton kamu juga bisa)
+// SUPABASE CLIENT PROVIDER
 // =========================================================
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
 
-
 // =========================================================
 // DATASOURCE PROVIDER
 // =========================================================
-final wargaRemoteDataSourceProvider = Provider<WargaRemoteDataSourceImpl>((ref) {
+final wargaRemoteDataSourceProvider = Provider<WargaRemoteDataSourceImpl>((
+  ref,
+) {
   final client = ref.read(supabaseClientProvider);
   return WargaRemoteDataSourceImpl(client);
 });
-
 
 // =========================================================
 // REPOSITORY PROVIDER
@@ -40,11 +41,9 @@ final wargaRepositoryProvider = Provider<WargaRepositoryImpl>((ref) {
   return WargaRepositoryImpl(remote);
 });
 
-
 // =========================================================
 // USECASE PROVIDERS
 // =========================================================
-
 final getAllWargaProvider = Provider<GetAllWarga>((ref) {
   return GetAllWarga(ref.read(wargaRepositoryProvider));
 });
@@ -65,28 +64,54 @@ final deleteWargaUseCaseProvider = Provider<DeleteWarga>((ref) {
   return DeleteWarga(ref.read(wargaRepositoryProvider));
 });
 
+// ==== TAMBAHAN USECASE SEARCH ====
+final searchWargaUseCaseProvider = Provider<SearchWarga>((ref) {
+  return SearchWarga(ref.read(wargaRepositoryProvider));
+});
 
 // =========================================================
-// PROVIDER: Get All Warga (Future Provider)
+// PROVIDER: Get All Warga
 // =========================================================
 final wargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
   final ds = ref.read(wargaRemoteDataSourceProvider);
-  return await ds.getAllWarga(); // langsung WargaModel
+  return await ds.getAllWarga();
 });
 
-
 // =========================================================
-// PROVIDER: Get Warga by ID (Future Provider Family)
+// PROVIDER: Get Warga by ID
 // =========================================================
-final wargaDetailProvider =
-    FutureProvider.family((ref, int id) async {
+final wargaDetailProvider = FutureProvider.family((ref, int id) async {
   final usecase = ref.read(getWargaByIdUseCaseProvider);
   return await usecase(id);
 });
 
+// =========================================================
+// PROVIDERS: SEARCH WARGA
+// =========================================================
+
+// Input user saat mengetik
+final searchInputProvider = StateProvider<String>((ref) => "");
+
+// Keyword yang benar-benar dipakai untuk search (saat klik tombol Cari)
+final searchKeywordProvider = StateProvider<String>((ref) => "");
+
+// FutureProvider hasil search berdasarkan searchKeywordProvider
+final searchWargaProvider = FutureProvider.autoDispose<List<WargaModel>>((
+  ref,
+) async {
+  final keyword = ref.watch(searchKeywordProvider);
+
+  // Jika belum ada keyword (belum ditekan tombol Cari)
+  if (keyword.isEmpty) return [];
+
+  final usecase = ref.read(searchWargaUseCaseProvider);
+  final results = await usecase(keyword);
+
+  return results.cast<WargaModel>();
+});
 
 // =========================================================
-// OPTIONAL: STATE UNTUK FORM / CREATE / UPDATE WARGA
+// STATE UNTUK FORM / CREATE / UPDATE WARGA
 // =========================================================
 
 class WargaFormState {
@@ -184,5 +209,5 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
 // Provider untuk Form
 final wargaFormProvider =
     StateNotifierProvider<WargaFormNotifier, WargaFormState>((ref) {
-  return WargaFormNotifier();
-});
+      return WargaFormNotifier();
+    });

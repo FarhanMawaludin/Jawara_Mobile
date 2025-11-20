@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 class JudulDetail extends StatelessWidget {
-  const JudulDetail({super.key});
+  String namaWarga;
+
+  JudulDetail({super.key, required this.namaWarga});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class JudulDetail extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Raudhil Firdaus Naufal",
+                namaWarga,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,

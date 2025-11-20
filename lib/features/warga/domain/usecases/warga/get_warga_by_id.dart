@@ -1,5 +1,5 @@
-import '../entities/warga.dart';
-import '../repositories/warga_repository.dart';
+import '../../entities/warga.dart';
+import '../../repositories/warga_repository.dart';
 
 class GetWargaById {
   final WargaRepository repository;

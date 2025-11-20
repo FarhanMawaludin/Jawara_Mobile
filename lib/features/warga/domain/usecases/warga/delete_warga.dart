@@ -1,4 +1,4 @@
-import '../repositories/warga_repository.dart';
+import '../../repositories/warga_repository.dart';
 
 class DeleteWarga {
   final WargaRepository repository;

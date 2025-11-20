@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:jawaramobile/features/warga/data/models/warga_model.dart';
 
 class CardAnggotaKeluarga extends StatelessWidget {
-  const CardAnggotaKeluarga({super.key});
+  final WargaModel warga;
+
+  const CardAnggotaKeluarga({super.key, required this.warga});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class CardAnggotaKeluarga extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Raudhil Firdaus Naufal ",
+                      warga.nama,
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -66,7 +69,7 @@ class CardAnggotaKeluarga extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "3275021502098765",
+                      warga.nik ?? "-",
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -98,7 +101,7 @@ class CardAnggotaKeluarga extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Laki-laki",
+                      warga.jenisKelamin ?? "-",
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -123,7 +126,9 @@ class CardAnggotaKeluarga extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "15 Februari 2009",
+                      warga.tanggalLahir != null
+                          ? "${warga.tanggalLahir!.day} ${_monthName(warga.tanggalLahir!.month)} ${warga.tanggalLahir!.year}"
+                          : "-",
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -139,5 +144,13 @@ class CardAnggotaKeluarga extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _monthName(int month) {
+    const names = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return names[month];
   }
 }
