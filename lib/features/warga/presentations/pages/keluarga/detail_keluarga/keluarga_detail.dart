@@ -13,7 +13,8 @@ class KeluargaDetail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final wargaAsync = ref.watch(wargaListProvider);
+    // ⬇⬇⬇ PAKAI PROVIDER BARU BERDASARKAN keluargaId
+    final wargaAsync = ref.watch(wargaByKeluargaProvider(keluargaId));
 
     return SafeArea(
       child: Scaffold(
@@ -37,16 +38,16 @@ class KeluargaDetail extends ConsumerWidget {
         body: Padding(
           padding: const EdgeInsets.all(20),
           child: wargaAsync.when(
-            data: (wargaList) {
-              final anggotaKeluarga = wargaList
-                  .where((w) => w.keluargaId == keluargaId)
-                  .toList();
+            data: (anggotaKeluarga) {
               if (anggotaKeluarga.isEmpty) {
                 return const Center(child: Text("Tidak ada anggota keluarga"));
               }
 
-              final kepalaKeluarga = anggotaKeluarga
-                  .first; // asumsi kepala keluarga adalah pertama
+              // Ambil kepala keluarga (role_keluarga = 'KEPALA_KELUARGA')
+              final kepalaKeluarga = anggotaKeluarga.firstWhere(
+                (w) => w.roleKeluarga == 'KEPALA_KELUARGA',
+                orElse: () => anggotaKeluarga.first,
+              );
 
               return SingleChildScrollView(
                 child: Column(
@@ -89,10 +90,15 @@ class KeluargaDetail extends ConsumerWidget {
                             softWrap: true,
                           ),
                           const SizedBox(height: 18),
-                          // tampilkan semua anggota keluarga
-                          ...anggotaKeluarga
-                              .map((w) => CardAnggotaKeluarga(warga: w))
-                              .toList(),
+
+                          ...anggotaKeluarga.map((w) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 8,
+                              ), // Jarak antar card
+                              child: CardAnggotaKeluarga(warga: w),
+                            );
+                          }).toList(),
                         ],
                       ),
                     ),

@@ -8,6 +8,7 @@ abstract class WargaRemoteDataSource {
   Future<void> updateWarga(WargaModel warga);
   Future<void> deleteWarga(int id);
   Future<List<WargaModel>> searchWarga(String keyword);
+  Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId); 
 }
 
 class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
@@ -18,7 +19,9 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
   @override
   Future<List<WargaModel>> getAllWarga() async {
     try {
-      final List<dynamic> data = await client.from('warga').select('''
+      final List<dynamic> data = await client
+          .from('warga')
+          .select('''
           *,
           keluarga:keluarga_id (
             id,
@@ -30,7 +33,8 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             blok,
             nomor_rumah
           )
-        ''');
+        ''')
+          .eq('role_keluarga', 'kepala_keluarga'); // only get heads of families
 
       print(data);
 
@@ -115,5 +119,14 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
     } catch (e) {
       throw Exception("Gagal mencari warga: $e");
     }
+  }
+
+  Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId) async {
+    final result = await client
+        .from('warga')
+        .select('*, keluarga(*), rumah(*)')
+        .eq('keluarga_id', keluargaId);
+
+    return result.map((e) => WargaModel.fromMap(e)).toList();
   }
 }
