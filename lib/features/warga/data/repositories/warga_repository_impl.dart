@@ -14,6 +14,11 @@ class WargaRepositoryImpl implements WargaRepository {
   }
 
   @override
+  Future<List<Warga>> getAllKeluarga() async {
+    return await remoteDataSource.getAllKeluarga();
+  }
+
+  @override
   Future<Warga?> getWargaById(int id) async {
     return await remoteDataSource.getWargaById(id);
   }
@@ -26,6 +31,12 @@ class WargaRepositoryImpl implements WargaRepository {
     // Domain butuh List<Warga>, tapi WargaModel extends Warga
     return result;
   }
+
+  @override
+Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
+  final response = await remoteDataSource.getWargaByKeluargaId(keluargaId);
+  return response;
+}
 
   @override
   Future<void> createWarga(Warga warga) async {
@@ -46,6 +57,7 @@ class WargaRepositoryImpl implements WargaRepository {
       golonganDarah: warga.golonganDarah,
       pekerjaan: warga.pekerjaan,
       status: warga.status,
+      pendidikan: warga.pendidikan,
     );
     await remoteDataSource.createWarga(model);
   }
@@ -69,6 +81,7 @@ class WargaRepositoryImpl implements WargaRepository {
       golonganDarah: warga.golonganDarah,
       pekerjaan: warga.pekerjaan,
       status: warga.status,
+      pendidikan: warga.pendidikan,
     );
     await remoteDataSource.updateWarga(model);
   }
