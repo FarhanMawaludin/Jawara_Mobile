@@ -28,6 +28,12 @@ class WargaRepositoryImpl implements WargaRepository {
   }
 
   @override
+Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
+  final response = await remoteDataSource.getWargaByKeluargaId(keluargaId);
+  return response;
+}
+
+  @override
   Future<void> createWarga(Warga warga) async {
     final model = WargaModel(
       id: warga.id,

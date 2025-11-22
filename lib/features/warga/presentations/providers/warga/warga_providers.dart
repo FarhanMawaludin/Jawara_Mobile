@@ -14,7 +14,8 @@ import '../../../domain/usecases/warga/get_warga_by_id.dart';
 import '../../../domain/usecases/warga/create_warga.dart';
 import '../../../domain/usecases/warga/update_warga.dart';
 import '../../../domain/usecases/warga/delete_warga.dart';
-import '../../../domain/usecases/warga/search_warga.dart'; // <-- TAMBAHAN
+import '../../../domain/usecases/warga/search_warga.dart'; 
+import '../../../domain/usecases/warga/get_warga_by_keluarga.dart';
 
 // =========================================================
 // SUPABASE CLIENT PROVIDER
@@ -64,9 +65,12 @@ final deleteWargaUseCaseProvider = Provider<DeleteWarga>((ref) {
   return DeleteWarga(ref.read(wargaRepositoryProvider));
 });
 
-// ==== TAMBAHAN USECASE SEARCH ====
 final searchWargaUseCaseProvider = Provider<SearchWarga>((ref) {
   return SearchWarga(ref.read(wargaRepositoryProvider));
+});
+
+final getWargaByKeluargaUseCaseProvider = Provider<GetWargaByKeluarga>((ref) {
+  return GetWargaByKeluarga(ref.read(wargaRepositoryProvider));
 });
 
 // =========================================================
@@ -83,6 +87,15 @@ final wargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
 final wargaDetailProvider = FutureProvider.family((ref, int id) async {
   final usecase = ref.read(getWargaByIdUseCaseProvider);
   return await usecase(id);
+});
+// =========================================================
+// PROVIDER: Get Warga by Keluarga ID
+// =========================================================
+final wargaByKeluargaProvider =
+    FutureProvider.family<List<WargaModel>, int>((ref, keluargaId) async {
+  final usecase = ref.read(getWargaByKeluargaUseCaseProvider);
+  final result = await usecase(keluargaId);
+  return result.cast<WargaModel>();
 });
 
 // =========================================================
