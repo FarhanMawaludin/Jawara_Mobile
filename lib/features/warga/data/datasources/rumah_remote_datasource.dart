@@ -20,13 +20,16 @@ class RumahRemoteDataSourceImpl implements RumahRemoteDataSource {
   @override
   Future<List<RumahModel>> getAllRumah() async {
     try {
-      final List<dynamic> data = await client.from('rumah').select('''
+      final List<dynamic> data = await client
+          .from('rumah')
+          .select('''
         *,
         keluarga:keluarga_id (
           id,
           nama_keluarga
         )
-      ''');
+      ''')
+          .order('id', ascending: true);
 
       return data.map((json) => RumahModel.fromMap(json)).toList();
     } catch (e) {
@@ -97,16 +100,23 @@ class RumahRemoteDataSourceImpl implements RumahRemoteDataSource {
     final response = await client
         .from('rumah')
         .update(rumah.toMap())
-        .eq('id', rumah.id);
+        .eq('id', rumah.id)
+        .select(); // <-- WAJIB (tanpa ini return-nya null)
 
-    if (response.error != null) throw response.error!;
+    // Kalau select() gagal → akan throw otomatis
+    if (response == null || response.isEmpty) {
+      throw Exception("Gagal memperbarui data Rumah");
+    }
   }
 
   @override
+  @override
   Future<void> deleteRumah(int id) async {
-    final response = await client.from('rumah').delete().eq('id', id);
-
-    if (response.error != null) throw response.error!;
+    try {
+      await client.from('rumah').delete().eq('id', id);
+    } catch (e) {
+      throw Exception("Gagal menghapus data Rumah: $e");
+    }
   }
 
   @override
