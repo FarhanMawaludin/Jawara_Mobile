@@ -48,7 +48,10 @@ class _DaftarWargaPageState extends ConsumerState<DaftarWargaPage> {
           elevation: 0,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
-            child: Container(height: 1, color: Colors.grey[300]),
+            child: Container(
+              height: 1,
+              color: Colors.grey[300],
+            ),
           ),
         ),
 
@@ -61,15 +64,22 @@ class _DaftarWargaPageState extends ConsumerState<DaftarWargaPage> {
                 const Search(),
                 const SizedBox(height: 20),
 
-                if (keyword.isEmpty) ...[
+                // ===========================
+                // LIST WARGA NORMAL
+                // ===========================
+                if (keyword.isEmpty)
                   wargaAsync.when(
                     data: (list) => Column(
                       children: list.map((w) {
-                        return CardWarga(
-                          nama: w.nama,
-                          keluargaNama: "Keluarga ${w.nama}",
-                          isVerified: true,
-                          wargaId: w.id,
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: CardWarga(
+                            nama: w.nama,
+                            keluargaNama:
+                                "Keluarga ${w.keluarga?['nama_keluarga'] ?? 'Tidak ada nama keluarga'}",
+                            isVerified: true,
+                            wargaId: w.id,
+                          ),
                         );
                       }).toList(),
                     ),
@@ -81,24 +91,34 @@ class _DaftarWargaPageState extends ConsumerState<DaftarWargaPage> {
                       "Error: $err",
                       style: const TextStyle(color: Colors.red),
                     ),
-                  ),
-                ] else ...[
+                  )
+
+                // ===========================
+                // LIST HASIL PENCARIAN
+                // ===========================
+                else
                   searchResults.when(
                     data: (list) {
                       if (list.isEmpty) {
-                        return const Text(
-                          "Tidak ada warga yang cocok.",
-                          style: TextStyle(color: Colors.grey),
+                        return const Center(
+                          child: Text(
+                            "Tidak ada warga yang cocok.",
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         );
                       }
 
                       return Column(
                         children: list.map((w) {
-                          return CardWarga(
-                            nama: w.nama,
-                            keluargaNama: "Keluarga ${w.nama}",
-                            isVerified: true,
-                            wargaId: w.id,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: CardWarga(
+                              nama: w.nama,
+                              keluargaNama:
+                                  "Keluarga ${w.keluarga?['nama_keluarga'] ?? 'Tidak ada nama keluarga'}",
+                              isVerified: true,
+                              wargaId: w.id,
+                            ),
                           );
                         }).toList(),
                       );
@@ -112,7 +132,6 @@ class _DaftarWargaPageState extends ConsumerState<DaftarWargaPage> {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
-                ],
               ],
             ),
           ),
