@@ -76,7 +76,7 @@ class DetailWargaPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "Keluarga ${w.nama}",
+                            w.keluarga?['nama_keluarga'] ?? "Tidak ada nama keluarga",
                             style: TextStyle(
                               color: Colors.grey[800],
                               fontWeight: FontWeight.w600,

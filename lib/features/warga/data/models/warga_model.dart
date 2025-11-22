@@ -1,9 +1,6 @@
 import '../../domain/entities/warga.dart';
 
 class WargaModel extends Warga {
-  final Map<String, dynamic>? keluarga;
-  final Map<String, dynamic>? rumah;
-
   WargaModel({
     required super.id,
     required super.keluargaId,
@@ -22,8 +19,9 @@ class WargaModel extends Warga {
     super.pekerjaan,
     super.status,
 
-    this.keluarga,
-    this.rumah,
+    // inherited from entity
+    super.keluarga,
+    super.rumah,
   });
 
   factory WargaModel.fromMap(Map<String, dynamic> map) {
@@ -46,11 +44,20 @@ class WargaModel extends Warga {
       golonganDarah: map['golongan_darah'],
       pekerjaan: map['pekerjaan'],
       status: map['status'],
-      keluarga: map['keluarga'] is Map ? map['keluarga'] : null,
-      rumah: map['rumah'] is Map ? map['rumah'] : null,
+
+      // nested keluarga
+      keluarga: (map['keluarga'] != null && map['keluarga'] is Map)
+          ? Map<String, dynamic>.from(map['keluarga'])
+          : null,
+
+      // nested rumah
+      rumah: (map['rumah'] != null && map['rumah'] is Map)
+          ? Map<String, dynamic>.from(map['rumah'])
+          : null,
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -69,6 +76,8 @@ class WargaModel extends Warga {
       'golongan_darah': golonganDarah,
       'pekerjaan': pekerjaan,
       'status': status,
+
+      // ❌ Tidak mengirim nested rumah & keluarga ke DB
     };
   }
 }

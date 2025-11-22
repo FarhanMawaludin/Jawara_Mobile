@@ -34,6 +34,8 @@ class Warga {
 
   // ENUM status
   final String? status;
+    final Map<String, dynamic>? keluarga;
+  final Map<String, dynamic>? rumah;
   
 
   Warga({
@@ -57,5 +59,8 @@ class Warga {
     this.golonganDarah,
     this.pekerjaan,
     this.status,
+    this.keluarga,
+    this.rumah,
+    
   });
 }
