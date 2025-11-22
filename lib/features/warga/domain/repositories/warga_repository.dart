@@ -2,6 +2,7 @@ import '../entities/warga.dart';
 
 abstract class WargaRepository {
   Future<List<Warga>> getAllWarga();
+  Future<List<Warga>> getAllKeluarga();
   Future<Warga?> getWargaById(int id);
   Future<void> createWarga(Warga warga);
   Future<void> updateWarga(Warga warga);

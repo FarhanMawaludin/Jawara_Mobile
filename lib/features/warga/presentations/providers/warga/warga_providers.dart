@@ -10,11 +10,12 @@ import '../../../data/repositories/warga_repository_impl.dart';
 
 // Usecases
 import '../../../domain/usecases/warga/get_all_warga.dart';
+import '../../../domain/usecases/warga/get_all_keluarga.dart';
 import '../../../domain/usecases/warga/get_warga_by_id.dart';
 import '../../../domain/usecases/warga/create_warga.dart';
 import '../../../domain/usecases/warga/update_warga.dart';
 import '../../../domain/usecases/warga/delete_warga.dart';
-import '../../../domain/usecases/warga/search_warga.dart'; 
+import '../../../domain/usecases/warga/search_warga.dart';
 import '../../../domain/usecases/warga/get_warga_by_keluarga.dart';
 
 // =========================================================
@@ -47,6 +48,10 @@ final wargaRepositoryProvider = Provider<WargaRepositoryImpl>((ref) {
 // =========================================================
 final getAllWargaProvider = Provider<GetAllWarga>((ref) {
   return GetAllWarga(ref.read(wargaRepositoryProvider));
+});
+
+final getAllKeluargaProvider = Provider<GetAllKeluarga>((ref) {
+  return GetAllKeluarga(ref.read(wargaRepositoryProvider));
 });
 
 final getWargaByIdUseCaseProvider = Provider<GetWargaById>((ref) {
@@ -82,6 +87,14 @@ final wargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
 });
 
 // =========================================================
+// PROVIDER: Get All Keluarga
+// =========================================================
+final keluargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
+  final ds = ref.read(wargaRemoteDataSourceProvider);
+  return await ds.getAllKeluarga();
+});
+
+// =========================================================
 // PROVIDER: Get Warga by ID
 // =========================================================
 final wargaDetailProvider = FutureProvider.family((ref, int id) async {
@@ -91,8 +104,10 @@ final wargaDetailProvider = FutureProvider.family((ref, int id) async {
 // =========================================================
 // PROVIDER: Get Warga by Keluarga ID
 // =========================================================
-final wargaByKeluargaProvider =
-    FutureProvider.family<List<WargaModel>, int>((ref, keluargaId) async {
+final wargaByKeluargaProvider = FutureProvider.family<List<WargaModel>, int>((
+  ref,
+  keluargaId,
+) async {
   final usecase = ref.read(getWargaByKeluargaUseCaseProvider);
   final result = await usecase(keluargaId);
   return result.cast<WargaModel>();

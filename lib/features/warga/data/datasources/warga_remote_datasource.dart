@@ -3,6 +3,7 @@ import '../models/warga_model.dart';
 
 abstract class WargaRemoteDataSource {
   Future<List<WargaModel>> getAllWarga();
+  Future<List<WargaModel>> getAllKeluarga();
   Future<WargaModel?> getWargaById(int id);
   Future<void> createWarga(WargaModel warga);
   Future<void> updateWarga(WargaModel warga);
@@ -33,8 +34,35 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             blok,
             nomor_rumah
           )
-        ''')
-          .eq('role_keluarga', 'kepala_keluarga'); // only get heads of families
+        '''); 
+
+      print(data);
+
+      return data.map((json) => WargaModel.fromMap(json)).toList();
+    } catch (e) {
+      throw Exception("Gagal mengambil data Warga: $e");
+    }
+  }
+
+   @override
+  Future<List<WargaModel>> getAllKeluarga() async {
+    try {
+      final List<dynamic> data = await client
+          .from('warga')
+          .select('''
+          *,
+          keluarga:keluarga_id (
+            id,
+            nama_keluarga
+          ),
+          rumah:alamat_rumah_id (
+            id,
+            alamat_lengkap,
+            blok,
+            nomor_rumah
+          )
+        ''').
+          eq('role_keluarga', 'kepala_keluarga'); 
 
       print(data);
 

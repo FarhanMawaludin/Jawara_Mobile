@@ -22,6 +22,7 @@ class WargaModel extends Warga {
     // inherited from entity
     super.keluarga,
     super.rumah,
+    super.pendidikan
   });
 
   factory WargaModel.fromMap(Map<String, dynamic> map) {
@@ -44,6 +45,7 @@ class WargaModel extends Warga {
       golonganDarah: map['golongan_darah'],
       pekerjaan: map['pekerjaan'],
       status: map['status'],
+      pendidikan: map['pendidikan'],
 
       // nested keluarga
       keluarga: (map['keluarga'] != null && map['keluarga'] is Map)
@@ -76,6 +78,7 @@ class WargaModel extends Warga {
       'golongan_darah': golonganDarah,
       'pekerjaan': pekerjaan,
       'status': status,
+      'pendidikan': pendidikan,
 
       // ❌ Tidak mengirim nested rumah & keluarga ke DB
     };
