@@ -76,7 +76,8 @@ class DetailWargaPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "Keluarga ${w.nama}",
+                            w.keluarga?['nama_keluarga'] ??
+                                "Tidak ada nama keluarga",
                             style: TextStyle(
                               color: Colors.grey[800],
                               fontWeight: FontWeight.w600,
@@ -88,16 +89,14 @@ class DetailWargaPage extends ConsumerWidget {
                           // ======== Card Warga Dinamis ========
                           CardWarga(
                             ttl: w.tanggalLahir != null
-                                ? DateFormat(
-                                    'dd-MM-yyyy',
-                                  ).format(w.tanggalLahir!)
-                                : "-",
-                            noTelepon: "-",
+                                ? "${w.tempatLahir ?? '-'}, ${DateFormat('dd-MM-yyyy').format(w.tanggalLahir!)}"
+                                : (w.tempatLahir ?? "-"),
+                            noTelepon: w.noTelp ?? "-",
                             jenisKelamin: w.jenisKelamin ?? "-",
-                            agama: "-",
-                            golonganDarah: "-",
-                            pendidikan: "-",
-                            pekerjaan: "-",
+                            agama: w.agama ?? "-",
+                            golonganDarah: w.golonganDarah ?? "-",
+                            pendidikan: w.pendidikan ?? "-",
+                            pekerjaan: w.pekerjaan ?? "-",
                             peranKeluarga: w.roleKeluarga.toString(),
                             statusPenduduk: "Aktif",
                           ),
