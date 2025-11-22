@@ -57,6 +57,7 @@ Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
       golonganDarah: warga.golonganDarah,
       pekerjaan: warga.pekerjaan,
       status: warga.status,
+      pendidikan: warga.pendidikan,
     );
     await remoteDataSource.createWarga(model);
   }
@@ -80,6 +81,7 @@ Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
       golonganDarah: warga.golonganDarah,
       pekerjaan: warga.pekerjaan,
       status: warga.status,
+      pendidikan: warga.pendidikan,
     );
     await remoteDataSource.updateWarga(model);
   }

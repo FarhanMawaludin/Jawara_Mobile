@@ -154,6 +154,7 @@ class WargaFormState {
   final String? golonganDarah;
   final String? pekerjaan;
   final String? status;
+  final String? pendidikan;
 
   WargaFormState({
     this.nama = '',
@@ -167,6 +168,7 @@ class WargaFormState {
     this.golonganDarah,
     this.pekerjaan,
     this.status,
+    this.pendidikan,
   });
 
   WargaFormState copyWith({
@@ -181,6 +183,7 @@ class WargaFormState {
     String? golonganDarah,
     String? pekerjaan,
     String? status,
+    String? pendidikan,
   }) {
     return WargaFormState(
       nama: nama ?? this.nama,
@@ -194,6 +197,7 @@ class WargaFormState {
       golonganDarah: golonganDarah ?? this.golonganDarah,
       pekerjaan: pekerjaan ?? this.pekerjaan,
       status: status ?? this.status,
+      pendidikan: pendidikan ?? this.pendidikan,
     );
   }
 }
@@ -213,6 +217,7 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
     String? golonganDarah,
     String? pekerjaan,
     String? status,
+    String? pendidikan,
   }) {
     state = state.copyWith(
       nama: nama,
@@ -226,6 +231,7 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
       golonganDarah: golonganDarah,
       pekerjaan: pekerjaan,
       status: status,
+      pendidikan: pendidikan,
     );
   }
 
