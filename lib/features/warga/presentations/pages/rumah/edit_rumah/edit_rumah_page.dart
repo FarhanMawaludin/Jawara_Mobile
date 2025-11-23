@@ -7,14 +7,16 @@ import 'package:lottie/lottie.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
 import 'package:jawaramobile/features/warga/domain/entities/rumah.dart';
 
-class TambahRumahPage extends ConsumerStatefulWidget {
-  const TambahRumahPage({super.key});
+class EditRumahPage extends ConsumerStatefulWidget {
+  final int rumahId;
+
+  const EditRumahPage({super.key, required this.rumahId});
 
   @override
-  ConsumerState<TambahRumahPage> createState() => _TambahRumahPageState();
+  ConsumerState<EditRumahPage> createState() => _EditRumahPageState();
 }
 
-class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
+class _EditRumahPageState extends ConsumerState<EditRumahPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController blokController = TextEditingController();
@@ -22,8 +24,23 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
   final TextEditingController alamatLengkapController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+
+    // Ambil data rumah existing
+    Future.microtask(() async {
+      final data = await ref.read(getRumahByIdProvider)(widget.rumahId);
+      if (data != null) {
+        blokController.text = data.blok.toString();
+        nomorRumahController.text = data.nomorRumah.toString();
+        alamatLengkapController.text = data.alamatLengkap.toString();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final createRumah = ref.read(createRumahProvider);
+    final updateRumah = ref.read(updateRumahProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -34,7 +51,7 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Tambah Rumah Baru',
+          'Edit Rumah',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: PreferredSize(
@@ -42,6 +59,7 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
           child: Container(color: Colors.grey[300], height: 1),
         ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -86,22 +104,21 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       final rumah = Rumah(
-                        id: 0, 
+                        id: widget.rumahId,
                         blok: blokController.text.trim(),
                         nomorRumah: nomorRumahController.text.trim(),
                         alamatLengkap: alamatLengkapController.text.trim(),
                         createdAt: DateTime.now(),
                       );
 
-                      await createRumah(rumah);
+                      await updateRumah(rumah);
 
                       ref.invalidate(rumahListProvider);
 
-                      // === bottom alert berhasil ===
                       showBottomAlert(
                         context: context,
-                        title: "Rumah Berhasil Ditambahkan",
-                        message: "Data rumah baru telah disimpan ke dalam sistem.",
+                        title: "Berhasil Diperbarui",
+                        message: "Data rumah telah berhasil diperbarui.",
                         yesText: "Kembali",
                         onlyYes: true,
                         onYes: () {
@@ -119,7 +136,7 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
                     }
                   },
                   child: const Text(
-                    'Simpan',
+                    'Simpan Perubahan',
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
