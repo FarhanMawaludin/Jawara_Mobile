@@ -1,5 +1,3 @@
-// lib/presentation/pages/register_step3_rumah.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,20 +20,27 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
   final _nomorRumahController = TextEditingController();
   final _alamatLengkapController = TextEditingController();
 
-  /// ===========================================================
-  /// VALIDATOR MANUAL
-  /// ===========================================================
+  @override
+  void initState() {
+    super.initState();
+
+    // Load cache step 3
+    final cache = ref.read(registerStep3CacheProvider);
+
+    _blokController.text = cache.blok;
+    _nomorRumahController.text = cache.nomorRumah;
+    _alamatLengkapController.text = cache.alamatLengkap;
+  }
+
   List<String> _validateInputs() {
-    List<String> errors = [];
+    final errors = <String>[];
 
     if (_blokController.text.trim().isEmpty) {
       errors.add("Blok wajib diisi");
     }
-
     if (_nomorRumahController.text.trim().isEmpty) {
       errors.add("Nomor rumah wajib diisi");
     }
-
     if (_alamatLengkapController.text.trim().isEmpty) {
       errors.add("Alamat lengkap wajib diisi");
     }
@@ -45,16 +50,6 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(registerStateProvider);
-
-    /// Force redirect jika step 2 belum selesai
-    if (state.keluargaId == null) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => context.go('/register/step2'),
-      );
-      return const SizedBox();
-    }
-
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -62,14 +57,14 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           leading: IconButton(
-            icon: Icon(HeroiconsMini.arrowLeft, color: Colors.grey[950]),
+            icon: Icon(HeroiconsMini.arrowLeft, color: Colors.grey[900]),
             onPressed: () => context.pop(),
           ),
           titleSpacing: 0,
           title: Text(
             'Register',
             style: TextStyle(
-              color: Colors.grey[950],
+              color: Colors.grey[900],
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -80,39 +75,42 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// ==============================================
-              /// PROGRESS STEPS (1,2 aktif — 3 aktif)
-              /// ==============================================
+              /// ------ PROGRESS BAR ------
               Row(
                 children: [
                   Expanded(
-                    child: Divider(
-                      thickness: 6,
-                      color: Colors.deepPurpleAccent[400],
-                      radius: BorderRadius.all(Radius.circular(10)),
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurpleAccent[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Divider(
-                      thickness: 6,
-                      color: Colors.deepPurpleAccent[400],
-                      radius: BorderRadius.all(Radius.circular(10)),
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurpleAccent[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Divider(
-                      thickness: 6,
-                      color: Colors.deepPurpleAccent[400],
-                      radius: BorderRadius.all(Radius.circular(10)),
+                    child: Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurpleAccent[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ],
               ),
 
               const SizedBox(height: 20),
-
               Text(
                 "Data Rumah",
                 style: TextStyle(
@@ -121,7 +119,6 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                   color: Colors.deepPurpleAccent[400],
                 ),
               ),
-              const SizedBox(height: 4),
               Text(
                 "Masukkan informasi rumah Anda",
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
@@ -129,14 +126,14 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
 
               const SizedBox(height: 16),
 
-              /// ===========================================
-              /// INPUT FIELDS (SAMA STYLE DENGAN STEP 1 & 2)
-              /// ===========================================
               InputField(
                 label: "Blok Rumah",
                 hintText: "Contoh: A, B, C",
                 controller: _blokController,
                 validator: (_) => null,
+                onChanged: (v) => ref
+                    .read(registerStep3CacheProvider.notifier)
+                    .updateCache(blok: v),
               ),
 
               InputField(
@@ -144,6 +141,9 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                 hintText: "Contoh: 12, 21A",
                 controller: _nomorRumahController,
                 validator: (_) => null,
+                onChanged: (v) => ref
+                    .read(registerStep3CacheProvider.notifier)
+                    .updateCache(nomorRumah: v),
               ),
 
               InputField(
@@ -151,13 +151,13 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                 hintText: "Masukkan alamat lengkap",
                 controller: _alamatLengkapController,
                 validator: (_) => null,
+                onChanged: (v) => ref
+                    .read(registerStep3CacheProvider.notifier)
+                    .updateCache(alamatLengkap: v),
               ),
 
               const SizedBox(height: 20),
 
-              /// ===========================================
-              /// FINAL BUTTON
-              /// ===========================================
               TextButton(
                 onPressed: () async {
                   final errors = _validateInputs();
@@ -171,10 +171,7 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                       onlyYes: true,
                       icon: SizedBox(
                         height: MediaQuery.of(context).size.height * 0.22,
-                        child: Lottie.asset(
-                          'assets/lottie/Failed.json',
-                          fit: BoxFit.contain,
-                        ),
+                        child: Lottie.asset("assets/lottie/Failed.json"),
                       ),
                       onYes: () => Navigator.pop(context),
                     );
@@ -182,39 +179,27 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                   }
 
                   try {
-                    final usecase = ref.read(createRumahProvider);
-
-                    await usecase.execute(
-                      state.keluargaId!,
-                      _blokController.text,
-                      _nomorRumahController.text,
-                      _alamatLengkapController.text,
-                    );
-
-                    /// update global state
-                    ref
+                    /// -------- SUBMIT ALL DATA (SESUAI FLOW BARU) --------
+                    await ref
                         .read(registerStateProvider.notifier)
-                        .updateRumah(
-                          _blokController.text,
-                          _nomorRumahController.text,
-                          _alamatLengkapController.text,
-                        );
+                        .submitAll(ref);
 
-                    /// ============================
-                    /// SHOW SUCCESS ALERT DULU
-                    /// ============================
+                    ref.invalidate(registerStep1CacheProvider);
+                    ref.invalidate(registerStep2CacheProvider);
+                    ref.invalidate(registerStep3CacheProvider);
+
+                    /// clear cache setelah berhasil
+                    ref.read(registerStep3CacheProvider.notifier).clearCache();
+
                     showBottomAlert(
                       context: context,
                       title: "Berhasil!",
-                      message: "Anda berhasil melakukan pendaftaran.",
+                      message: "Akun dan data rumah berhasil dibuat.",
                       yesText: "Lanjut Login",
                       onlyYes: true,
                       icon: SizedBox(
                         height: MediaQuery.of(context).size.height * 0.22,
-                        child: Lottie.asset(
-                          'assets/lottie/Done.json',
-                          fit: BoxFit.contain,
-                        ),
+                        child: Lottie.asset("assets/lottie/Done.json"),
                       ),
                       onYes: () {
                         Navigator.pop(context);
@@ -237,16 +222,13 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                   backgroundColor: WidgetStateProperty.all(
                     Colors.deepPurpleAccent[400],
                   ),
+                  minimumSize: WidgetStateProperty.all(
+                    const Size(double.infinity, 50),
+                  ),
                   shape: WidgetStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                  ),
-                  padding: WidgetStateProperty.all(
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                  ),
-                  minimumSize: WidgetStateProperty.all(
-                    const Size(double.infinity, 50),
                   ),
                 ),
 
