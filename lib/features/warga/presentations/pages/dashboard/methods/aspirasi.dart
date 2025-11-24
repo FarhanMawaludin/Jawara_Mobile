@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../aspirasi/presentations/providers/aspirasi_providers.dart';
+import '../../../../../aspirasi/data/models/aspiration_model.dart';
 
-class Aspirasi extends StatelessWidget {
+class Aspirasi extends ConsumerWidget {
   const Aspirasi({super.key});
 
+  String _relativeTime(DateTime dt) {
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inMinutes < 60) return '${diff.inMinutes} menit lalu';
+    if (diff.inHours < 24) return '${diff.inHours} jam lalu';
+    if (diff.inDays < 7) return '${diff.inDays} hari lalu';
+    if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} minggu lalu';
+    if (diff.inDays < 365) return '${(diff.inDays / 30).floor()} bulan lalu';
+    return '${(diff.inDays / 365).floor()} tahun lalu';
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncList = ref.watch(aspirationListProvider);
+
     return Container(
       padding: const EdgeInsets.all(0),
       child: Column(
@@ -49,20 +65,27 @@ class Aspirasi extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // List Pesan
-          _buildMessageTile(
-            imageUrl:
-                'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-            name: 'John Doe',
-            message: 'Selamat pagi, semoga harimu menyenangkan!',
-            time: '2 jam lalu',
-          ),
-          _buildMessageTile(
-            imageUrl:
-                'https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-            name: 'Jane Smith',
-            message: 'Terima kasih atas bantuanmu kemarin!',
-            time: '5 jam lalu',
+          // List Pesan (from aspirasi)
+          asyncList.when(
+            data: (items) {
+              if (items.isEmpty) return const Text('Belum ada pesan.');
+              // show up to 3 latest
+              final latest = List<AspirationModel>.from(items)..sort((a,b) => b.createdAt.compareTo(a.createdAt));
+              final show = latest.take(3).toList();
+              return Column(
+                children: show.map((e) {
+                  final displayName = (e.sender.split('@').first).trim();
+                  return _buildMessageTile(
+                    imageUrl: null,
+                    name: displayName.isNotEmpty ? displayName : 'Warga',
+                    message: e.message.isNotEmpty ? e.message : e.title,
+                    time: _relativeTime(e.createdAt),
+                  );
+                }).toList(),
+              );
+            },
+            loading: () => const SizedBox(height: 56, child: Center(child: CircularProgressIndicator())),
+            error: (err, st) => Text('Gagal memuat pesan: $err'),
           ),
         ],
       ),
@@ -71,7 +94,7 @@ class Aspirasi extends StatelessWidget {
 
   // Komponen ListTile supaya bisa dipakai ulang
   Widget _buildMessageTile({
-    required String imageUrl,
+    String? imageUrl,
     required String name,
     required String message,
     required String time,
@@ -84,10 +107,13 @@ class Aspirasi extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(100),
           border: Border.all(color: Colors.grey[300]!, width: 1.5),
+          color: Colors.grey[200],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(100),
-          child: Image.network(imageUrl, fit: BoxFit.cover),
+          child: imageUrl != null && imageUrl.isNotEmpty
+              ? Image.network(imageUrl, fit: BoxFit.cover)
+              : Center(child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w600))),
         ),
       ),
       title: Text(
