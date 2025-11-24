@@ -53,4 +53,14 @@ class MutasiRepositoryImpl implements MutasiRepository {
       throw Exception("Gagal membuat data Mutasi: $e");
     }
   }
+
+  @override
+  Future<List<Mutasi>> searchMutasi(String keyword) async {
+    try {
+      final result = await remoteDataSource.searchMutasi(keyword);
+      return result;
+    } catch (e) {
+      throw Exception("Gagal mencari data Mutasi: $e");
+    }
+  }
 }
