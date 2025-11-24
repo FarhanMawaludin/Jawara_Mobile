@@ -233,9 +233,7 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         older.sort((a, b) => b.date.compareTo(a.date));
 
         addSection('Terbaru', latest);
-        addSection('Dalam 7 Hari', week);
-        addSection('Dalam 1 Tahun', year);
-        addSection('Lebih dari 1 Tahun', older);
+        addSection('7 Hari Terakhir', week);
 
         return Column(
           children: [
