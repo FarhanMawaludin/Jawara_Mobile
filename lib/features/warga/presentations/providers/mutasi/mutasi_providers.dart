@@ -11,6 +11,8 @@ import '../../../domain/usecases/mutasi/get_all_mutasi.dart';
 import '../../../domain/usecases/mutasi/get_mutasi_by_id.dart';
 import '../../../domain/usecases/mutasi/get_mutasi_by_keluarga.dart';
 import '../../../domain/usecases/mutasi/create_mutasi.dart';
+import '../../../domain/usecases/mutasi/search_mutasi.dart';
+
 
 // =========================================================
 // SUPABASE CLIENT PROVIDER
@@ -18,6 +20,7 @@ import '../../../domain/usecases/mutasi/create_mutasi.dart';
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
+
 
 // =========================================================
 // DATASOURCE PROVIDER
@@ -29,6 +32,7 @@ final mutasiRemoteDataSourceProvider = Provider<MutasiRemoteDatasourceImpl>((
   return MutasiRemoteDatasourceImpl(client);
 });
 
+
 // =========================================================
 // REPOSITORY PROVIDER
 // =========================================================
@@ -36,6 +40,7 @@ final mutasiRepositoryProvider = Provider<MutasiRepositoryImpl>((ref) {
   final remote = ref.read(mutasiRemoteDataSourceProvider);
   return MutasiRepositoryImpl(remote);
 });
+
 
 // =========================================================
 // USECASE PROVIDERS
@@ -56,6 +61,11 @@ final createMutasiProvider = Provider<CreateMutasi>((ref) {
   return CreateMutasi(ref.read(mutasiRepositoryProvider));
 });
 
+final searchMutasiProvider = Provider<SearchMutasi>((ref) {
+  return SearchMutasi(ref.read(mutasiRepositoryProvider));
+});
+
+
 // =========================================================
 // FUTURE PROVIDER
 // =========================================================
@@ -72,3 +82,25 @@ final mutasiDetailProvider = FutureProvider.family<Mutasi?, int>((
   final usecase = ref.read(getMutasiByIdProvider);
   return await usecase(id);
 });
+
+
+// =========================================================
+// SEARCH PROVIDERS
+// =========================================================
+final searchMutasiInputProvider = StateProvider<String>((ref) => "");
+
+final searchMutasiKeywordProvider = StateProvider<String>((ref) => "");
+
+final searchMutasiResultProvider =
+    FutureProvider.autoDispose<List<Mutasi>>((ref) async {
+  final keyword = ref.watch(searchMutasiKeywordProvider);
+
+  if (keyword.isEmpty) return [];
+
+  final usecase = ref.read(searchMutasiProvider);
+  return await usecase(keyword);
+});
+
+
+
+

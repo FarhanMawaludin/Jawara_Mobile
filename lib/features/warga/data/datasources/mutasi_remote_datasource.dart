@@ -6,6 +6,7 @@ abstract class MutasiRemoteDataSource {
   Future<MutasiModel?> getMutasiByKeluarga(int keluargaId);
   Future<MutasiModel?> getMutasiById(int id);
   Future<void> createMutasi(MutasiModel mutasi);
+  Future<List<MutasiModel>> searchMutasi(String keyword);
 }
 
 class MutasiRemoteDatasourceImpl implements MutasiRemoteDataSource {
@@ -119,6 +120,20 @@ class MutasiRemoteDatasourceImpl implements MutasiRemoteDataSource {
       });
     } catch (e) {
       throw Exception("Gagal membuat data Mutasi: $e");
+    }
+  }
+
+  @override
+  Future<List<MutasiModel>> searchMutasi(String keyword) async {
+    try {
+      final result = await client
+          .from('mutasi_keluarga')
+          .select('*, keluarga:keluarga_id!inner(id, nama_keluarga)')
+          .ilike('keluarga.nama_keluarga', '%$keyword%');
+
+      return result.map((json) => MutasiModel.fromMap(json)).toList();
+    } catch (e) {
+      throw Exception("Gagal mencari Mutasi: $e");
     }
   }
 }
