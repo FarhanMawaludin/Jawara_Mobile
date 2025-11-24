@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_list_section.dart';
-import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/search_section.dart';
+// import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/search_section.dart';
 
 
 class AspirationPage extends StatelessWidget {
@@ -43,11 +43,7 @@ class AspirationPage extends StatelessWidget {
             ),
           ),
 
-          // Sticky search (kept outside scrollable list)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-            child: const SearchSection(),
-          ),
+          // Top search removed — using the search inside the list section
 
           // Content area (list scrolls independently)
           const Expanded(

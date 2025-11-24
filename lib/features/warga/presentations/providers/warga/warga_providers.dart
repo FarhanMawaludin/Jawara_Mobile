@@ -10,11 +10,13 @@ import '../../../data/repositories/warga_repository_impl.dart';
 
 // Usecases
 import '../../../domain/usecases/warga/get_all_warga.dart';
+import '../../../domain/usecases/warga/get_all_keluarga.dart';
 import '../../../domain/usecases/warga/get_warga_by_id.dart';
 import '../../../domain/usecases/warga/create_warga.dart';
 import '../../../domain/usecases/warga/update_warga.dart';
 import '../../../domain/usecases/warga/delete_warga.dart';
-import '../../../domain/usecases/warga/search_warga.dart'; // <-- TAMBAHAN
+import '../../../domain/usecases/warga/search_warga.dart';
+import '../../../domain/usecases/warga/get_warga_by_keluarga.dart';
 
 // =========================================================
 // SUPABASE CLIENT PROVIDER
@@ -48,6 +50,10 @@ final getAllWargaProvider = Provider<GetAllWarga>((ref) {
   return GetAllWarga(ref.read(wargaRepositoryProvider));
 });
 
+final getAllKeluargaProvider = Provider<GetAllKeluarga>((ref) {
+  return GetAllKeluarga(ref.read(wargaRepositoryProvider));
+});
+
 final getWargaByIdUseCaseProvider = Provider<GetWargaById>((ref) {
   return GetWargaById(ref.read(wargaRepositoryProvider));
 });
@@ -64,9 +70,12 @@ final deleteWargaUseCaseProvider = Provider<DeleteWarga>((ref) {
   return DeleteWarga(ref.read(wargaRepositoryProvider));
 });
 
-// ==== TAMBAHAN USECASE SEARCH ====
 final searchWargaUseCaseProvider = Provider<SearchWarga>((ref) {
   return SearchWarga(ref.read(wargaRepositoryProvider));
+});
+
+final getWargaByKeluargaUseCaseProvider = Provider<GetWargaByKeluarga>((ref) {
+  return GetWargaByKeluarga(ref.read(wargaRepositoryProvider));
 });
 
 // =========================================================
@@ -78,11 +87,30 @@ final wargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
 });
 
 // =========================================================
+// PROVIDER: Get All Keluarga
+// =========================================================
+final keluargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
+  final ds = ref.read(wargaRemoteDataSourceProvider);
+  return await ds.getAllKeluarga();
+});
+
+// =========================================================
 // PROVIDER: Get Warga by ID
 // =========================================================
 final wargaDetailProvider = FutureProvider.family((ref, int id) async {
   final usecase = ref.read(getWargaByIdUseCaseProvider);
   return await usecase(id);
+});
+// =========================================================
+// PROVIDER: Get Warga by Keluarga ID
+// =========================================================
+final wargaByKeluargaProvider = FutureProvider.family<List<WargaModel>, int>((
+  ref,
+  keluargaId,
+) async {
+  final usecase = ref.read(getWargaByKeluargaUseCaseProvider);
+  final result = await usecase(keluargaId);
+  return result.cast<WargaModel>();
 });
 
 // =========================================================
@@ -126,6 +154,7 @@ class WargaFormState {
   final String? golonganDarah;
   final String? pekerjaan;
   final String? status;
+  final String? pendidikan;
 
   WargaFormState({
     this.nama = '',
@@ -139,6 +168,7 @@ class WargaFormState {
     this.golonganDarah,
     this.pekerjaan,
     this.status,
+    this.pendidikan,
   });
 
   WargaFormState copyWith({
@@ -153,6 +183,7 @@ class WargaFormState {
     String? golonganDarah,
     String? pekerjaan,
     String? status,
+    String? pendidikan,
   }) {
     return WargaFormState(
       nama: nama ?? this.nama,
@@ -166,6 +197,7 @@ class WargaFormState {
       golonganDarah: golonganDarah ?? this.golonganDarah,
       pekerjaan: pekerjaan ?? this.pekerjaan,
       status: status ?? this.status,
+      pendidikan: pendidikan ?? this.pendidikan,
     );
   }
 }
@@ -185,6 +217,7 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
     String? golonganDarah,
     String? pekerjaan,
     String? status,
+    String? pendidikan,
   }) {
     state = state.copyWith(
       nama: nama,
@@ -198,6 +231,7 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
       golonganDarah: golonganDarah,
       pekerjaan: pekerjaan,
       status: status,
+      pendidikan: pendidikan,
     );
   }
 

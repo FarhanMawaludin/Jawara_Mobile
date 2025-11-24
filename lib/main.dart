@@ -5,6 +5,7 @@ import 'package:jawaramobile/config/app_config.dart';
 import 'core/supabase_client.dart';
 import 'router/router.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(

@@ -30,7 +30,7 @@ class _DaftarKeluargaPageState extends ConsumerState<DaftarKeluargaPage> {
     final keyword = ref.watch(searchKeywordProvider);
 
     final wargaAsync = ref.watch(
-      keyword.isEmpty ? wargaListProvider : searchWargaProvider,
+      keyword.isEmpty ? keluargaListProvider : searchWargaProvider,
     );
 
     return SafeArea(

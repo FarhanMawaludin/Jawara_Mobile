@@ -1,13 +1,15 @@
-// lib/features/warga/presentation/pages/daftar_rumah/methods/card_rumah.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:jawaramobile/core/component/bottom_alert.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
 
-class CardRumah extends StatelessWidget {
-  final String namaRumah; // contoh: Griyashanta L.203
-  final bool ditempati; // kalau true → ditempati, kalau false → kosong
-  final int rumahId; // untuk navigasi detail
+
+class CardRumah extends ConsumerWidget {
+  final String namaRumah;
+  final bool ditempati;
+  final int rumahId;
 
   const CardRumah({
     super.key,
@@ -17,7 +19,7 @@ class CardRumah extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -26,6 +28,9 @@ class CardRumah extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // -----------------------------------------------------
+          // HEADER
+          // -----------------------------------------------------
           Row(
             children: [
               Text(
@@ -38,7 +43,12 @@ class CardRumah extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 8),
+
+          // -----------------------------------------------------
+          // STATUS
+          // -----------------------------------------------------
           Row(
             children: [
               Icon(
@@ -51,13 +61,17 @@ class CardRumah extends StatelessWidget {
                 ditempati ? "Ditempati" : "Kosong",
                 style: TextStyle(
                   color: ditempati ? Colors.green[600] : Colors.grey[600],
-                  fontWeight: FontWeight.w400,
                   fontSize: 12,
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 16),
+
+          // -----------------------------------------------------
+          // DETAIL BUTTON
+          // -----------------------------------------------------
           TextButton(
             onPressed: () {
               context.push('/warga/daftar-rumah/detail/$rumahId');
@@ -65,13 +79,10 @@ class CardRumah extends StatelessWidget {
             style: TextButton.styleFrom(
               backgroundColor: Colors.deepPurpleAccent[400],
               padding: const EdgeInsets.symmetric(vertical: 12),
-              overlayColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              alignment: Alignment.center,
               minimumSize: const Size(double.infinity, 0),
-              side: BorderSide(color: Colors.deepPurpleAccent[400]!, width: 1),
             ),
             child: const Text(
               "Detail",
@@ -80,6 +91,80 @@ class CardRumah extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // -----------------------------------------------------
+          // EDIT & DELETE BUTTONS
+          // -----------------------------------------------------
+          Row(
+            children: [
+              // EDIT
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    context.push('/warga/daftar-rumah/edit/$rumahId');
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.blue[600]!),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Edit",
+                    style: TextStyle(
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // DELETE
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    showBottomAlert(
+                      context: context,
+                      title: "Hapus Rumah?",
+                      message:
+                          "Aksi ini tidak dapat dibatalkan. Apakah Anda yakin ingin menghapus rumah ini?",
+                      yesText: "Hapus",
+                      noText: "Batal",
+                      onYes: () async {
+                        Navigator.pop(context); // tutup alert
+
+                        /// PANGGIL USECASE DENGAN PROVIDER YANG BENAR
+                        final delete = ref.read(deleteRumahProvider);
+                        await delete(rumahId);
+
+                        // Refresh list rumah
+                        ref.invalidate(rumahListProvider);
+                      },
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red[400]!),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Hapus",
+                    style: TextStyle(
+                      color: Colors.red[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

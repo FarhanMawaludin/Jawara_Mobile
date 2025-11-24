@@ -3,11 +3,13 @@ import '../models/warga_model.dart';
 
 abstract class WargaRemoteDataSource {
   Future<List<WargaModel>> getAllWarga();
+  Future<List<WargaModel>> getAllKeluarga();
   Future<WargaModel?> getWargaById(int id);
   Future<void> createWarga(WargaModel warga);
   Future<void> updateWarga(WargaModel warga);
   Future<void> deleteWarga(int id);
   Future<List<WargaModel>> searchWarga(String keyword);
+  Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId); 
 }
 
 class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
@@ -18,7 +20,9 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
   @override
   Future<List<WargaModel>> getAllWarga() async {
     try {
-      final List<dynamic> data = await client.from('warga').select('''
+      final List<dynamic> data = await client
+          .from('warga')
+          .select('''
           *,
           keluarga:keluarga_id (
             id,
@@ -30,7 +34,35 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             blok,
             nomor_rumah
           )
-        ''');
+        '''); 
+
+      print(data);
+
+      return data.map((json) => WargaModel.fromMap(json)).toList();
+    } catch (e) {
+      throw Exception("Gagal mengambil data Warga: $e");
+    }
+  }
+
+   @override
+  Future<List<WargaModel>> getAllKeluarga() async {
+    try {
+      final List<dynamic> data = await client
+          .from('warga')
+          .select('''
+          *,
+          keluarga:keluarga_id (
+            id,
+            nama_keluarga
+          ),
+          rumah:alamat_rumah_id (
+            id,
+            alamat_lengkap,
+            blok,
+            nomor_rumah
+          )
+        ''').
+          eq('role_keluarga', 'kepala_keluarga'); 
 
       print(data);
 
@@ -115,5 +147,14 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
     } catch (e) {
       throw Exception("Gagal mencari warga: $e");
     }
+  }
+
+  Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId) async {
+    final result = await client
+        .from('warga')
+        .select('*, keluarga(*), rumah(*)')
+        .eq('keluarga_id', keluargaId);
+
+    return result.map((e) => WargaModel.fromMap(e)).toList();
   }
 }

@@ -95,6 +95,8 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
 
                       await createRumah(rumah);
 
+                      ref.invalidate(rumahListProvider);
+
                       // === bottom alert berhasil ===
                       showBottomAlert(
                         context: context,
