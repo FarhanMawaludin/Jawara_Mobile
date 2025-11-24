@@ -162,8 +162,11 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const DaftarMutasiPage(),
     ),
     GoRoute(
-      path: '/warga/daftar-mutasi/detail',
-      builder: (context, state) => const DetailMutasiPage(),
+      path: '/warga/daftar-mutasi/detail/:id',
+      builder: (context, state) {
+      final id = int.parse(state.pathParameters['id']!);
+      return DetailMutasiPage(mutasiId: id);
+    }
     ),
     GoRoute(
       path: '/warga/tambah-mutasi',
