@@ -98,7 +98,7 @@ class Lainnya extends StatelessWidget {
                     MenuItemWidget(
                       icon: HeroiconsOutline.chatBubbleLeftRight,
                       label: "Aspirasi Warga",
-                      onTap: () => context.push('/aspirasi'),
+                      onTap: () => context.push('/warga/aspirasi'),
                     ),
 
                     MenuItemWidget(

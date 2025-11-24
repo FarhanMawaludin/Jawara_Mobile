@@ -1,6 +1,5 @@
 // lib/domain/usecases/create_keluarga_and_warga.dart
-import '../entities/keluarga.dart';
-import '../entities/warga.dart';
+
 import '../repositories/register_repository.dart';
 
 class CreateKeluargaAndWarga {
@@ -8,23 +7,22 @@ class CreateKeluargaAndWarga {
 
   CreateKeluargaAndWarga(this.repository);
 
-  Future<(Keluarga, Warga)> execute(
-    String userId,
-    String namaKeluarga,
-    String nama,
-    String? nik,
-    String? jenisKelamin,
-    DateTime? tanggalLahir,
-    String roleKeluarga,
-  ) {
+  Future<int> call({
+    required String userId,
+    required String nama,
+    required String? nik,
+    required String? jenisKelamin,
+    required DateTime? tanggalLahir,
+    required String roleKeluarga,
+  }) async {
+    // Kembalikan keluargaId sesuai RegisterRepository
     return repository.createKeluargaAndWarga(
-      userId,
-      namaKeluarga,
-      nama,
-      nik,
-      jenisKelamin,
-      tanggalLahir,
-      roleKeluarga,
+      userId: userId,
+      nama: nama,
+      nik: nik,
+      jenisKelamin: jenisKelamin,
+      tanggalLahir: tanggalLahir,
+      roleKeluarga: roleKeluarga,
     );
   }
 }

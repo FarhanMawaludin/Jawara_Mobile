@@ -1,5 +1,5 @@
 // lib/domain/usecases/create_rumah.dart
-import '../entities/rumah.dart';
+
 import '../repositories/register_repository.dart';
 
 class CreateRumah {
@@ -7,17 +7,17 @@ class CreateRumah {
 
   CreateRumah(this.repository);
 
-  Future<Rumah> execute(
-    int keluargaId,
-    String? blok,
-    String? nomorRumah,
-    String? alamatLengkap,
-  ) {
+  Future<int> call({
+    required int keluargaId,
+    required String? blok,
+    required String? nomorRumah,
+    required String? alamatLengkap,
+  }) async {
     return repository.createRumah(
-      keluargaId,
-      blok,
-      nomorRumah,
-      alamatLengkap,
+      keluargaId: keluargaId,
+      blok: blok,
+      nomorRumah: nomorRumah,
+      alamatLengkap: alamatLengkap,
     );
   }
 }
