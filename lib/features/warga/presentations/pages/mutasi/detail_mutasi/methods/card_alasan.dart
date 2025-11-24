@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CardAlasan extends StatelessWidget {
-  const CardAlasan({super.key});
+  final String alasanMutasi;
+  const CardAlasan({super.key, required this.alasanMutasi});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class CardAlasan extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "-",
+                      alasanMutasi,
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CardMutasi extends StatelessWidget {
-  const CardMutasi({super.key});
+  final String alamatLama;
+  final String alamatBaru;
+  final String tanggalMutasi;
+  const CardMutasi({super.key, required this.alamatLama, required this.alamatBaru, required this.tanggalMutasi});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,7 @@ class CardMutasi extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Malang",
+                      alamatLama,
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -57,7 +60,7 @@ class CardMutasi extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Surabaya",
+                      alamatBaru,
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -89,7 +92,7 @@ class CardMutasi extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "12 Januari 2020",
+                      tanggalMutasi,
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontWeight: FontWeight.w600,
@@ -108,3 +111,5 @@ class CardMutasi extends StatelessWidget {
     );
   }
 }
+
+
