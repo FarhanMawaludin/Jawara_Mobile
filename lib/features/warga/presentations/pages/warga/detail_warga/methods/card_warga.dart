@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
 
 class CardWarga extends StatelessWidget {
-  const CardWarga({super.key});
+  final String ttl;
+  final String noTelepon;
+  final String jenisKelamin;
+  final String agama;
+  final String golonganDarah;
+  final String pendidikan;
+  final String pekerjaan;
+  final String peranKeluarga;
+  final String statusPenduduk;
+
+  const CardWarga({
+    super.key,
+    required this.ttl,
+    required this.noTelepon,
+    required this.jenisKelamin,
+    required this.agama,
+    required this.golonganDarah,
+    required this.pendidikan,
+    required this.pekerjaan,
+    required this.peranKeluarga,
+    required this.statusPenduduk,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,268 +35,95 @@ class CardWarga extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // TETAP SAMA, hanya ubah teks menjadi variabel
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "TTL",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Malang, 12-05-1990",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "TTL", value: ttl),
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "No. Telepon",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "081234567890",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "No. Telepon", value: noTelepon),
               ),
             ],
           ),
           const SizedBox(height: 16),
+
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Jenis Kelamin",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Laki-laki",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "Jenis Kelamin", value: jenisKelamin),
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Agama",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Islam",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "Agama", value: agama),
               ),
             ],
           ),
           const SizedBox(height: 16),
+
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Golongan Darah",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "O",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "Golongan Darah", value: golonganDarah),
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Pendidikan Terakhir",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "S1-Management",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "Pendidikan Terakhir", value: pendidikan),
               ),
             ],
           ),
           const SizedBox(height: 16),
+
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Pekerjaan",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Karyawan Swasta",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "Pekerjaan", value: pekerjaan),
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Peran dalam Keluarga",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Kepala Keluarga",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
+                child: InfoColumn(title: "Peran dalam Keluarga", value: formatPeranKeluarga(peranKeluarga)),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Status Penduduk",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Aktif",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
-              ),
-              
-            ],
-          ),
+
+          InfoColumn(title: "Status Penduduk", value: statusPenduduk),
         ],
       ),
     );
   }
+}
+
+// Helper kecil biar rapi
+class InfoColumn extends StatelessWidget {
+  final String title;
+  final String value;
+  const InfoColumn({super.key, required this.title, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w400,
+                fontSize: 14)),
+        const SizedBox(height: 4),
+        Text(value,
+            style: TextStyle(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.w600,
+                fontSize: 16)),
+      ],
+    );
+  }
+}
+
+String formatPeranKeluarga(String value) {
+  final cleaned = value.replaceAll('_', ' ');
+  return cleaned
+      .split(' ')
+      .map((e) => e.isEmpty ? e : e[0].toUpperCase() + e.substring(1))
+      .join(' ');
 }

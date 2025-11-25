@@ -9,7 +9,7 @@ class InputField extends StatefulWidget {
   final TextEditingController? controller;
 
   const InputField({
-    Key? key,
+    super.key,
     required this.label,
     required this.hintText,
     this.isPassword = false,
@@ -17,7 +17,7 @@ class InputField extends StatefulWidget {
     this.onChanged,
     this.controller, 
     final String? Function(String?)? validator, 
-  }) : super(key: key);
+  });
 
   @override
   State<InputField> createState() => _InputFieldState();

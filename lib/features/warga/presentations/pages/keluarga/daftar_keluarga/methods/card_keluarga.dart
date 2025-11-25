@@ -3,7 +3,29 @@ import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 class CardKeluarga extends StatelessWidget {
-  const CardKeluarga({super.key});
+  final String namaKeluarga;
+  final String alamat;
+  final String role;
+  final int keluargaId; // tambahkan properti ini
+
+  const CardKeluarga({
+    super.key,
+    required this.namaKeluarga,
+    required this.alamat,
+    required this.role,
+    required this.keluargaId, // wajib diisi
+  });
+
+  // ==== Formatter untuk role ====
+  String formatRole(String? role) {
+    if (role == null || role.isEmpty) return "Tidak diketahui";
+
+    return role
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((e) => e[0].toUpperCase() + e.substring(1))
+        .join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +40,7 @@ class CardKeluarga extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Keluarga Raudhil Firdaus Naufal",
+                namaKeluarga,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -45,7 +67,7 @@ class CardKeluarga extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    "Blok A No.12",
+                    alamat,
                     style: TextStyle(
                       color: Colors.deepPurpleAccent[400],
                       fontWeight: FontWeight.w400,
@@ -64,7 +86,7 @@ class CardKeluarga extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    "Pemilik",
+                    formatRole(role),
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w400,
@@ -78,7 +100,8 @@ class CardKeluarga extends StatelessWidget {
           const SizedBox(height: 16),
           TextButton(
             onPressed: () {
-              context.push('/warga/keluarga/detail');
+              // Kirim keluargaId ke halaman detail
+              context.push('/warga/keluarga/detail', extra: keluargaId);
             },
             style: TextButton.styleFrom(
               backgroundColor: Colors.deepPurpleAccent[400],

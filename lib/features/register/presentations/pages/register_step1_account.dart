@@ -8,20 +8,66 @@ import 'package:lottie/lottie.dart';
 
 import '../providers/register_providers.dart';
 
-class RegisterStep1Account extends ConsumerWidget {
-  RegisterStep1Account({super.key});
+class RegisterStep1Account extends ConsumerStatefulWidget {
+  const RegisterStep1Account({super.key});
 
+  @override
+  ConsumerState<RegisterStep1Account> createState() =>
+      _RegisterStep1AccountState();
+}
+
+class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+
+    // === Load Cache Data ===
+    final cache = ref.read(registerStep1CacheProvider);
+
+    _emailController.text = cache.email;
+    _passwordController.text = cache.password;
+    _confirmController.text = cache.confirmPassword;
+
+    // === Listen perubahan dan simpan ke cache ===
+    _emailController.addListener(() {
+      ref
+          .read(registerStep1CacheProvider.notifier)
+          .updateCache(email: _emailController.text);
+    });
+
+    _passwordController.addListener(() {
+      ref
+          .read(registerStep1CacheProvider.notifier)
+          .updateCache(password: _passwordController.text);
+    });
+
+    _confirmController.addListener(() {
+      ref
+          .read(registerStep1CacheProvider.notifier)
+          .updateCache(confirmPassword: _confirmController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  // === Email regex validator ===
   bool _isValidEmail(String email) {
     final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return regex.hasMatch(email);
   }
 
-  // === MENGAMBIL PESAN ERROR VALIDATOR ===
+  // === Validasi manual ===
   List<String> _validateInputs() {
     List<String> errors = [];
 
@@ -51,56 +97,62 @@ class RegisterStep1Account extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: Scaffold(
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: Icon(HeroiconsMini.arrowLeft, color: Colors.grey[950]),
-            onPressed: () => context.pop(),
-          ),
-          titleSpacing: 0,
-          title: Text(
-            'Register',
-            style: TextStyle(
-              color: Colors.grey[950],
-              fontWeight: FontWeight.w600,
-            ),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(HeroiconsMini.arrowLeft, color: Colors.grey[950]),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          'Register',
+          style: TextStyle(
+            color: Colors.grey[950],
+            fontWeight: FontWeight.w600,
           ),
         ),
-
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // === PROGRESS BAR ===
+                // ===== PROGRESS BAR =====
                 Row(
                   children: [
                     Expanded(
-                      child: Divider(
-                        thickness: 6,
-                        color: Colors.deepPurpleAccent[400],
-                        radius: BorderRadius.all(Radius.circular(10)),
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurpleAccent[400],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Divider(
-                        thickness: 6,
-                        color: Colors.grey[300],
-                        radius: BorderRadius.all(Radius.circular(10)),
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Divider(
-                        thickness: 6,
-                        color: Colors.grey[300],
-                        radius: BorderRadius.all(Radius.circular(10)),
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                   ],
@@ -108,7 +160,7 @@ class RegisterStep1Account extends ConsumerWidget {
 
                 const SizedBox(height: 20),
 
-                // === TITLE ===
+                // ===== TITLE =====
                 Text(
                   'Akun',
                   style: TextStyle(
@@ -124,12 +176,12 @@ class RegisterStep1Account extends ConsumerWidget {
 
                 const SizedBox(height: 20),
 
-                // === INPUT FIELD ===
+                // ===== INPUT FIELD =====
                 InputField(
                   label: 'Email',
                   hintText: 'Masukkan Email',
                   controller: _emailController,
-                  validator: (_) => null, // kita handle sendiri
+                  validator: (_) => null,
                 ),
 
                 InputField(
@@ -150,12 +202,11 @@ class RegisterStep1Account extends ConsumerWidget {
 
                 const SizedBox(height: 20),
 
-                // === BUTTON ===
+                // ===== BUTTON LANJUT =====
                 TextButton(
                   onPressed: () async {
                     final errors = _validateInputs();
 
-                    // jika ada error → tampil alert
                     if (errors.isNotEmpty) {
                       showBottomAlert(
                         context: context,
@@ -164,91 +215,46 @@ class RegisterStep1Account extends ConsumerWidget {
                         yesText: "Mengerti",
                         onlyYes: true,
                         icon: SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height *
-                                0.22, // 22% tinggi layar
-                            child: Lottie.asset(
-                              'assets/lottie/Failed.json',
-                              fit: BoxFit.contain,
-                            ),
+                          height: MediaQuery.of(context).size.height * 0.22,
+                          child: Lottie.asset(
+                            'assets/lottie/Failed.json',
+                            fit: BoxFit.contain,
                           ),
+                        ),
                         onYes: () => Navigator.pop(context),
                       );
                       return;
                     }
 
-                    try {
-                      final usecase = ref.read(registerAccountProvider);
-
-                      final userApp = await usecase.execute(
-                        _emailController.text.trim(),
-                        _passwordController.text.trim(),
-                      );
-
-                      // === CEK EMAIL SUDAH TERDAFTAR ===
-                      if (userApp == null || userApp.id == null) {
-                        showBottomAlert(
-                          context: context,
-                          title: "Email Sudah Terdaftar",
-                          message:
-                              "Gunakan email lain atau login jika sudah memiliki akun.",
-                          yesText: "Mengerti",
-                          onlyYes: true,
-                          icon: SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height *
-                                0.22, // 22% tinggi layar
-                            child: Lottie.asset(
-                              'assets/lottie/Failed.json',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          onYes: () => Navigator.pop(context),
+                    // === Simpan ke cache step 1 ===
+                    ref.read(registerStep1CacheProvider.notifier).updateCache(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim(),
+                          confirmPassword: _confirmController.text.trim(),
                         );
-                        return;
-                      }
 
-                      // === SIMPAN STATE ===
-                      ref
-                          .read(registerStateProvider.notifier)
-                          .updateAccount(
-                            _emailController.text.trim(),
-                            _passwordController.text.trim(),
-                            userApp.id!,
-                          );
-
-                      // === LANJUT STEP 2 ===
-                      context.push('/register/step2');
-                    } catch (_) {
-                      showBottomAlert(
-                        context: context,
-                        title: "Terjadi Kesalahan",
-                        message:
-                            "Terjadi kesalahan saat membuat akun. Silakan coba lagi nanti.",
-                        yesText: "Tutup",
-                        onlyYes: true,
-                        onYes: () => Navigator.pop(context),
-                      );
-                    }
+                    // === Lanjut ke langkah berikutnya ===
+                    context.push('/register/step2');
                   },
-
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
+                    backgroundColor: WidgetStateProperty.all(
                       Colors.deepPurpleAccent[400],
                     ),
-                    shape: MaterialStateProperty.all(
+                    shape: WidgetStateProperty.all(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    padding: MaterialStateProperty.all(
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    padding: WidgetStateProperty.all(
+                      const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
+                      ),
                     ),
-                    minimumSize: MaterialStateProperty.all(
+                    minimumSize: WidgetStateProperty.all(
                       const Size(double.infinity, 50),
                     ),
                   ),
-
                   child: const Text(
                     "Lanjutkan",
                     style: TextStyle(

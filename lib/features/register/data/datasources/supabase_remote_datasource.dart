@@ -1,65 +1,76 @@
 // lib/data/datasources/supabase_remote_datasource.dart
+
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/supabase_client.dart'; 
-import '../models/user_app_model.dart';
-import '../models/keluarga_model.dart';
-import '../models/warga_model.dart';
-import '../models/rumah_model.dart';
+import '../../../../core/supabase_client.dart';
 
 class SupabaseRemoteDatasource {
   final SupabaseClient client = SupabaseClientSingleton().client;
 
-  Future<UserAppModel> registerAccount(String email, String password) async {
+  // ========================================================
+  // STEP 1 — Register Account → return userId
+  // ========================================================
+  Future<String> registerAccount(String email, String password) async {
     final response = await client.auth.signUp(email: email, password: password);
+
     final user = response.user;
     if (user == null) {
       throw Exception('Failed to register account');
     }
 
-    final userAppData = await client.from('user_app').insert({
+    // Tambahkan data ke tabel user_app
+    await client.from('user_app').insert({
       'id': user.id,
       'role': 'kepala_keluarga',
-    }).select();
+    });
 
-    return UserAppModel.fromJson(userAppData.first as Map<String, dynamic>);
+    return user.id; // === return userId ===
   }
 
-  Future<(KeluargaModel, WargaModel)> createKeluargaAndWarga(
-    String userId,
-    String namaKeluarga,
-    String nama,
-    String? nik,
-    String? jenisKelamin,
-    DateTime? tanggalLahir,
-    String roleKeluarga,
-  ) async {
+  // ========================================================
+  // STEP 2 — Create Keluarga + Warga → return keluargaId
+  // ========================================================
+  Future<int> createKeluargaAndWarga({
+    required String userId,
+    required String nama,
+    required String? nik,
+    required String? jenisKelamin,
+    required DateTime? tanggalLahir,
+    required String roleKeluarga,
+  }) async {
+    // 1. INSERT keluarga
     final keluargaData = await client.from('keluarga').insert({
       'user_id': userId,
-      'nama_keluarga': namaKeluarga,
+      'nama_keluarga': nama, // otomatis nama kepala keluarga
     }).select();
 
-    final keluarga = KeluargaModel.fromJson(keluargaData.first as Map<String, dynamic>);
+    final keluargaId = keluargaData.first['id'] as int;
 
-    final wargaData = await client.from('warga').insert({
-      'keluarga_id': keluarga.id,
+    // 2. INSERT warga (kepala keluarga)
+    await client.from('warga').insert({
+      'keluarga_id': keluargaId,
       'nama': nama,
-      'nik': nik,
+
+      // 🔥 Fix bagian nik → ubah "" menjadi NULL
+      'nik': (nik == null || nik.trim().isEmpty) ? null : nik,
+
       'jenis_kelamin': jenisKelamin,
       'tanggal_lahir': tanggalLahir?.toIso8601String(),
       'role_keluarga': roleKeluarga,
-    }).select();
+    });
 
-    final warga = WargaModel.fromJson(wargaData.first as Map<String, dynamic>);
-
-    return (keluarga, warga);
+    return keluargaId;
   }
 
-  Future<RumahModel> createRumah(
-    int keluargaId,
-    String? blok,
-    String? nomorRumah,
-    String? alamatLengkap,
-  ) async {
+  // ========================================================
+  // STEP 3 — Create Rumah → return rumahId
+  // ========================================================
+  Future<int> createRumah({
+    required int keluargaId,
+    required String? blok,
+    required String? nomorRumah,
+    required String? alamatLengkap,
+  }) async {
+    // 1. INSERT rumah
     final rumahData = await client.from('rumah').insert({
       'keluarga_id': keluargaId,
       'blok': blok,
@@ -67,6 +78,15 @@ class SupabaseRemoteDatasource {
       'alamat_lengkap': alamatLengkap,
     }).select();
 
-    return RumahModel.fromJson(rumahData.first as Map<String, dynamic>);
+    final rumahId = rumahData.first['id'] as int;
+
+    // 2. Update warga untuk kepala keluarga → set alamat_rumah_id
+    await client
+        .from('warga')
+        .update({'alamat_rumah_id': rumahId})
+        .eq('keluarga_id', keluargaId)
+        .eq('role_keluarga', 'kepala_keluarga');
+
+    return rumahId;
   }
 }

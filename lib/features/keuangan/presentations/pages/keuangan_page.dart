@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/router/router.dart';
@@ -14,14 +15,14 @@ class KeuanganPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final menuItems = [
-      {'icon': Icons.category, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran'},
-      {'icon': Icons.request_quote, 'label': 'Tagih Iuran', 'route': '/tagih-iuran'},
-      {'icon': Icons.receipt_long, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan'},
-      {'icon': Icons.trending_up, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain'},
-      {'icon': Icons.add_circle, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan'},
-      {'icon': Icons.trending_down, 'label': 'Daftar Pengeluaran', 'route': '/daftar-pengeluaran'},
-      {'icon': Icons.remove_circle, 'label': 'Tambah Pengeluaran', 'route': '/tambah-pengeluaran'},
-      {'icon': Icons.more_horiz, 'label': 'Lainnya', 'route': '/keuangan/lainnya'},
+      {'icon': CupertinoIcons.qrcode, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran', 'warna': Colors.black},
+      {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/iuran/tambah-iuran', 'warna': Colors.black},
+      {'icon': CupertinoIcons.doc, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan', 'warna': Colors.black},
+      {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain', 'warna': Colors.green},
+      {'icon': CupertinoIcons.add, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'warna': Colors.green},
+      {'icon': CupertinoIcons.arrow_up_right, 'label': 'Daftar Pengeluaran', 'route': '/daftar-pengeluaran', 'warna': Colors.red},
+      {'icon': CupertinoIcons.add, 'label': 'Tambah Pengeluaran', 'route': '/tambah-pengeluaran', 'warna': Colors.red},
+      {'icon': CupertinoIcons.bars, 'label': 'Lainnya', 'route': '/keuangan/lainnya', 'warna': Colors.black},
     ];
 
     final transaksi = [
@@ -31,6 +32,7 @@ class KeuanganPage extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -54,7 +56,7 @@ class KeuanganPage extends StatelessWidget {
                 children: [
                   
                   SizedBox(height: 25),
-                  Text("Saldo", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                  Text("Saldo", style: TextStyle(color: Colors.white, fontSize: 14)),
                   Text(
                     "Rp. 50.000.000",
                     style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
@@ -90,8 +92,11 @@ class KeuanganPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircleAvatar(
+                          radius: 25,
                           backgroundColor: Colors.white,
-                          child: Icon(item['icon'] as IconData, color: Colors.deepPurple),
+                          child: Icon(
+                            item['icon'] as IconData?, 
+                            color:  item['warna'] as Color),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -130,7 +135,12 @@ class KeuanganPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(children: [
-                            Icon(Icons.arrow_upward, color: t['warna'] as Color),
+                              Icon(
+                                (t['warna'] == Colors.green)
+                                  ? CupertinoIcons.arrow_down_left 
+                                  : CupertinoIcons.arrow_up_right,
+                                color: t['warna'] as Color,
+                                ),
                             const SizedBox(width: 10),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

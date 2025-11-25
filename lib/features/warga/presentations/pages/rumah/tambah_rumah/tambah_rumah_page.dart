@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
+import 'package:jawaramobile/core/component/bottom_alert.dart';
+import 'package:lottie/lottie.dart';
 
+import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
+import 'package:jawaramobile/features/warga/domain/entities/rumah.dart';
 
-class TambahRumahPage extends StatefulWidget {
+class TambahRumahPage extends ConsumerStatefulWidget {
   const TambahRumahPage({super.key});
 
   @override
-  State<TambahRumahPage> createState() => _TambahRumahPageState();
+  ConsumerState<TambahRumahPage> createState() => _TambahRumahPageState();
 }
 
-class _TambahRumahPageState extends State<TambahRumahPage> {
+class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
   final _formKey = GlobalKey<FormState>();
 
-  
+  final TextEditingController blokController = TextEditingController();
+  final TextEditingController nomorRumahController = TextEditingController();
+  final TextEditingController alamatLengkapController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    final createRumah = ref.read(createRumahProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -38,27 +49,72 @@ class _TambahRumahPageState extends State<TambahRumahPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              InputField(
+                label: "Blok",
+                hintText: "Contoh: A / B / C",
+                controller: blokController,
+              ),
 
-              // Input Nama
-              InputField(label: "Alamat Rumah", hintText: "Contoh : Jl. Mawar No. 123"),
+              const SizedBox(height: 16),
+
+              InputField(
+                label: "Nomor Rumah",
+                hintText: "Contoh: 12 / 20B",
+                controller: nomorRumahController,
+              ),
+
+              const SizedBox(height: 16),
+
+              InputField(
+                label: "Alamat Lengkap",
+                hintText: "Contoh: Jl. Kenanga No. 12",
+                controller: alamatLengkapController,
+              ),
 
               const SizedBox(height: 24),
 
-              // Tombol Simpan
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6750A4), // Warna ungu muda seperti gambar
+                    backgroundColor: Colors.deepPurpleAccent[400],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Data Rumah Baru Disimpan')),
+                      final rumah = Rumah(
+                        id: 0, 
+                        blok: blokController.text.trim(),
+                        nomorRumah: nomorRumahController.text.trim(),
+                        alamatLengkap: alamatLengkapController.text.trim(),
+                        createdAt: DateTime.now(),
+                      );
+
+                      await createRumah(rumah);
+
+                      ref.invalidate(rumahListProvider);
+
+                      // === bottom alert berhasil ===
+                      showBottomAlert(
+                        context: context,
+                        title: "Rumah Berhasil Ditambahkan",
+                        message: "Data rumah baru telah disimpan ke dalam sistem.",
+                        yesText: "Kembali",
+                        onlyYes: true,
+                        onYes: () {
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        icon: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.22,
+                          child: Lottie.asset(
+                            'assets/lottie/Done.json',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       );
                     }
                   },
@@ -71,27 +127,6 @@ class _TambahRumahPageState extends State<TambahRumahPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // Widget untuk text field agar tidak berulang
-  Widget buildTextField(String label, String hint, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return '$label tidak boleh kosong';
-          }
-          return null;
-        },
       ),
     );
   }

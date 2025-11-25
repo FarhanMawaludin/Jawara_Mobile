@@ -1,5 +1,5 @@
 // lib/domain/usecases/register_account.dart
-import '../entities/user_app.dart';
+
 import '../repositories/register_repository.dart';
 
 class RegisterAccount {
@@ -7,7 +7,7 @@ class RegisterAccount {
 
   RegisterAccount(this.repository);
 
-  Future<UserApp> execute(String email, String password) {
+  Future<String> call(String email, String password) async {
     return repository.registerAccount(email, password);
   }
 }
