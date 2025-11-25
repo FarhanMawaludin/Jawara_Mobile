@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
-import 'methods/judul_detail.dart';
 import 'methods/card_rumah.dart';
 
 class DetailRumahPage extends ConsumerWidget {

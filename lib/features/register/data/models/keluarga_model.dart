@@ -7,16 +7,11 @@ part 'keluarga_model.g.dart';
 @JsonSerializable()
 class KeluargaModel extends Keluarga {
   KeluargaModel({
-    required int id,
-    @JsonKey(name: 'user_id') required String userId,
-    @JsonKey(name: 'nama_keluarga') required String namaKeluarga,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-  }) : super(
-          id: id,
-          userId: userId,
-          namaKeluarga: namaKeluarga,
-          createdAt: createdAt,
-        );
+    required super.id,
+    @JsonKey(name: 'user_id') required super.userId,
+    @JsonKey(name: 'nama_keluarga') required super.namaKeluarga,
+    @JsonKey(name: 'created_at') required super.createdAt,
+  });
 
   factory KeluargaModel.fromJson(Map<String, dynamic> json) =>
       _$KeluargaModelFromJson(json);
