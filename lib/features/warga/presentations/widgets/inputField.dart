@@ -9,13 +9,13 @@ class InputField extends StatefulWidget {
   final Function(String)? onChanged;
 
   const InputField({
-    Key? key,
+    super.key,
     required this.label,
     required this.hintText,
     this.isPassword = false,
     this.options,
     this.onChanged,
-  }) : super(key: key);
+  });
 
 
   @override

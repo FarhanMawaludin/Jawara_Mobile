@@ -8,14 +8,10 @@ part 'user_app_model.g.dart';
 class UserAppModel extends UserApp {
 
   UserAppModel({
-    required String id,
-    required String role,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-  }) : super(
-          id: id,
-          role: role,
-          createdAt: createdAt,
-        );
+    required super.id,
+    required super.role,
+    @JsonKey(name: 'created_at') required super.createdAt,
+  });
 
   factory UserAppModel.fromJson(Map<String, dynamic> json) =>
       _$UserAppModelFromJson(json);
