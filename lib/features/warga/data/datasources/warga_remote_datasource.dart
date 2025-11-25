@@ -157,4 +157,6 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
     return result.map((e) => WargaModel.fromMap(e)).toList();
   }
+
+  
 }
