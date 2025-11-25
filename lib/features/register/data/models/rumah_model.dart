@@ -7,29 +7,22 @@ part 'rumah_model.g.dart';
 @JsonSerializable()
 class RumahModel extends Rumah {
   RumahModel({
-    required int id,
+    required super.id,
 
     @JsonKey(name: 'keluarga_id')
-    required int keluargaId,
+    required super.keluargaId,
 
-    String? blok,
+    super.blok,
 
     @JsonKey(name: 'nomor_rumah')
-    String? nomorRumah,
+    super.nomorRumah,
 
     @JsonKey(name: 'alamat_lengkap')
-    String? alamatLengkap,
+    super.alamatLengkap,
 
     @JsonKey(name: 'created_at')
-    required DateTime createdAt,
-  }) : super(
-          id: id,
-          keluargaId: keluargaId,
-          blok: blok,
-          nomorRumah: nomorRumah,
-          alamatLengkap: alamatLengkap,
-          createdAt: createdAt,
-        );
+    required super.createdAt,
+  });
 
   factory RumahModel.fromJson(Map<String, dynamic> json) =>
       _$RumahModelFromJson(json);

@@ -61,15 +61,11 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       final client = ref.read(supabaseClientProvider);
       final resp = await client.from('keluarga').select('id, nama_keluarga');
       // resp biasanya List<dynamic>
-      if (resp is List) {
-        _keluargaList = resp
-            .where((e) => e is Map)
-            .map((e) => Map<String, dynamic>.from(e as Map))
-            .toList();
-      } else {
-        _keluargaList = [];
-      }
-    } catch (e) {
+      _keluargaList = resp
+          .where((e) => e is Map)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+        } catch (e) {
       // silent fail + beri pesan singkat
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -5,10 +5,6 @@ import '../../domain/entities/warga.dart';
 import '../../domain/entities/rumah.dart';
 import '../../domain/repositories/register_repository.dart';
 import '../datasources/supabase_remote_datasource.dart';
-import '../models/user_app_model.dart';
-import '../models/keluarga_model.dart';
-import '../models/warga_model.dart';
-import '../models/rumah_model.dart';
 
 class RegisterRepositoryImpl implements RegisterRepository {
   final SupabaseRemoteDatasource datasource;

@@ -228,7 +228,7 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                       _passwordController.text.trim(),
                     );
 
-                    if (userApp == null || userApp.id == null) {
+                    if (userApp.id == null) {
                       showBottomAlert(
                         context: context,
                         title: "Email Sudah Terdaftar",
@@ -254,7 +254,7 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                         .updateAccount(
                           _emailController.text.trim(),
                           _passwordController.text.trim(),
-                          userApp.id!,
+                          userApp.id,
                         );
 
                     context.push('/register/step2');

@@ -21,7 +21,7 @@ class SupabaseRemoteDatasource {
       'role': 'kepala_keluarga',
     }).select();
 
-    return UserAppModel.fromJson(userAppData.first as Map<String, dynamic>);
+    return UserAppModel.fromJson(userAppData.first);
   }
 
   Future<(KeluargaModel, WargaModel)> createKeluargaAndWarga(
@@ -39,7 +39,7 @@ class SupabaseRemoteDatasource {
     }).select();
 
     final keluarga = KeluargaModel.fromJson(
-      keluargaData.first as Map<String, dynamic>,
+      keluargaData.first,
     );
 
     final wargaData = await client.from('warga').insert({
@@ -51,7 +51,7 @@ class SupabaseRemoteDatasource {
       'role_keluarga': roleKeluarga,
     }).select();
 
-    final warga = WargaModel.fromJson(wargaData.first as Map<String, dynamic>);
+    final warga = WargaModel.fromJson(wargaData.first);
 
     return (keluarga, warga);
   }
@@ -70,7 +70,7 @@ class SupabaseRemoteDatasource {
       'alamat_lengkap': alamatLengkap,
     }).select();
 
-    final rumahJson = rumahData.first as Map<String, dynamic>;
+    final rumahJson = rumahData.first;
     final rumah = RumahModel.fromJson(rumahJson);
 
     // 2. UPDATE warga → set alamat_rumah_id untuk kepala keluarga
