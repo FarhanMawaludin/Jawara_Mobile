@@ -1,24 +1,24 @@
 // lib/domain/repositories/register_repository.dart
-import '../entities/user_app.dart';
-import '../entities/keluarga.dart';
-import '../entities/warga.dart';
-import '../entities/rumah.dart';
 
 abstract class RegisterRepository {
-  Future<UserApp> registerAccount(String email, String password);
-  Future<(Keluarga, Warga)> createKeluargaAndWarga(
-    String userId,
-    String namaKeluarga,
-    String nama,
-    String? nik,
-    String? jenisKelamin,
-    DateTime? tanggalLahir,
-    String roleKeluarga,
-  );
-  Future<Rumah> createRumah(
-    int keluargaId,
-    String? blok,
-    String? nomorRumah,
-    String? alamatLengkap,
-  );
+  // STEP 1: daftar akun → return userId
+  Future<String> registerAccount(String email, String password);
+
+  // STEP 2: buat keluarga & warga → return keluargaId
+  Future<int> createKeluargaAndWarga({
+    required String userId,
+    required String nama,
+    required String? nik,
+    required String? jenisKelamin,
+    required DateTime? tanggalLahir,
+    required String roleKeluarga,
+  });
+
+  // STEP 3: buat rumah → return rumahId (opsional)
+  Future<int> createRumah({
+    required int keluargaId,
+    required String? blok,
+    required String? nomorRumah,
+    required String? alamatLengkap,
+  });
 }

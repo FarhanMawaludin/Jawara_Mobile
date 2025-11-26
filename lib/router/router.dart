@@ -43,7 +43,6 @@ import 'package:jawaramobile/features/main_shell.dart';
 import '../features/register/presentations/pages/register_step1_account.dart';
 import '../features/register/presentations/pages/register_step2_warga.dart';
 import '../features/register/presentations/pages/register_step3_rumah.dart';
-import '../features/register/presentations/pages/register_complete.dart';
 
 // Warga
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_keluarga/daftar_keluarga_page.dart';
@@ -65,10 +64,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/register/step3',
       builder: (context, state) => RegisterStep3Rumah(),
-    ),
-    GoRoute(
-      path: '/register/complete',
-      builder: (context, state) => const RegisterComplete(),
     ),
     // Shell route for bottom nav or persistent layout
     ShellRoute(
@@ -162,8 +157,11 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const DaftarMutasiPage(),
     ),
     GoRoute(
-      path: '/warga/daftar-mutasi/detail',
-      builder: (context, state) => const DetailMutasiPage(),
+      path: '/warga/daftar-mutasi/detail/:id',
+      builder: (context, state) {
+      final id = int.parse(state.pathParameters['id']!);
+      return DetailMutasiPage(mutasiId: id);
+    }
     ),
     GoRoute(
       path: '/warga/tambah-mutasi',

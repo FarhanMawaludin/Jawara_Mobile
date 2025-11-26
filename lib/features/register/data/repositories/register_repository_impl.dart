@@ -1,8 +1,5 @@
 // lib/data/repositories/register_repository_impl.dart
-import '../../domain/entities/user_app.dart';
-import '../../domain/entities/keluarga.dart';
-import '../../domain/entities/warga.dart';
-import '../../domain/entities/rumah.dart';
+
 import '../../domain/repositories/register_repository.dart';
 import '../datasources/supabase_remote_datasource.dart';
 
@@ -11,75 +8,62 @@ class RegisterRepositoryImpl implements RegisterRepository {
 
   RegisterRepositoryImpl(this.datasource);
 
+  // ------------------------------------------------------
+  // STEP 1 — Register Account
+  // Return: userId (String)
+  // ------------------------------------------------------
   @override
-  Future<UserApp> registerAccount(String email, String password) async {
-    final model = await datasource.registerAccount(email, password);
-    return UserApp(
-      id: model.id,
-      role: model.role,
-      createdAt: model.createdAt,
-    );
+  Future<String> registerAccount(String email, String password) async {
+    // datasource sudah return String userId
+    final userId = await datasource.registerAccount(email, password);
+    return userId;
   }
 
+  // ------------------------------------------------------
+  // STEP 2 — Create Keluarga & Warga
+  // Return: keluargaId (int)
+  // ------------------------------------------------------
   @override
-  Future<(Keluarga, Warga)> createKeluargaAndWarga(
-    String userId,
-    String namaKeluarga,
-    String nama,
-    String? nik,
-    String? jenisKelamin,
-    DateTime? tanggalLahir,
-    String roleKeluarga,
-  ) async {
-    final (keluargaModel, wargaModel) = await datasource.createKeluargaAndWarga(
-      userId,
-      namaKeluarga,
-      nama,
-      nik,
-      jenisKelamin,
-      tanggalLahir,
-      roleKeluarga,
+  Future<int> createKeluargaAndWarga({
+    required String userId,
+    required String nama,
+    required String? nik,
+    required String? jenisKelamin,
+    required DateTime? tanggalLahir,
+    required String roleKeluarga,
+  }) async {
+    // datasource sudah return int keluargaId
+    final keluargaId = await datasource.createKeluargaAndWarga(
+      userId: userId,
+      nama: nama,
+      nik: nik,
+      jenisKelamin: jenisKelamin,
+      tanggalLahir: tanggalLahir,
+      roleKeluarga: roleKeluarga,
     );
-    return (
-      Keluarga(
-        id: keluargaModel.id,
-        userId: keluargaModel.userId,
-        namaKeluarga: keluargaModel.namaKeluarga,
-        createdAt: keluargaModel.createdAt,
-      ),
-      Warga(
-        id: wargaModel.id,
-        keluargaId: wargaModel.keluargaId,
-        nama: wargaModel.nama,
-        nik: wargaModel.nik,
-        jenisKelamin: wargaModel.jenisKelamin,
-        tanggalLahir: wargaModel.tanggalLahir,
-        roleKeluarga: wargaModel.roleKeluarga,
-        createdAt: wargaModel.createdAt,
-      )
-    );
+
+    return keluargaId;
   }
 
+  // ------------------------------------------------------
+  // STEP 3 — Create Rumah
+  // Return: rumahId (int)
+  // ------------------------------------------------------
   @override
-  Future<Rumah> createRumah(
-    int keluargaId,
-    String? blok,
-    String? nomorRumah,
-    String? alamatLengkap,
-  ) async {
-    final model = await datasource.createRumah(
-      keluargaId,
-      blok,
-      nomorRumah,
-      alamatLengkap,
+  Future<int> createRumah({
+    required int keluargaId,
+    required String? blok,
+    required String? nomorRumah,
+    required String? alamatLengkap,
+  }) async {
+    // datasource sudah return rumahId
+    final rumahId = await datasource.createRumah(
+      keluargaId: keluargaId,
+      blok: blok,
+      nomorRumah: nomorRumah,
+      alamatLengkap: alamatLengkap,
     );
-    return Rumah(
-      id: model.id,
-      keluargaId: model.keluargaId,
-      blok: model.blok,
-      nomorRumah: model.nomorRumah,
-      alamatLengkap: model.alamatLengkap,
-      createdAt: model.createdAt,
-    );
+
+    return rumahId;
   }
 }

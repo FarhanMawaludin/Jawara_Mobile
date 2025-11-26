@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
-import 'package:jawaramobile/features/warga/domain/entities/warga.dart';
 
 class TambahWargaPage extends ConsumerStatefulWidget {
   const TambahWargaPage({super.key});
@@ -15,30 +14,27 @@ class TambahWargaPage extends ConsumerStatefulWidget {
 class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Field state
-  String? _selectedKeluargaName; 
-  int? _selectedKeluargaId; // id yang akan dikirim ke DB
+  String? _selectedKeluargaName;
+  int? _selectedKeluargaId;
+
   String _nama = '';
   String? _nik;
   String? _noTelp;
   String? _tempatLahir;
+  DateTime? _tanggalLahir;
 
-  // new dropdown selections (display values)
-  String? _selectedJenisKelamin; // display like "Laki-Laki"
-  String? _selectedRoleKeluarga; // display like "Kepala Keluarga"
-  String? _selectedStatus; // "aktif" or "tidak aktif"
-  String? _selectedGolonganDarah; // "A","B","AB","O"
+  String? _selectedJenisKelamin;
+  String? _selectedRoleKeluarga;
+  String? _selectedStatus;
+  String? _selectedGolonganDarah;
 
+  String? _agama;
   String? _pendidikan;
   String? _pekerjaan;
 
-  DateTime? _tanggalLahir;
-
-  // local keluarga list 
   List<Map<String, dynamic>> _keluargaList = [];
   bool _loadingKeluarga = false;
 
-  // nilai dropdown options
   final List<String> _jenisKelaminOptions = ['Laki-Laki', 'Perempuan'];
   final List<String> _roleKeluargaOptions = [
     'Kepala Keluarga',
@@ -47,6 +43,29 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   ];
   final List<String> _statusOptions = ['aktif', 'tidak aktif'];
   final List<String> _golDarahOptions = ['A', 'B', 'AB', 'O'];
+
+  final List<String> _agamaOptions = [
+    'Islam',
+    'Kristen',
+    'Katolik',
+    'Hindu',
+    'Buddha',
+    'Konghucu'
+  ];
+
+  final List<String> _pendidikanOptions = [
+    'SD',
+    'SMP',
+    'SMA',
+    'SMK',
+    'D1',
+    'D2',
+    'D3',
+    'D4',
+    'S1',
+    'S2',
+    'S3'
+  ];
 
   @override
   void initState() {
@@ -60,35 +79,28 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
     try {
       final client = ref.read(supabaseClientProvider);
       final resp = await client.from('keluarga').select('id, nama_keluarga');
-      // resp biasanya List<dynamic>
-      _keluargaList = resp
-          .where((e) => e is Map)
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
-        } catch (e) {
-      // silent fail + beri pesan singkat
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memuat daftar keluarga: $e')),
-        );
+
+      if (resp is List) {
+        _keluargaList =
+            resp.map((e) => Map<String, dynamic>.from(e as Map)).toList();
       }
-      _keluargaList = [];
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Gagal memuat daftar keluarga")),
+      );
     } finally {
       if (mounted) setState(() => _loadingKeluarga = false);
     }
   }
 
-  // mapping display -> db value
-  String? _mapJenisKelaminToDb(String? display) {
-    if (display == null) return null;
-    if (display == 'Laki-Laki') return 'L';
-    if (display == 'Perempuan') return 'P';
-    return display;
+  String? _mapJenisKelaminToDb(String? d) {
+    if (d == 'Laki-Laki') return 'L';
+    if (d == 'Perempuan') return 'P';
+    return d;
   }
 
-  String? _mapRoleKeluargaToDb(String? display) {
-    if (display == null) return null;
-    switch (display) {
+  String? _mapRoleToDb(String? r) {
+    switch (r) {
       case 'Kepala Keluarga':
         return 'kepala_keluarga';
       case 'Ibu Rumah Tangga':
@@ -96,18 +108,23 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       case 'Anak':
         return 'anak';
       default:
-        return display;
+        return r;
     }
   }
 
-  // show date picker
+  String? _mapAgamaToDb(String? a) {
+    if (a == null) return null;
+    a = a.toLowerCase();
+    if (a == "buddha") return "budha"; // mapping DB
+    return a;
+  }
+
   Future<void> _pickTanggalLahir() async {
     final now = DateTime.now();
-    final first = DateTime(1900);
     final picked = await showDatePicker(
       context: context,
       initialDate: _tanggalLahir ?? DateTime(now.year - 20),
-      firstDate: first,
+      firstDate: DateTime(1900),
       lastDate: now,
     );
 
@@ -116,303 +133,242 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
     }
   }
 
-  // helper format yyyy-mm-dd
-  String? _formatDateOnly(DateTime? d) {
+  String? _formatDate(DateTime? d) {
     if (d == null) return null;
-    final y = d.year.toString().padLeft(4, '0');
-    final m = d.month.toString().padLeft(2, '0');
-    final day = d.day.toString().padLeft(2, '0');
-    return '$y-$m-$day';
+    return "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
   }
 
-  // Simpan: panggil langsung Supabase (tanpa mengirim `id`)
   Future<void> _onSimpan() async {
-    // lakukan validasi form (FormFields + required dropdowns)
     if (!_formKey.currentState!.validate()) return;
 
-    // additional validation for dropdowns
-    if (_selectedKeluargaId == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Pilih keluarga terlebih dahulu')));
-      return;
-    }
-    if (_selectedJenisKelamin == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Pilih jenis kelamin')));
-      return;
-    }
-    if (_selectedRoleKeluarga == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Pilih peran keluarga')));
-      return;
-    }
-    if (_selectedStatus == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Pilih status')));
-      return;
-    }
-    if (_tanggalLahir == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Pilih tanggal lahir')));
-      return;
-    }
+    if (_selectedKeluargaId == null) return _show("Pilih keluarga");
+    if (_selectedJenisKelamin == null) return _show("Pilih jenis kelamin");
+    if (_selectedRoleKeluarga == null) return _show("Pilih peran keluarga");
+    if (_selectedStatus == null) return _show("Pilih status");
+    if (_tanggalLahir == null) return _show("Pilih tanggal lahir");
+    if (_agama == null) return _show("Pilih agama");
+    if (_pendidikan == null) return _show("Pilih pendidikan");
 
-    // simpan state form ke variabel
     _formKey.currentState!.save();
 
-    // mapping ke DB values
-    final jenisKelaminDb = _mapJenisKelaminToDb(_selectedJenisKelamin);
-    final roleKeluargaDb = _mapRoleKeluargaToDb(_selectedRoleKeluarga);
-    final statusDb = _selectedStatus; // 'aktif' or 'tidak aktif'
-    final golDarahDb = _selectedGolonganDarah;
-
-    // siapkan data untuk insert
-    final Map<String, dynamic> insertData = {
+    final data = {
       'keluarga_id': _selectedKeluargaId,
       'nama': _nama,
       'nik': _nik,
-      'jenis_kelamin': jenisKelaminDb,
-      'tanggal_lahir': _formatDateOnly(_tanggalLahir),
-      'role_keluarga': roleKeluargaDb,
-      'user_id': null,
-      'alamat_rumah_id': null,
+      'jenis_kelamin': _mapJenisKelaminToDb(_selectedJenisKelamin),
+      'tanggal_lahir': _formatDate(_tanggalLahir),
+      'role_keluarga': _mapRoleToDb(_selectedRoleKeluarga),
+      'status': _selectedStatus,
+      'golongan_darah': _selectedGolonganDarah,
       'no_telp': _noTelp,
       'tempat_lahir': _tempatLahir,
-      'agama': null,
-      'golongan_darah': golDarahDb,
+      'agama': _agama,
+      'pendidikan': _pendidikan,
       'pekerjaan': _pekerjaan,
-      'status': statusDb,
+      'user_id': null,
+      'alamat_rumah_id': null,
     };
 
     try {
       final client = ref.read(supabaseClientProvider);
-
-      // lakukan insert — tidak mengirim id agar Supabase auto-generate
-      // .select() supaya Supabase mengembalikan baris yang dimasukkan (opsional)
-      await client.from('warga').insert(insertData).select();
+      await client.from('warga').insert(data).select();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Data Warga Disimpan')),
-        );
-        // kembali dan beri tahu parent kalau perlu refresh
+        _show("Data warga berhasil disimpan");
         Navigator.pop(context, true);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan: ${e.toString()}')),
-        );
-      }
+      _show("Gagal menyimpan: $e");
     }
+  }
+
+  void _show(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   Widget build(BuildContext context) {
-    // build daftar nama keluarga (untuk InputField.options)
     final keluargaNames =
-        _keluargaList.map((m) => (m['nama_keluarga'] ?? '').toString()).toList();
+        _keluargaList.map((e) => e['nama_keluarga'].toString()).toList();
 
-    // UI utama
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context)),
         title: const Text(
-          'Tambah Warga',
+          "Tambah Warga",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey[300], height: 1),
-        ),
+            preferredSize: const Size.fromHeight(1),
+            child: Container(color: Colors.grey[300], height: 1)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dropdown Pilih Keluarga 
               InputField(
-                label: 'Pilih Keluarga',
-                hintText: _loadingKeluarga ? 'Memuat keluarga...' : 'Pilih Keluarga',
+                label: "Pilih Keluarga",
+                hintText: "Pilih Keluarga",
                 options: keluargaNames,
                 onChanged: (val) {
                   setState(() {
                     _selectedKeluargaName = val;
-                    // cari id pada _keluargaList
-                    final found = _keluargaList.firstWhere(
-                      (m) => (m['nama_keluarga'] ?? '').toString() == val,
-                      orElse: () => <String, dynamic>{},
-                    );
-                    if (found.isNotEmpty && found['id'] != null) {
-                      final idRaw = found['id'];
-                      _selectedKeluargaId = idRaw is int ? idRaw : int.tryParse(idRaw.toString());
-                    } else {
-                      _selectedKeluargaId = null;
-                    }
+                    final f = _keluargaList.firstWhere(
+                        (m) => m['nama_keluarga'] == val,
+                        orElse: () => {});
+                    _selectedKeluargaId = f['id'];
                   });
                 },
               ),
 
-              // Input Nama
               InputField(
                 label: "Nama",
                 hintText: "Masukkan Nama Lengkap",
-                onChanged: (val) => _nama = val,
+                onChanged: (v) => _nama = v,
               ),
 
-              // NIK
               InputField(
-                label: "Nik",
-                hintText: "Masukkan NIK sesuai KTP",
-                onChanged: (val) => _nik = val,
+                label: "NIK",
+                hintText: "Masukkan NIK",
+                onChanged: (v) => _nik = v,
               ),
 
-              // No. Telepon
               InputField(
                 label: "No. Telepon",
                 hintText: "08xxxxxxxxxx",
-                onChanged: (val) => _noTelp = val,
+                onChanged: (v) => _noTelp = v,
               ),
 
-              // Tempat Lahir
               InputField(
                 label: "Tempat Lahir",
                 hintText: "Masukkan tempat lahir",
-                onChanged: (val) => _tempatLahir = val,
+                onChanged: (v) => _tempatLahir = v,
               ),
 
-              // Tanggal Lahir 
-              Container(
-                margin: const EdgeInsets.only(top: 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tanggal Lahir',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Colors.grey[950],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    InkWell(
-                      onTap: _pickTanggalLahir,
-                      child: IgnorePointer(
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            hintText: _tanggalLahir != null
-                                ? "${_tanggalLahir!.day.toString().padLeft(2,'0')}-${_tanggalLahir!.month.toString().padLeft(2,'0')}-${_tanggalLahir!.year}"
-                                : "Pilih tanggal lahir",
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide(color: Colors.grey[400]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide(color: Colors.deepPurpleAccent[400]!),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-                            suffixIcon: const Icon(Icons.calendar_today),
-                          ),
-                          validator: (value) {
-                            if (_tanggalLahir == null) {
-                              return 'Tanggal lahir tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+
+              const SizedBox(height: 14),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Tanggal Lahir",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,   
+                    fontSize: 16,                  
+                    color: Color(0xFF1A1A1A),      
+                  ),
                 ),
               ),
+              const SizedBox(height: 6),
 
-              // Golongan Darah (A, B, AB, O)
+
+          InkWell(
+            onTap: _pickTanggalLahir,
+            child: IgnorePointer(
+              child: TextFormField(
+                decoration: InputDecoration(
+                  hintText: _tanggalLahir == null
+                      ? "Pilih Tanggal Lahir"
+                      : "${_tanggalLahir!.day}-${_tanggalLahir!.month}-${_tanggalLahir!.year}",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400],    
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey[400]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: Colors.deepPurpleAccent),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
+                  ),
+                  suffixIcon: const Icon(Icons.calendar_today),
+                ),
+                validator: (_) =>
+                    _tanggalLahir == null ? "Tanggal lahir wajib" : null,
+              ),
+            ),
+          ),
+
+
               InputField(
                 label: "Golongan Darah",
                 hintText: "Pilih golongan darah",
                 options: _golDarahOptions,
-                onChanged: (val) => setState(() => _selectedGolonganDarah = val),
+                onChanged: (v) => _selectedGolonganDarah = v,
               ),
 
-              // Peran Keluarga 
               InputField(
                 label: "Peran Keluarga",
                 hintText: "Pilih peran keluarga",
                 options: _roleKeluargaOptions,
-                onChanged: (val) => setState(() => _selectedRoleKeluarga = val),
+                onChanged: (v) => _selectedRoleKeluarga = v,
               ),
 
-              // Pendidikan Terakhir 
               InputField(
-                label: "Pendidikan Terakhir",
-                hintText: "Masukkan pendidikan terakhir",
-                onChanged: (val) => _pendidikan = val,
+                label: "Agama",
+                hintText: "Pilih agama",
+                options: _agamaOptions,
+                onChanged: (v) {
+                  setState(() {
+                    _agama = _mapAgamaToDb(v);
+                  });
+                },
               ),
 
-              // Pekerjaan
+              InputField(
+                label: "Pendidikan",
+                hintText: "Pilih pendidikan",
+                options: _pendidikanOptions,
+                onChanged: (v) => _pendidikan = v,
+              ),
+
               InputField(
                 label: "Pekerjaan",
                 hintText: "Masukkan pekerjaan",
-                onChanged: (val) => _pekerjaan = val,
+                onChanged: (v) => _pekerjaan = v,
               ),
 
-              // Status ('aktif' or 'tidak aktif')
               InputField(
                 label: "Status",
                 hintText: "Pilih status",
                 options: _statusOptions,
-                onChanged: (val) => setState(() => _selectedStatus = val),
+                onChanged: (v) => _selectedStatus = v,
               ),
 
-              // Jenis Kelamin (dropdown)
               InputField(
                 label: "Jenis Kelamin",
                 hintText: "Pilih jenis kelamin",
                 options: _jenisKelaminOptions,
-                onChanged: (val) => setState(() => _selectedJenisKelamin = val),
+                onChanged: (v) => _selectedJenisKelamin = v,
               ),
 
               const SizedBox(height: 24),
 
-              // Tombol Simpan
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6750A4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  onPressed: () async {
-                    // validasi manual: pastikan nama minimal
-                    if (_nama.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nama tidak boleh kosong')));
-                      return;
-                    }
-                    // jalankan validator form
-                    if (!_formKey.currentState!.validate()) return;
-
-                    await _onSimpan();
-                  },
+                  onPressed: _onSimpan,
                   child: const Text(
-                    'Simpan',
+                    "Simpan",
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
