@@ -123,7 +123,7 @@ class _TambahPemasukanPageState extends State<TambahPemasukanPage> {
               const Text('Kategori Pemasukan'),
               const SizedBox(height: 5),
               DropdownButtonFormField<String>(
-                value: _kategori,
+                initialValue: _kategori,
                 items: _kategoriList
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),

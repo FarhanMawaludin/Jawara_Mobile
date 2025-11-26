@@ -18,7 +18,6 @@ class RegisterStep1Account extends ConsumerStatefulWidget {
 
 class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
