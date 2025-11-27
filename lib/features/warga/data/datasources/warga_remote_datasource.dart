@@ -112,7 +112,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
           .from('warga')
           .update(warga.toMap())
           .eq('id', warga.id)
-          .select(); // wajib untuk memunculkan error saat gagal
+          .select();
     } catch (e) {
       throw Exception("Gagal update warga: $e");
     }
@@ -120,10 +120,41 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
   @override
   Future<void> deleteWarga(int id) async {
-    final response = await client.from('warga').delete().eq('id', id);
+    // 1. Ambil data warga yang mau dihapus
+    final data = await client
+        .from('warga')
+        .select('id, role_keluarga, keluarga_id')
+        .eq('id', id)
+        .maybeSingle();
 
-    final error = response?.error;
-    if (error != null) throw error;
+    if (data == null) {
+      throw Exception("Warga tidak ditemukan");
+    }
+
+    final role = data['role_keluarga'] as String?;
+    final keluargaId = data['keluarga_id'] as int?;
+
+    // Validasi role
+    if (role == null) {
+      throw Exception("role_keluarga null");
+    }
+
+    // Jika kepala keluarga → hapus keluarga + semua anggota
+    if (role == 'kepala_keluarga') {
+      if (keluargaId == null) {
+        throw Exception("keluarga_id null untuk kepala keluarga");
+      }
+
+      // 1. Hapus semua anggota keluarga
+      await client.from('warga').delete().eq('keluarga_id', keluargaId);
+
+      // 2. Hapus data keluarga di tabel keluarga
+      await client.from('keluarga').delete().eq('id', keluargaId);
+    }
+    // Jika bukan kepala keluarga → hanya hapus satu orang
+    else {
+      await client.from('warga').delete().eq('id', id);
+    }
   }
 
   @override
@@ -144,7 +175,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             nomor_rumah
           )
         ''')
-          .ilike('nama', '%$keyword%'); // search by nama (case-insensitive)
+          .ilike('nama', '%$keyword%');
 
       return data.map((json) => WargaModel.fromMap(json)).toList();
     } catch (e) {
