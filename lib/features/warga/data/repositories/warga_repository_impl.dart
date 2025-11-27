@@ -90,4 +90,14 @@ class WargaRepositoryImpl implements WargaRepository {
   Future<void> deleteWarga(int id) async {
     await remoteDataSource.deleteWarga(id);
   }
+
+  @override
+  Future<int> countKeluarga() async {
+    return await remoteDataSource.countKeluarga();
+  }
+
+  @override
+  Future<int> countWarga() async {
+    return await remoteDataSource.countWarga();
+  }
 }

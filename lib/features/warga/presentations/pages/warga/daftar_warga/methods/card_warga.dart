@@ -136,9 +136,9 @@ class CardWarga extends ConsumerWidget {
                   onPressed: () {
                     showBottomAlert(
                       context: context,
-                      title: "Hapus Rumah?",
+                      title: "Hapus Warga?",
                       message:
-                          "Aksi ini tidak dapat dibatalkan. Apakah Anda yakin ingin menghapus rumah ini?",
+                          "Aksi ini tidak dapat dibatalkan. Apakah Anda yakin ingin menghapus warga ini?",
                       yesText: "Hapus",
                       noText: "Batal",
                       onYes: () async {

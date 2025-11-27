@@ -10,6 +10,8 @@ abstract class WargaRemoteDataSource {
   Future<void> deleteWarga(int id);
   Future<List<WargaModel>> searchWarga(String keyword);
   Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId);
+  Future<int> countKeluarga();
+  Future<int> countWarga();
 }
 
 class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
@@ -191,5 +193,22 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
         .eq('keluarga_id', keluargaId);
 
     return result.map((e) => WargaModel.fromMap(e)).toList();
+  }
+
+  @override
+  Future<int> countKeluarga() async {
+    final List data = await client
+        .from('warga')
+        .select('id')
+        .eq('role_keluarga', 'kepala_keluarga');
+
+    return data.length;
+  }
+
+  @override
+  Future<int> countWarga() async {
+    final List data = await client.from('warga').select('id');
+
+    return data.length;
   }
 }
