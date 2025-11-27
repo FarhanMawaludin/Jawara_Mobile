@@ -9,7 +9,7 @@ abstract class WargaRemoteDataSource {
   Future<void> updateWarga(WargaModel warga);
   Future<void> deleteWarga(int id);
   Future<List<WargaModel>> searchWarga(String keyword);
-  Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId); 
+  Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId);
 }
 
 class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
@@ -20,9 +20,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
   @override
   Future<List<WargaModel>> getAllWarga() async {
     try {
-      final List<dynamic> data = await client
-          .from('warga')
-          .select('''
+      final List<dynamic> data = await client.from('warga').select('''
           *,
           keluarga:keluarga_id (
             id,
@@ -34,7 +32,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             blok,
             nomor_rumah
           )
-        '''); 
+        ''');
 
       print(data);
 
@@ -44,7 +42,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
     }
   }
 
-   @override
+  @override
   Future<List<WargaModel>> getAllKeluarga() async {
     try {
       final List<dynamic> data = await client
@@ -61,8 +59,8 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             blok,
             nomor_rumah
           )
-        ''').
-          eq('role_keluarga', 'kepala_keluarga'); 
+        ''')
+          .eq('role_keluarga', 'kepala_keluarga');
 
       print(data);
 
@@ -109,18 +107,23 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
   @override
   Future<void> updateWarga(WargaModel warga) async {
-    final response = await client
-        .from('warga')
-        .update(warga.toMap())
-        .eq('id', warga.id); // Hapus
-
-    if (response.error != null) throw response.error!;
+    try {
+      await client
+          .from('warga')
+          .update(warga.toMap())
+          .eq('id', warga.id)
+          .select(); // wajib untuk memunculkan error saat gagal
+    } catch (e) {
+      throw Exception("Gagal update warga: $e");
+    }
   }
 
   @override
   Future<void> deleteWarga(int id) async {
     final response = await client.from('warga').delete().eq('id', id);
-    if (response.error != null) throw response.error!;
+
+    final error = response?.error;
+    if (error != null) throw error;
   }
 
   @override
@@ -158,6 +161,4 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
     return result.map((e) => WargaModel.fromMap(e)).toList();
   }
-
-  
 }
