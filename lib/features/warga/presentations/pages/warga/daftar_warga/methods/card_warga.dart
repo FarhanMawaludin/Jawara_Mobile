@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
-class CardWarga extends StatelessWidget {
+import 'package:jawaramobile/core/component/bottom_alert.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+
+class CardWarga extends ConsumerWidget {
   final String nama;
   final String keluargaNama;
   final bool isVerified;
@@ -17,7 +21,7 @@ class CardWarga extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -26,6 +30,9 @@ class CardWarga extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // -----------------------------------------------------
+          // NAMA + VERIFIED
+          // -----------------------------------------------------
           Row(
             children: [
               Text(
@@ -36,7 +43,7 @@ class CardWarga extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               if (isVerified)
                 Icon(
                   HeroiconsOutline.checkBadge,
@@ -45,7 +52,12 @@ class CardWarga extends StatelessWidget {
                 ),
             ],
           ),
+
           const SizedBox(height: 8),
+
+          // -----------------------------------------------------
+          // NAMA KELUARGA
+          // -----------------------------------------------------
           Row(
             children: [
               Icon(HeroiconsOutline.user, size: 16, color: Colors.grey[600]),
@@ -54,13 +66,17 @@ class CardWarga extends StatelessWidget {
                 keluargaNama,
                 style: TextStyle(
                   color: Colors.grey[600],
-                  fontWeight: FontWeight.w400,
                   fontSize: 12,
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 16),
+
+          // -----------------------------------------------------
+          // DETAIL BUTTON
+          // -----------------------------------------------------
           TextButton(
             onPressed: () {
               context.push('/warga/daftar-warga/detail/$wargaId');
@@ -68,13 +84,10 @@ class CardWarga extends StatelessWidget {
             style: TextButton.styleFrom(
               backgroundColor: Colors.deepPurpleAccent[400],
               padding: const EdgeInsets.symmetric(vertical: 12),
-              overlayColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              alignment: Alignment.center,
               minimumSize: const Size(double.infinity, 0),
-              side: BorderSide(color: Colors.deepPurpleAccent[400]!, width: 1),
             ),
             child: const Text(
               "Detail",
@@ -83,6 +96,80 @@ class CardWarga extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // -----------------------------------------------------
+          // EDIT & DELETE BUTTONS
+          // -----------------------------------------------------
+          Row(
+            children: [
+              // EDIT BUTTON
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    context.push('/warga/daftar-warga/edit/$wargaId');
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.blue[600]!),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Edit",
+                    style: TextStyle(
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // DELETE BUTTON
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    showBottomAlert(
+                      context: context,
+                      title: "Hapus Rumah?",
+                      message:
+                          "Aksi ini tidak dapat dibatalkan. Apakah Anda yakin ingin menghapus rumah ini?",
+                      yesText: "Hapus",
+                      noText: "Batal",
+                      onYes: () async {
+                        Navigator.pop(context); // tutup alert
+
+                        /// PANGGIL USECASE DENGAN PROVIDER YANG BENAR
+                        final delete = ref.read(deleteWargaUseCaseProvider);
+                        await delete(wargaId);
+
+                        // Refresh list warga
+                        ref.invalidate(wargaListProvider);
+                      },
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red[400]!),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Hapus",
+                    style: TextStyle(
+                      color: Colors.red[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
