@@ -11,6 +11,7 @@ class AspirationListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final displayName = item.sender.split('@')[0].trim();
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -27,7 +28,7 @@ class AspirationListItem extends StatelessWidget {
               radius: 22,
               backgroundColor: Colors.grey.shade200,
               child: Text(
-                item.sender.isNotEmpty ? item.sender[0].toUpperCase() : '?',
+                displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
                 style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w600),
               ),
             ),
@@ -37,7 +38,7 @@ class AspirationListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.sender,
+                    displayName,
                     style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 6),

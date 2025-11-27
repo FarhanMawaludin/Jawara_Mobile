@@ -5,7 +5,6 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:jawaramobile/core/component/bottom_alert.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
 
-
 class CardRumah extends ConsumerWidget {
   final String namaRumah;
   final bool ditempati;

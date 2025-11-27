@@ -87,14 +87,7 @@ class AspirationDetailPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            PopupMenuButton<String>(
-                              icon: const Icon(Icons.more_vert, color: Colors.black54),
-                              onSelected: (_) {},
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(value: 'report', child: Text('Laporkan')),
-                                const PopupMenuItem(value: 'share', child: Text('Bagikan')),
-                              ],
-                            ),
+                            // Overflow menu removed as requested
                           ],
                         ),
                         const SizedBox(height: 18),

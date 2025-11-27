@@ -149,6 +149,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
     }
   }
 
+  @override
   Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId) async {
     final result = await client
         .from('warga')
@@ -157,4 +158,6 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
     return result.map((e) => WargaModel.fromMap(e)).toList();
   }
+
+  
 }

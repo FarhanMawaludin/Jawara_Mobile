@@ -27,6 +27,7 @@ import 'package:jawaramobile/features/warga/presentations/pages/rumah/tambah_rum
 import 'package:jawaramobile/features/warga/presentations/pages/statistik/statistik_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/warga/daftar_warga/daftar_warga_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/warga/detail_warga/detail_warga_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/warga/edit_warga/edit_warga_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/warga/tambah_warga/tambah_warga_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/dashboard/warga_page.dart';
 
@@ -43,7 +44,6 @@ import 'package:jawaramobile/features/main_shell.dart';
 import '../features/register/presentations/pages/register_step1_account.dart';
 import '../features/register/presentations/pages/register_step2_warga.dart';
 import '../features/register/presentations/pages/register_step3_rumah.dart';
-import '../features/register/presentations/pages/register_complete.dart';
 
 // Warga
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_keluarga/daftar_keluarga_page.dart';
@@ -65,10 +65,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/register/step3',
       builder: (context, state) => RegisterStep3Rumah(),
-    ),
-    GoRoute(
-      path: '/register/complete',
-      builder: (context, state) => const RegisterComplete(),
     ),
     // Shell route for bottom nav or persistent layout
     ShellRoute(
@@ -133,6 +129,13 @@ final GoRouter router = GoRouter(
         return DetailWargaPage(wargaId: wargaId);
       },
     ),
+    GoRoute(
+      path: '/warga/daftar-warga/edit/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return EditWargaPage(wargaId: id);
+      },
+    ),
 
     GoRoute(
       path: '/warga/daftar-rumah',
@@ -162,8 +165,11 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const DaftarMutasiPage(),
     ),
     GoRoute(
-      path: '/warga/daftar-mutasi/detail',
-      builder: (context, state) => const DetailMutasiPage(),
+      path: '/warga/daftar-mutasi/detail/:id',
+      builder: (context, state) {
+      final id = int.parse(state.pathParameters['id']!);
+      return DetailMutasiPage(mutasiId: id);
+    }
     ),
     GoRoute(
       path: '/warga/tambah-mutasi',

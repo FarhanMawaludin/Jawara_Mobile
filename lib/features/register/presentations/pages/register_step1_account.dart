@@ -18,7 +18,6 @@ class RegisterStep1Account extends ConsumerStatefulWidget {
 
 class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -52,6 +51,14 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
           .read(registerStep1CacheProvider.notifier)
           .updateCache(confirmPassword: _confirmController.text);
     });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
   }
 
   // === Email regex validator ===
@@ -93,7 +100,6 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -109,131 +115,103 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
           ),
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ===== PROGRESS BAR =====
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.deepPurpleAccent[400],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // ===== TITLE =====
-              Text(
-                'Akun',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.deepPurpleAccent[400],
-                ),
-              ),
-              Text(
-                'Silahkan buat akun dengan email dan password Anda',
-                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ===== INPUT FIELD =====
-              InputField(
-                label: 'Email',
-                hintText: 'Masukkan Email',
-                controller: _emailController,
-                validator: (_) => null,
-              ),
-
-              InputField(
-                label: 'Password',
-                hintText: 'Masukkan Password',
-                isPassword: true,
-                controller: _passwordController,
-                validator: (_) => null,
-              ),
-
-              InputField(
-                label: 'Konfirmasi Password',
-                hintText: 'Masukkan Ulang Password',
-                isPassword: true,
-                controller: _confirmController,
-                validator: (_) => null,
-              ),
-
-              const SizedBox(height: 20),
-
-              // ===== BUTTON LANJUT =====
-              TextButton(
-                onPressed: () async {
-                  final errors = _validateInputs();
-
-                  if (errors.isNotEmpty) {
-                    showBottomAlert(
-                      context: context,
-                      title: "Validasi Gagal",
-                      message: errors.join("\n"),
-                      yesText: "Mengerti",
-                      onlyYes: true,
-                      icon: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.22,
-                        child: Lottie.asset(
-                          'assets/lottie/Failed.json',
-                          fit: BoxFit.contain,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ===== PROGRESS BAR =====
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurpleAccent[400],
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      onYes: () => Navigator.pop(context),
-                    );
-                    return;
-                  }
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
-                  try {
-                    final usecase = ref.read(registerAccountProvider);
+                const SizedBox(height: 20),
 
-                    final userApp = await usecase.execute(
-                      _emailController.text.trim(),
-                      _passwordController.text.trim(),
-                    );
+                // ===== TITLE =====
+                Text(
+                  'Akun',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.deepPurpleAccent[400],
+                  ),
+                ),
+                Text(
+                  'Silahkan buat akun dengan email dan password Anda',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                ),
 
-                    if (userApp == null || userApp.id == null) {
+                const SizedBox(height: 20),
+
+                // ===== INPUT FIELD =====
+                InputField(
+                  label: 'Email',
+                  hintText: 'Masukkan Email',
+                  controller: _emailController,
+                  validator: (_) => null,
+                ),
+
+                InputField(
+                  label: 'Password',
+                  hintText: 'Masukkan Password',
+                  isPassword: true,
+                  controller: _passwordController,
+                  validator: (_) => null,
+                ),
+
+                InputField(
+                  label: 'Konfirmasi Password',
+                  hintText: 'Masukkan Ulang Password',
+                  isPassword: true,
+                  controller: _confirmController,
+                  validator: (_) => null,
+                ),
+
+                const SizedBox(height: 20),
+
+                // ===== BUTTON LANJUT =====
+                TextButton(
+                  onPressed: () async {
+                    final errors = _validateInputs();
+
+                    if (errors.isNotEmpty) {
                       showBottomAlert(
                         context: context,
-                        title: "Email Sudah Terdaftar",
-                        message:
-                            "Gunakan email lain atau login jika sudah memiliki akun.",
+                        title: "Validasi Gagal",
+                        message: errors.join("\n"),
                         yesText: "Mengerti",
                         onlyYes: true,
                         icon: SizedBox(
@@ -248,30 +226,17 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                       return;
                     }
 
-                    // Simpan ke global state multi-step
-                    ref
-                        .read(registerStateProvider.notifier)
-                        .updateAccount(
-                          _emailController.text.trim(),
-                          _passwordController.text.trim(),
-                          userApp.id!,
+                    // === Simpan ke cache step 1 ===
+                    ref.read(registerStep1CacheProvider.notifier).updateCache(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim(),
+                          confirmPassword: _confirmController.text.trim(),
                         );
 
+                    // === Lanjut ke langkah berikutnya ===
                     context.push('/register/step2');
-                  } catch (_) {
-                    showBottomAlert(
-                      context: context,
-                      title: "Terjadi Kesalahan",
-                      message:
-                          "Terjadi kesalahan saat membuat akun. Silakan coba lagi nanti.",
-                      yesText: "Tutup",
-                      onlyYes: true,
-                      onYes: () => Navigator.pop(context),
-                    );
-                  }
-                },
-
-                style: ButtonStyle(
+                  },
+                  style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(
                       Colors.deepPurpleAccent[400],
                     ),
@@ -290,19 +255,19 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                       const Size(double.infinity, 50),
                     ),
                   ),
-
-                child: const Text(
-                  "Lanjutkan",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                  child: const Text(
+                    "Lanjutkan",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
