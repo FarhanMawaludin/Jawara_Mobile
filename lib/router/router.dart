@@ -27,6 +27,7 @@ import 'package:jawaramobile/features/warga/presentations/pages/rumah/tambah_rum
 import 'package:jawaramobile/features/warga/presentations/pages/statistik/statistik_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/warga/daftar_warga/daftar_warga_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/warga/detail_warga/detail_warga_page.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/warga/edit_warga/edit_warga_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/warga/tambah_warga/tambah_warga_page.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/dashboard/warga_page.dart';
 
@@ -126,6 +127,13 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final wargaId = int.parse(state.pathParameters['id']!);
         return DetailWargaPage(wargaId: wargaId);
+      },
+    ),
+    GoRoute(
+      path: '/warga/daftar-warga/edit/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return EditWargaPage(wargaId: id);
       },
     ),
 
