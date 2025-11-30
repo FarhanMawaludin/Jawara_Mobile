@@ -1,209 +1,124 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/kegiatan_list.dart'; // PASTIKAN IMPORT INI
+import 'widgets/kegiatan_card.dart';
 
-class DaftarKegiatanPage extends StatefulWidget {
+class DaftarKegiatanPage extends ConsumerWidget {
   const DaftarKegiatanPage({super.key});
 
   @override
-  State<DaftarKegiatanPage> createState() => _DaftarKegiatanPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final kegiatanState = ref.watch(kegiatanListNotifierProvider);
 
-class _DaftarKegiatanPageState extends State<DaftarKegiatanPage> {
-  // Dummy data - Replace with your Provider/Repository data
-  final List<Map<String, String>> _kegiatanList = [
-    {
-      'id': '1',
-      'nama': 'Kerja Bakti Desa',
-      'tanggal': '01 Des 2025',
-      'lokasi': 'Balai Desa',
-      'status': 'Akan Datang'
-    },
-    {
-      'id': '2',
-      'nama': 'Rapat Karang Taruna',
-      'tanggal': '05 Des 2025',
-      'lokasi': 'Aula Utama',
-      'status': 'Selesai'
-    },
-    {
-      'id': '3',
-      'nama': 'Posyandu Balita',
-      'tanggal': '10 Des 2025',
-      'lokasi': 'Pos 1',
-      'status': 'Akan Datang'
-    },
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Daftar Kegiatan',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            fontSize: 18,
+          ),
         ),
-        backgroundColor: Colors.purple,
+        centerTitle: true,
+        backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              ref.read(kegiatanListNotifierProvider.notifier).refresh();
+            },
+          ),
+        ],
       ),
       backgroundColor: Colors.grey[50],
-      body: _kegiatanList.isEmpty
-          ? Center(
-              child: Text(
-                'Belum ada kegiatan',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _kegiatanList.length,
-              itemBuilder: (context, index) {
-                final item = _kegiatanList[index];
-                return _buildSwipeableCard(item, index);
-              },
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to TambahKegiatanPage
-          // Navigator.pushNamed(context, '/tambah_kegiatan');
-        },
-        backgroundColor: Colors.purple,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      body: _buildBody(context, ref, kegiatanState),
     );
   }
 
-  Widget _buildSwipeableCard(Map<String, String> item, int index) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Dismissible(
-        key: Key(item['id']!),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          decoration: BoxDecoration(
-            color: Colors.redAccent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.delete_outline, color: Colors.white, size: 28),
-              Text("Hapus",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold))
-            ],
-          ),
+  Widget _buildBody(
+    BuildContext context,
+    WidgetRef ref,
+    KegiatanListState state,
+  ) {
+    if (state.isLoading && state.items.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
+      );
+    }
+
+    if (state.error != null && state.items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text(
+              'Gagal memuat data',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.error ?? '',
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () =>
+                  ref.read(kegiatanListNotifierProvider.notifier).refresh(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6C63FF),
+              ),
+              child: const Text(
+                'Coba Lagi',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         ),
-        confirmDismiss: (direction) async {
-          return await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text("Konfirmasi Hapus"),
-                content: Text(
-                    "Apakah Anda yakin ingin menghapus kegiatan '${item['nama']}'?"),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text("Batal",
-                        style: TextStyle(color: Colors.grey)),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text("Hapus",
-                        style: TextStyle(color: Colors.red)),
-                  ),
-                ],
-              );
+      );
+    }
+
+    if (state.items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.event_busy, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Belum ada kegiatan',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () =>
+          ref.read(kegiatanListNotifierProvider.notifier).refresh(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: state.items.length,
+        itemBuilder: (context, index) {
+          final kegiatan = state.items[index];
+          return KegiatanCard(
+            kegiatan: kegiatan,
+            onTap: () {
+              // TODO: Navigate to detail page
+              // context.push('/kegiatan/detail', extra: kegiatan);
             },
           );
         },
-        onDismissed: (direction) {
-          setState(() {
-            _kegiatanList.removeAt(index);
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("${item['nama']} dihapus")),
-          );
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.purple.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.purple.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.event_note, color: Colors.purple),
-            ),
-            title: Text(
-              item['nama']!,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today,
-                        size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(item['tanggal']!,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(item['lokasi']!,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  ],
-                ),
-              ],
-            ),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: item['status'] == 'Selesai'
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                item['status']!,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: item['status'] == 'Selesai'
-                      ? Colors.green
-                      : Colors.orange,
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

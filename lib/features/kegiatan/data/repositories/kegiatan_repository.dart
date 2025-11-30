@@ -7,106 +7,57 @@ class KegiatanRepository {
 
   KegiatanRepository(this._supabase);
 
-  // Method untuk mendapatkan statistik kegiatan
-  Future<KegiatanStatisticsModel> getStatistics() async {
-    try {
-      final today = DateTime.now();
-      final todayStart = DateTime(today.year, today.month, today.day);
-      final todayEnd = DateTime(today.year, today.month, today.day, 23, 59, 59);
-
-      // Get semua kegiatan - HANYA ambil tanggal_kegiatan
-      final allKegiatan = await _supabase
-          .from('kegiatan')
-          .select('tanggal_kegiatan')
-          .order('tanggal_kegiatan', ascending: false);
-
-      print('Debug: Total data dari Supabase: ${allKegiatan.length}'); // Debug log
-
-      int totalKegiatan = allKegiatan.length;
-      int selesai = 0;
-      int hariIni = 0;
-      int akanDatang = 0;
-
-      for (var kegiatan in allKegiatan) {
-        try {
-          final tanggalKegiatanStr = kegiatan['tanggal_kegiatan'] as String?;
-          
-          if (tanggalKegiatanStr == null) continue;
-
-          // Parse tanggal (format dari Supabase: 'YYYY-MM-DD')
-          final tanggalKegiatan = DateTime.parse(tanggalKegiatanStr);
-
-          print('Debug: Tanggal kegiatan: $tanggalKegiatan'); // Debug log
-
-          // Hitung kegiatan yang sudah lewat (dianggap selesai)
-          if (tanggalKegiatan.isBefore(todayStart)) {
-            selesai++;
-          }
-
-          // Hitung kegiatan hari ini
-          if (tanggalKegiatan.isAfter(todayStart.subtract(const Duration(seconds: 1))) && 
-              tanggalKegiatan.isBefore(todayEnd)) {
-            hariIni++;
-          }
-
-          // Hitung kegiatan yang akan datang (tanggal > hari ini)
-          if (tanggalKegiatan.isAfter(todayEnd)) {
-            akanDatang++;
-          }
-        } catch (e) {
-          print('Error parsing tanggal: $e');
-          continue;
-        }
-      }
-
-      print('Debug Statistik: Total=$totalKegiatan, Selesai=$selesai, Hari Ini=$hariIni, Akan Datang=$akanDatang');
-
-      return KegiatanStatisticsModel(
-        totalKegiatan: totalKegiatan,
-        selesai: selesai,
-        hariIni: hariIni,
-        akanDatang: akanDatang,
-      );
-    } catch (e) {
-      print('Error getStatistics: $e');
-      // Jika error, return data kosong
-      return KegiatanStatisticsModel.empty();
-    }
-  }
-
   Future<Map<String, dynamic>> createKegiatan(KegiatanFormModel form) async {
     try {
-      // Validasi tanggal
-      if (form.tanggalKegiatan == null) {
+      if (form.namaKegiatan.isEmpty) {
         return {
           'success': false,
-          'message': 'Tanggal kegiatan harus diisi',
+          'message': 'Nama kegiatan wajib diisi',
         };
       }
 
-      // Konversi kategori ke lowercase untuk match dengan enum di Supabase
-      final kategoriLowercase = form.kategori.toLowerCase();
-
       final data = {
         'nama_kegiatan': form.namaKegiatan.trim(),
-        'tanggal_kegiatan': form.tanggalKegiatan!.toIso8601String().split('T')[0],
-        'lokasi_kegiatan': form.lokasi.trim(),
-        'penanggung_jawab_kegiatan': form.penanggungJawab.trim(),
-        'kategori_kegiatan': kategoriLowercase,
-        'deskripsi_kegiatan': form.deskripsi.trim(),
+        'kategori_kegiatan': form.kategori.toLowerCase(), // FIX: kategori, bukan kategoriKegiatan
+        'tanggal_kegiatan': form.tanggalKegiatan?.toIso8601String(),
+        'lokasi_kegiatan': form.lokasi.trim(), // FIX: lokasi, bukan lokasiKegiatan
+        'penanggung_jawab_kegiatan': form.penanggungJawab.trim(), // FIX: penanggungJawab, bukan penanggungJawabKegiatan
+        'deskripsi_kegiatan': form.deskripsi.trim(), // FIX: deskripsi, bukan deskripsiKegiatan
       };
 
-      await _supabase.from('kegiatan').insert(data);
+      print('DEBUG: Sending data to Supabase: $data');
 
-      return {
-        'success': true,
-        'message': 'Kegiatan berhasil ditambahkan',
-      };
-    } on PostgrestException catch (e) {
-      if (e.code == '22P02') {
+      final response = await _supabase
+          .from('kegiatan')
+          .insert(data)
+          .select()
+          .single();
+
+      print('DEBUG: Response from Supabase: $response');
+
+      if (response != null && response['id'] != null) {
+        return {
+          'success': true,
+          'message': 'Kegiatan berhasil ditambahkan',
+          'data': response,
+        };
+      } else {
         return {
           'success': false,
-          'message': 'Kategori tidak valid. Silakan pilih kategori yang tersedia.',
+          'message': 'Data tersimpan tapi response tidak valid',
+        };
+      }
+    } on PostgrestException catch (e) {
+      print('ERROR PostgrestException:');
+      print('  Message: ${e.message}');
+      print('  Code: ${e.code}');
+      print('  Details: ${e.details}');
+      print('  Hint: ${e.hint}');
+
+      if (e.code == '23502') {
+        return {
+          'success': false,
+          'message': 'Kolom wajib tidak boleh kosong',
         };
       }
 
@@ -114,7 +65,10 @@ class KegiatanRepository {
         'success': false,
         'message': 'Database error: ${e.message}',
       };
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('ERROR General: $e');
+      print('Stack Trace: $stackTrace');
+
       return {
         'success': false,
         'message': 'Terjadi kesalahan: $e',
@@ -122,79 +76,20 @@ class KegiatanRepository {
     }
   }
 
-  // Method untuk get list kegiatan (opsional)
   Future<List<Map<String, dynamic>>> getKegiatanList() async {
     try {
       final response = await _supabase
           .from('kegiatan')
           .select()
-          .order('created_at', ascending: false);
+          .order('tanggal_kegiatan', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
+      print('ERROR getKegiatanList: $e');
       throw Exception('Gagal mengambil data kegiatan: $e');
     }
   }
 
-  // Ambil detail kegiatan
-  Future<Map<String, dynamic>?> getKegiatanById(int id) async {
-    try {
-      final response = await _supabase
-          .from('kegiatan')
-          .select()
-          .eq('id', id)
-          .single();
-
-      return response;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  // Update kegiatan
-  Future<Map<String, dynamic>> updateKegiatan(
-      int id, KegiatanFormModel form) async {
-    try {
-      if (form.tanggalKegiatan == null) {
-        return {
-          'success': false,
-          'message': 'Tanggal kegiatan harus diisi',
-        };
-      }
-
-      final kategoriLowercase = form.kategori.toLowerCase();
-
-      final data = {
-        'nama_kegiatan': form.namaKegiatan.trim(),
-        'tanggal_kegiatan': form.tanggalKegiatan!
-            .toIso8601String()
-            .split('T')[0],
-        'lokasi_kegiatan': form.lokasi.trim(),
-        'penanggung_jawab_kegiatan': form.penanggungJawab.trim(),
-        'kategori_kegiatan': kategoriLowercase,
-        'deskripsi_kegiatan': form.deskripsi.trim(),
-      };
-
-      await _supabase.from('kegiatan').update(data).eq('id', id);
-
-      return {
-        'success': true,
-        'message': 'Kegiatan berhasil diperbarui',
-      };
-    } on PostgrestException catch (e) {
-      return {
-        'success': false,
-        'message': 'Database error: ${e.message}',
-      };
-    } catch (e) {
-      return {
-        'success': false,
-        'message': 'Terjadi kesalahan: $e',
-      };
-    }
-  }
-
-  // Hapus kegiatan
   Future<Map<String, dynamic>> deleteKegiatan(int id) async {
     try {
       await _supabase.from('kegiatan').delete().eq('id', id);
@@ -204,10 +99,81 @@ class KegiatanRepository {
         'message': 'Kegiatan berhasil dihapus',
       };
     } catch (e) {
+      print('ERROR deleteKegiatan: $e');
       return {
         'success': false,
-        'message': 'Terjadi kesalahan: $e',
+        'message': 'Gagal menghapus kegiatan: $e',
       };
+    }
+  }
+
+  Future<Map<String, dynamic>?> getKegiatanById(int id) async {
+    try {
+      final response = await _supabase
+          .from('kegiatan')
+          .select()
+          .eq('id', id)
+          .single();
+
+      return response;
+    } catch (e) {
+      print('ERROR getKegiatanById: $e');
+      return null;
+    }
+  }
+
+  Future<KegiatanStatisticsModel> getStatistics() async {
+    try {
+      final kegiatanList = await getKegiatanList();
+      
+      if (kegiatanList.isEmpty) {
+        return KegiatanStatisticsModel.empty();
+      }
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      int selesai = 0;
+      int hariIni = 0;
+      int akanDatang = 0;
+
+      for (var kegiatan in kegiatanList) {
+        final tanggalStr = kegiatan['tanggal_kegiatan'];
+        
+        if (tanggalStr == null) {
+          continue;
+        }
+
+        try {
+          final tanggalKegiatan = DateTime.parse(tanggalStr);
+          final kegiatanDate = DateTime(
+            tanggalKegiatan.year,
+            tanggalKegiatan.month,
+            tanggalKegiatan.day,
+          );
+
+          if (kegiatanDate.isBefore(today)) {
+            selesai++;
+          } else if (kegiatanDate.isAtSameMomentAs(today)) {
+            hariIni++;
+          } else {
+            akanDatang++;
+          }
+        } catch (e) {
+          print('ERROR parsing date: $e');
+          continue;
+        }
+      }
+
+      return KegiatanStatisticsModel(
+        totalKegiatan: kegiatanList.length,
+        selesai: selesai,
+        hariIni: hariIni,
+        akanDatang: akanDatang,
+      );
+    } catch (e) {
+      print('ERROR getStatistics: $e');
+      return KegiatanStatisticsModel.empty();
     }
   }
 }

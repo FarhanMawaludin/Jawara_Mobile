@@ -23,32 +23,53 @@ class StatisticsCard extends ConsumerWidget {
         loading: () => const Center(
           child: Padding(
             padding: EdgeInsets.all(40.0),
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+              color: Color(0xFF6C63FF),
+            ),
           ),
         ),
         
         // Saat error
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
-              const SizedBox(height: 8),
-              Text(
-                'Gagal memuat statistik',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () {
-                  ref.invalidate(kegiatanStatisticsProvider);
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Coba Lagi'),
-              ),
-            ],
-          ),
-        ),
+        error: (error, stack) {
+          print('ERROR in StatisticsCard: $error');
+          print('Stack: $stack');
+          
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                const SizedBox(height: 8),
+                Text(
+                  'Gagal memuat statistik',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  error.toString(),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ref.invalidate(kegiatanStatisticsProvider);
+                  },
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Coba Lagi'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6C63FF),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
         
         // Saat data berhasil dimuat
         data: (statistics) => Column(
@@ -64,6 +85,7 @@ class StatisticsCard extends ConsumerWidget {
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
                     height: 1,
+                    color: Color(0xFF6C63FF),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -88,7 +110,7 @@ class StatisticsCard extends ConsumerWidget {
                 Expanded(
                   child: StatusItem(
                     icon: Icons.check_circle_outline,
-                    iconColor: Colors.blue,
+                    iconColor: Colors.green,
                     label: 'Selesai',
                     value: '${statistics.selesai}',
                   ),
@@ -97,7 +119,7 @@ class StatisticsCard extends ConsumerWidget {
                 Expanded(
                   child: StatusItem(
                     icon: Icons.today_outlined,
-                    iconColor: Colors.orange,
+                    iconColor: Colors.blue,
                     label: 'Hari Ini',
                     value: '${statistics.hariIni}',
                   ),
@@ -106,7 +128,7 @@ class StatisticsCard extends ConsumerWidget {
                 Expanded(
                   child: StatusItem(
                     icon: Icons.calendar_today_outlined,
-                    iconColor: Colors.green,
+                    iconColor: Colors.orange,
                     label: 'Akan Datang',
                     value: '${statistics.akanDatang}',
                   ),
@@ -115,6 +137,19 @@ class StatisticsCard extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
+
+            // Refresh button (optional)
+            TextButton.icon(
+              onPressed: () {
+                ref.invalidate(kegiatanStatisticsProvider);
+              },
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('Refresh'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF6C63FF),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+            ),
           ],
         ),
       ),

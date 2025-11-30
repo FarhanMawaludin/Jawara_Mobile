@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/kegiatan_form_model.dart';
 import '../../data/repositories/kegiatan_repository.dart';
-import '../../../../core/providers/supabase_provider.dart'; // Import supabase provider
+import '../../../../core/providers/supabase_provider.dart';
 
 class KegiatanFormNotifier extends StateNotifier<KegiatanFormModel> {
   final KegiatanRepository _repository;
@@ -42,7 +42,6 @@ class KegiatanFormNotifier extends StateNotifier<KegiatanFormModel> {
       final result = await _repository.createKegiatan(state);
 
       if (result['success']) {
-        // Reset state HANYA setelah berhasil submit
         reset();
       }
 
@@ -56,17 +55,9 @@ class KegiatanFormNotifier extends StateNotifier<KegiatanFormModel> {
   }
 }
 
-// Provider untuk KegiatanRepository - UPDATED
-final kegiatanRepositoryProvider = Provider<KegiatanRepository>((ref) {
-  final supabaseClient = ref.watch(supabaseClientProvider);
-  return KegiatanRepository(supabaseClient);
-});
-
-// Provider untuk KegiatanFormNotifier
 final kegiatanFormProvider =
     StateNotifierProvider<KegiatanFormNotifier, KegiatanFormModel>(
-  (ref) {
-    final repository = ref.watch(kegiatanRepositoryProvider);
-    return KegiatanFormNotifier(repository);
-  },
+  (ref) => KegiatanFormNotifier(
+    KegiatanRepository(ref.read(supabaseClientProvider)),
+  ),
 );

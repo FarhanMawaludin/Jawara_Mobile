@@ -15,6 +15,7 @@ import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
 import 'package:jawaramobile/features/pengaturan/presentation/pages/settings_page.dart';
 import 'package:jawaramobile/features/kegiatan/presentations/pages/kegiatan.dart';
 import 'package:jawaramobile/features/kegiatan/presentations/pages/tambah_kegiatan_page.dart';
+import 'package:jawaramobile/features/kegiatan/presentations/pages/daftar_kegiatan.dart';
 
 // Broadcast imports
 import 'package:jawaramobile/features/broadcast/presentations/pages/daftar_broadcast.dart';
@@ -232,6 +233,11 @@ final router = GoRouter(
     GoRoute(
       path: '/kegiatan/tambah-kegiatan',
       builder: (context, state) => const TambahKegiatanPage(),
+    ),
+      GoRoute(
+      path: '/kegiatan/daftar-kegiatan',
+      name: 'daftar-kegiatan',
+      builder: (context, state) => const DaftarKegiatanPage(),
     ),
 
     // ============================================

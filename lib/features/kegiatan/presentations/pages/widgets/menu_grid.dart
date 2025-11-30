@@ -27,7 +27,7 @@ class MenuGrid extends StatelessWidget {
           icon: HeroiconsOutline.clipboardDocumentList,
           label: 'Daftar\nKegiatan',
           onTap: () {
-            // Navigate to daftar kegiatan
+            context.push('/kegiatan/daftar-kegiatan');
           },
         ),
         MenuCard(
