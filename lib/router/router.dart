@@ -15,6 +15,11 @@ import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
 import 'package:jawaramobile/features/pengaturan/presentation/pages/settings_page.dart';
 import 'package:jawaramobile/features/kegiatan/presentations/pages/kegiatan.dart';
 import 'package:jawaramobile/features/kegiatan/presentations/pages/tambah_kegiatan_page.dart';
+
+// Broadcast imports
+import 'package:jawaramobile/features/broadcast/presentations/pages/daftar_broadcast.dart';
+import 'package:jawaramobile/features/broadcast/presentations/pages/tambah_broadcast_page.dart';
+
 // Warga imports
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/detail_keluarga/keluarga_detail.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/lainnya/lainnya.dart';
@@ -223,10 +228,24 @@ final router = GoRouter(
       builder: (context, state) => const StatistikPage(),
     ),
 
-    // Kegiatan Routes (tambahkan setelah routes lainnya)
+    // Kegiatan Routes
     GoRoute(
       path: '/kegiatan/tambah-kegiatan',
       builder: (context, state) => const TambahKegiatanPage(),
+    ),
+
+    // ============================================
+    // BROADCAST ROUTES - TAMBAHKAN DISINI
+    // ============================================
+    GoRoute(
+      path: '/broadcast/tambah-broadcast',
+      name: 'tambah-broadcast',
+      builder: (context, state) => const TambahBroadcastPage(),
+    ),
+    GoRoute(
+      path: '/broadcast/daftar-broadcast',
+      name: 'daftar-broadcast',
+      builder: (context, state) => const DaftarBroadcastPage(),
     ),
   ],
 );

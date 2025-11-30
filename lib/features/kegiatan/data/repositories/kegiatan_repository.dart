@@ -94,7 +94,6 @@ class KegiatanRepository {
         'penanggung_jawab_kegiatan': form.penanggungJawab.trim(),
         'kategori_kegiatan': kategoriLowercase,
         'deskripsi_kegiatan': form.deskripsi.trim(),
-        'status': 'direncanakan', // Default status
       };
 
       await _supabase.from('kegiatan').insert(data);

@@ -34,14 +34,14 @@ class MenuGrid extends StatelessWidget {
           icon: HeroiconsOutline.userGroup,
           label: 'Tambah\nBroadcast',
           onTap: () {
-            // Navigate to tambah broadcast
+            context.push('/broadcast/tambah-broadcast');
           },
         ),
         MenuCard(
           icon: HeroiconsOutline.rectangleStack,
           label: 'Daftar\nBroadcast',
           onTap: () {
-            // Navigate to daftar broadcast
+           context.push('/broadcast/daftar-broadcast');
           },
         ),
       ],
