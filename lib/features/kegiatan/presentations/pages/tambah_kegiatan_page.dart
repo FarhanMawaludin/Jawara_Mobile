@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../providers/kegiatan_form_provider.dart';
+import 'widgets/form_tambah/nama_kegiatan.dart';
+import 'widgets/form_tambah/tanggal_kegiatan.dart';
+import 'widgets/form_tambah/lokasi.dart';
+import 'widgets/form_tambah/penganggunjawab.dart';
+import 'widgets/form_tambah/kategori_kegiatan.dart';
+import 'widgets/form_tambah/deskripsi_kegiatan.dart';
 
 class TambahKegiatanPage extends ConsumerStatefulWidget {
   const TambahKegiatanPage({super.key});
@@ -13,62 +18,6 @@ class TambahKegiatanPage extends ConsumerStatefulWidget {
 class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
   final _formKey = GlobalKey<FormState>();
   final Color _primaryColor = const Color(0xFF6C63FF);
-
-  final List<String> _kategoriList = [
-    'Komunitas',
-    'Kebersihan',
-    'Kesehatan',
-    'Keagamaan',
-    'Pendidikan',
-    'Olahraga',
-    'Keamanan',
-    'Sosial',
-  ];
-
-  String? _getDisplayKategori(String kategori) {
-    if (kategori.isEmpty) return null;
-
-    final match = _kategoriList.firstWhere(
-      (k) => k.toLowerCase() == kategori.toLowerCase(),
-      orElse: () => '',
-    );
-
-    return match.isEmpty ? null : match;
-  }
-
-  InputDecoration _inputDecoration({
-    required String label,
-    String? hint,
-    IconData? icon,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon:
-          icon != null ? Icon(icon, color: Colors.grey[600], size: 20) : null,
-      filled: true,
-      fillColor: Colors.grey[50],
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _primaryColor, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.red.shade400),
-      ),
-      floatingLabelStyle: TextStyle(color: _primaryColor),
-    );
-  }
 
   // Konfirmasi saat keluar dari halaman
   Future<bool> _onWillPop() async {
@@ -109,37 +58,10 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
     return shouldPop ?? false;
   }
 
-  // Pilih tanggal kegiatan
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: _primaryColor,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      ref
-          .read(kegiatanFormProvider.notifier)
-          .updateTanggalKegiatan(picked);
-    }
-  }
-
   // Submit form tambah kegiatan
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      // Tampilkan loading
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -148,11 +70,13 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
         ),
       );
 
-      final result =
-          await ref.read(kegiatanFormProvider.notifier).submitForm();
+      // Submit form
+      final result = await ref.read(kegiatanFormProvider.notifier).submitForm();
 
+      // Tutup loading
       if (mounted) Navigator.pop(context);
 
+      // Tampilkan hasil
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -179,8 +103,6 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(kegiatanFormProvider);
-
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -219,133 +141,31 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nama kegiatan
-                  TextFormField(
-                    initialValue: formState.namaKegiatan,
-                    decoration: _inputDecoration(
-                      label: 'Nama Kegiatan',
-                      hint: 'Contoh: Kerja Bakti RT 01',
-                      icon: Icons.event_note,
-                    ),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Wajib diisi' : null,
-                    onChanged: (value) {
-                      ref
-                          .read(kegiatanFormProvider.notifier)
-                          .updateNamaKegiatan(value);
-                    },
-                  ),
+                  // Nama Kegiatan Field
+                  NamaKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
 
-                  // Tanggal kegiatan
-                  InkWell(
-                    onTap: () => _selectDate(context),
-                    borderRadius: BorderRadius.circular(12),
-                    child: InputDecorator(
-                      decoration: _inputDecoration(
-                        label: 'Tanggal Pelaksanaan',
-                        icon: Icons.calendar_today_outlined,
-                      ),
-                      child: Text(
-                        formState.tanggalKegiatan != null
-                            ? DateFormat('dd MMMM yyyy')
-                                .format(formState.tanggalKegiatan!)
-                            : 'Pilih Tanggal',
-                        style: TextStyle(
-                          color: formState.tanggalKegiatan != null
-                              ? Colors.black87
-                              : Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Tanggal Kegiatan Field
+                  TanggalKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
 
-                  // Lokasi kegiatan
-                  TextFormField(
-                    initialValue: formState.lokasi,
-                    decoration: _inputDecoration(
-                      label: 'Lokasi',
-                      hint: 'Contoh: Lapangan Balai Warga',
-                      icon: Icons.location_on_outlined,
-                    ),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Wajib diisi' : null,
-                    onChanged: (value) {
-                      ref
-                          .read(kegiatanFormProvider.notifier)
-                          .updateLokasi(value);
-                    },
-                  ),
+                  // Lokasi Field
+                  LokasiKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
 
-                  // Penanggung jawab
-                  TextFormField(
-                    initialValue: formState.penanggungJawab,
-                    decoration: _inputDecoration(
-                      label: 'Penanggung Jawab',
-                      hint: 'Nama Ketua Panitia',
-                      icon: Icons.person_outline,
-                    ),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Wajib diisi' : null,
-                    onChanged: (value) {
-                      ref
-                          .read(kegiatanFormProvider.notifier)
-                          .updatePenanggungJawab(value);
-                    },
-                  ),
+                  // Penanggung Jawab Field
+                  PenanggungJawabField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
 
-                  // Kategori kegiatan
-                  DropdownButtonFormField<String>(
-                    value: _getDisplayKategori(formState.kategori),
-                    decoration: _inputDecoration(
-                      label: 'Kategori',
-                      icon: Icons.category_outlined,
-                    ),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                    items: _kategoriList.map((String kategori) {
-                      return DropdownMenuItem<String>(
-                        value: kategori,
-                        child: Text(kategori),
-                      );
-                    }).toList(),
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Wajib dipilih' : null,
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref
-                            .read(kegiatanFormProvider.notifier)
-                            .updateKategori(value.toLowerCase());
-                      }
-                    },
-                  ),
+                  // Kategori Dropdown
+                  KategoriKegiatanDropdown(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
 
-                  // Deskripsi kegiatan
-                  TextFormField(
-                    initialValue: formState.deskripsi,
-                    decoration: _inputDecoration(
-                      label: 'Deskripsi Lengkap',
-                      hint: 'Jelaskan detail kegiatan...',
-                    ).copyWith(
-                      alignLabelWithHint: true,
-                      contentPadding: const EdgeInsets.all(20),
-                    ),
-                    maxLines: 5,
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Wajib diisi' : null,
-                    onChanged: (value) {
-                      ref
-                          .read(kegiatanFormProvider.notifier)
-                          .updateDeskripsi(value);
-                    },
-                  ),
+                  // Deskripsi Field
+                  DeskripsiKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 40),
 
-                  // Tombol submit
+                  // Tombol Submit
                   SizedBox(
                     width: double.infinity,
                     height: 56,
