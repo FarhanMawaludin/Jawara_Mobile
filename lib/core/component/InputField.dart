@@ -15,8 +15,8 @@ class InputField extends StatefulWidget {
     this.isPassword = false,
     this.options,
     this.onChanged,
-    this.controller, 
-    final String? Function(String?)? validator, 
+    this.controller,
+    final String? Function(String?)? validator,
   });
 
   @override
@@ -26,6 +26,21 @@ class InputField extends StatefulWidget {
 class _InputFieldState extends State<InputField> {
   bool _obscureText = true;
   String? _selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // =============================
+    // TAMBAHAN: BACA VALUE AWAL DROPDOWN DARI controller
+    // =============================
+    if (widget.options != null &&
+        widget.options!.isNotEmpty &&
+        widget.controller != null &&
+        widget.controller!.text.isNotEmpty) {
+      _selectedValue = widget.controller!.text;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +74,18 @@ class _InputFieldState extends State<InputField> {
           // ==============================================
           if (widget.options != null && widget.options!.isNotEmpty)
             DropdownButtonFormField<String>(
-              initialValue: _selectedValue,
+              // key: widget.key,
+
+              // =============================================
+              // TAMBAHAN: Gunakan controller.text sebagai value
+              // jika ada.
+              // =============================================
+              value:
+                  widget.options!.contains(
+                    _selectedValue ?? widget.controller?.text,
+                  )
+                  ? (_selectedValue ?? widget.controller?.text)
+                  : null,
               hint: Text(
                 widget.hintText,
                 style: TextStyle(color: Colors.grey[400]),
@@ -72,6 +98,7 @@ class _InputFieldState extends State<InputField> {
                   vertical: 18,
                 ),
               ),
+
               icon: Container(
                 margin: const EdgeInsets.only(right: 14),
                 child: Icon(
@@ -79,13 +106,39 @@ class _InputFieldState extends State<InputField> {
                   color: Colors.grey[500],
                 ),
               ),
-              items: widget.options!
-                  .map(
-                    (item) => DropdownMenuItem(value: item, child: Text(item)),
-                  )
-                  .toList(),
+              items: [
+                DropdownMenuItem(
+                  value: null,
+                  child: Text(
+                    widget.hintText,
+                    style: TextStyle(color: Colors.grey[400],fontWeight: FontWeight.w400),
+                  ),
+                ),
+                ...widget.options!.map(
+                  (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(
+                      item,
+                      style: const TextStyle(
+                        // <---- STYLE ITEM LIST
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400, // tidak tebal
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
               onChanged: (value) {
                 setState(() => _selectedValue = value);
+
+                // =============================================
+                // TAMBAHAN: update controller saat pilih dropdown
+                // =============================================
+                if (widget.controller != null && value != null) {
+                  widget.controller!.text = value;
+                }
+
                 if (widget.onChanged != null && value != null) {
                   widget.onChanged!(value);
                 }
@@ -96,7 +149,8 @@ class _InputFieldState extends State<InputField> {
           // ==============================================
           else
             TextField(
-              controller: widget.controller, // ← pasang controller
+              // key: widget.key,
+              controller: widget.controller,
               obscureText: widget.isPassword ? _obscureText : false,
               decoration: InputDecoration(
                 hintText: widget.hintText,
@@ -107,7 +161,6 @@ class _InputFieldState extends State<InputField> {
                   horizontal: 18,
                   vertical: 16,
                 ),
-
                 suffixIcon: widget.isPassword
                     ? IconButton(
                         icon: Icon(

@@ -4,6 +4,8 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../aspirasi/presentations/providers/aspirasi_providers.dart';
 import '../../../../../aspirasi/data/models/aspiration_model.dart';
+import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration_detail.dart';
+import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart' as ui_model;
 
 class Aspirasi extends ConsumerWidget {
   const Aspirasi({super.key});
@@ -11,12 +13,10 @@ class Aspirasi extends ConsumerWidget {
   String _relativeTime(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes} menit lalu';
-    if (diff.inHours < 24) return '${diff.inHours} jam lalu';
-    if (diff.inDays < 7) return '${diff.inDays} hari lalu';
-    if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} minggu lalu';
-    if (diff.inDays < 365) return '${(diff.inDays / 30).floor()} bulan lalu';
-    return '${(diff.inDays / 365).floor()} tahun lalu';
+    // Prefer showing days only. If the timestamp appears to be in the future
+    final days = diff.isNegative ? 0 : diff.inDays;
+    if (days == 0) return 'Hari ini';
+    return '$days hari lalu';
   }
 
   @override
@@ -75,11 +75,27 @@ class Aspirasi extends ConsumerWidget {
               return Column(
                 children: show.map((e) {
                   final displayName = (e.sender.split('@').first).trim();
-                  return _buildMessageTile(
+                  final tile = _buildMessageTile(
                     imageUrl: null,
                     name: displayName.isNotEmpty ? displayName : 'Warga',
                     message: e.message.isNotEmpty ? e.message : e.title,
                     time: _relativeTime(e.createdAt),
+                  );
+
+                  return InkWell(
+                    onTap: () {
+                      final item = ui_model.AspirationItem(
+                        sender: e.sender,
+                        title: e.title,
+                        status: e.status,
+                        date: e.createdAt,
+                        message: e.message,
+                      );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => AspirationDetailPage(item: item)),
+                      );
+                    },
+                    child: tile,
                   );
                 }).toList(),
               );

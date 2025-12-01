@@ -142,6 +142,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     /// INPUT EMAIL
                     /// ==============================
                     InputField(
+                      key: const Key("emailField"),
                       label: "Email",
                       hintText: "Masukkan email",
                       controller: emailC,
@@ -151,6 +152,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     /// INPUT PASSWORD
                     /// ==============================
                     InputField(
+                      key: const Key("passwordField"),
                       label: "Password",
                       hintText: "Masukkan password",
                       isPassword: true,
@@ -168,6 +170,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                             width: double.infinity,
                             height: 50,
                             child: TextButton(
+                              key: const Key("loginButton"),
                               onPressed: () {
                                 final email = emailC.text.trim();
                                 final password = passC.text.trim();

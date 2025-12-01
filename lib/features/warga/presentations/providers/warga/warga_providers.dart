@@ -2,6 +2,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/features/warga/data/models/warga_model.dart';
+import 'package:jawaramobile/features/warga/domain/usecases/warga/count_keluarga.dart';
+import 'package:jawaramobile/features/warga/domain/usecases/warga/count_warga.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Datasource + Repository
@@ -78,6 +80,14 @@ final getWargaByKeluargaUseCaseProvider = Provider<GetWargaByKeluarga>((ref) {
   return GetWargaByKeluarga(ref.read(wargaRepositoryProvider));
 });
 
+final countKeluargaUseCaseProvider = Provider<CountKeluarga>((ref) {
+  return CountKeluarga(ref.read(wargaRepositoryProvider));
+});
+
+final countWargaUseCaseProvider = Provider<CountWarga>((ref) {
+  return CountWarga(ref.read(wargaRepositoryProvider));
+});
+
 // =========================================================
 // PROVIDER: Get All Warga
 // =========================================================
@@ -137,6 +147,24 @@ final searchWargaProvider = FutureProvider.autoDispose<List<WargaModel>>((
 
   return results.cast<WargaModel>();
 });
+
+// =========================================================
+// PROVIDER: COUNT KELUARGA
+// =========================================================
+final totalKeluargaProvider = FutureProvider<int>((ref) async {
+  final usecase = ref.watch(countKeluargaUseCaseProvider);
+  return await usecase();
+});
+
+// =========================================================
+// PROVIDER: COUNT WARGA
+// =========================================================
+final totalWargaProvider = FutureProvider<int>((ref) async {
+  final usecase = ref.watch(countWargaUseCaseProvider);
+  return await usecase();
+});
+
+
 
 // =========================================================
 // STATE UNTUK FORM / CREATE / UPDATE WARGA
