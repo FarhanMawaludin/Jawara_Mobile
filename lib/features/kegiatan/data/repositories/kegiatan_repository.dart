@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/kegiatan_form_model.dart';
 import '../models/kegiatan_statistics_model.dart';
@@ -18,22 +19,18 @@ class KegiatanRepository {
 
       final data = {
         'nama_kegiatan': form.namaKegiatan.trim(),
-        'kategori_kegiatan': form.kategori.toLowerCase(), // FIX: kategori, bukan kategoriKegiatan
+        'kategori_kegiatan': form.kategori.toLowerCase(),
         'tanggal_kegiatan': form.tanggalKegiatan?.toIso8601String(),
-        'lokasi_kegiatan': form.lokasi.trim(), // FIX: lokasi, bukan lokasiKegiatan
-        'penanggung_jawab_kegiatan': form.penanggungJawab.trim(), // FIX: penanggungJawab, bukan penanggungJawabKegiatan
-        'deskripsi_kegiatan': form.deskripsi.trim(), // FIX: deskripsi, bukan deskripsiKegiatan
+        'lokasi_kegiatan': form.lokasi.trim(),
+        'penanggung_jawab_kegiatan': form.penanggungJawab.trim(),
+        'deskripsi_kegiatan': form.deskripsi.trim(),
       };
-
-      print('DEBUG: Sending data to Supabase: $data');
 
       final response = await _supabase
           .from('kegiatan')
           .insert(data)
           .select()
           .single();
-
-      print('DEBUG: Response from Supabase: $response');
 
       if (response != null && response['id'] != null) {
         return {
@@ -48,12 +45,6 @@ class KegiatanRepository {
         };
       }
     } on PostgrestException catch (e) {
-      print('ERROR PostgrestException:');
-      print('  Message: ${e.message}');
-      print('  Code: ${e.code}');
-      print('  Details: ${e.details}');
-      print('  Hint: ${e.hint}');
-
       if (e.code == '23502') {
         return {
           'success': false,
@@ -65,10 +56,12 @@ class KegiatanRepository {
         'success': false,
         'message': 'Database error: ${e.message}',
       };
-    } catch (e, stackTrace) {
-      print('ERROR General: $e');
-      print('Stack Trace: $stackTrace');
-
+    } on SocketException catch (_) {
+      return {
+        'success': false,
+        'message': 'Tidak ada koneksi internet',
+      };
+    } catch (e) {
       return {
         'success': false,
         'message': 'Terjadi kesalahan: $e',
@@ -76,7 +69,26 @@ class KegiatanRepository {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getKegiatanList() async {
+  Future<List<Map<String, dynamic>>> getKegiatanList({
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('kegiatan')
+          .select()
+          .order('tanggal_kegiatan', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return List<Map<String, dynamic>>.from(response);
+    } on SocketException catch (_) {
+      throw Exception('Tidak ada koneksi internet');
+    } catch (e) {
+      throw Exception('Gagal mengambil data kegiatan: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllKegiatan() async {
     try {
       final response = await _supabase
           .from('kegiatan')
@@ -84,8 +96,9 @@ class KegiatanRepository {
           .order('tanggal_kegiatan', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
+    } on SocketException catch (_) {
+      throw Exception('Tidak ada koneksi internet');
     } catch (e) {
-      print('ERROR getKegiatanList: $e');
       throw Exception('Gagal mengambil data kegiatan: $e');
     }
   }
@@ -93,13 +106,17 @@ class KegiatanRepository {
   Future<Map<String, dynamic>> deleteKegiatan(int id) async {
     try {
       await _supabase.from('kegiatan').delete().eq('id', id);
-
+      
       return {
         'success': true,
         'message': 'Kegiatan berhasil dihapus',
       };
+    } on SocketException catch (_) {
+      return {
+        'success': false,
+        'message': 'Tidak ada koneksi internet',
+      };
     } catch (e) {
-      print('ERROR deleteKegiatan: $e');
       return {
         'success': false,
         'message': 'Gagal menghapus kegiatan: $e',
@@ -114,17 +131,18 @@ class KegiatanRepository {
           .select()
           .eq('id', id)
           .single();
-
+          
       return response;
+    } on SocketException catch (_) {
+      return null;
     } catch (e) {
-      print('ERROR getKegiatanById: $e');
       return null;
     }
   }
 
   Future<KegiatanStatisticsModel> getStatistics() async {
     try {
-      final kegiatanList = await getKegiatanList();
+      final kegiatanList = await getAllKegiatan();
       
       if (kegiatanList.isEmpty) {
         return KegiatanStatisticsModel.empty();
@@ -139,10 +157,7 @@ class KegiatanRepository {
 
       for (var kegiatan in kegiatanList) {
         final tanggalStr = kegiatan['tanggal_kegiatan'];
-        
-        if (tanggalStr == null) {
-          continue;
-        }
+        if (tanggalStr == null) continue;
 
         try {
           final tanggalKegiatan = DateTime.parse(tanggalStr);
@@ -159,8 +174,7 @@ class KegiatanRepository {
           } else {
             akanDatang++;
           }
-        } catch (e) {
-          print('ERROR parsing date: $e');
+        } catch (_) {
           continue;
         }
       }
@@ -171,8 +185,9 @@ class KegiatanRepository {
         hariIni: hariIni,
         akanDatang: akanDatang,
       );
+    } on SocketException catch (_) {
+      return KegiatanStatisticsModel.empty();
     } catch (e) {
-      print('ERROR getStatistics: $e');
       return KegiatanStatisticsModel.empty();
     }
   }

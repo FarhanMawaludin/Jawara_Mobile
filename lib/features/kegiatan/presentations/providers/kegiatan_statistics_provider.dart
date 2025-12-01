@@ -15,18 +15,14 @@ final kegiatanRepositoryProvider = Provider<KegiatanRepository>((ref) {
 });
 
 // Provider untuk Statistics
-final kegiatanStatisticsProvider = FutureProvider<KegiatanStatisticsModel>((ref) async {
+final kegiatanStatisticsProvider =
+    FutureProvider<KegiatanStatisticsModel>((ref) async {
   final repository = ref.watch(kegiatanRepositoryProvider);
   
   try {
     final statistics = await repository.getStatistics();
     return statistics;
   } catch (e) {
-    print('ERROR in kegiatanStatisticsProvider: $e');
-    // Return empty statistics jika error
     return KegiatanStatisticsModel.empty();
   }
 });
-
-// Provider untuk refresh trigger (optional)
-final refreshStatisticsProvider = StateProvider<int>((ref) => 0);
