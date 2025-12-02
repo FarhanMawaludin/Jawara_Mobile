@@ -65,6 +65,12 @@ final searchMutasiProvider = Provider<SearchMutasi>((ref) {
   return SearchMutasi(ref.read(mutasiRepositoryProvider));
 });
 
+final updateKeluargaRumahProvider =
+    Provider<Future<void> Function(int keluargaId, int? rumahId)>((ref) {
+  final repo = ref.watch(mutasiRepositoryProvider);
+  return (kelId, rumId) => repo.updateRumah(kelId, rumId);
+});
+
 
 // =========================================================
 // FUTURE PROVIDER

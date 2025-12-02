@@ -31,8 +31,7 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 // DATASOURCE PROVIDER
 // =========================================================
 final wargaRemoteDataSourceProvider = Provider<WargaRemoteDataSourceImpl>((
-  ref,
-) {
+  ref,) {
   final client = ref.read(supabaseClientProvider);
   return WargaRemoteDataSourceImpl(client);
 });

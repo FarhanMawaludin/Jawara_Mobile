@@ -7,6 +7,7 @@ abstract class MutasiRemoteDataSource {
   Future<MutasiModel?> getMutasiById(int id);
   Future<void> createMutasi(MutasiModel mutasi);
   Future<List<MutasiModel>> searchMutasi(String keyword);
+  Future<void> updateRumah(int keluargaId, int? rumahId);
 }
 
 class MutasiRemoteDatasourceImpl implements MutasiRemoteDataSource {
@@ -134,6 +135,36 @@ class MutasiRemoteDatasourceImpl implements MutasiRemoteDataSource {
       return result.map((json) => MutasiModel.fromMap(json)).toList();
     } catch (e) {
       throw Exception("Gagal mencari Mutasi: $e");
+    }
+  }
+
+  @override
+  Future<void> updateRumah(int keluargaId, int? rumahBaruId) async {
+    try {
+      // 1️⃣ Cari rumah asal dari keluarga tersebut
+      final rumahAsal = await client
+          .from('rumah')
+          .select('id')
+          .eq('keluarga_id', keluargaId)
+          .maybeSingle();
+
+      // 2️⃣ Kosongkan rumah asal (agar tidak ditempati lagi)
+      if (rumahAsal != null && rumahAsal['id'] != null) {
+        await client
+            .from('rumah')
+            .update({'keluarga_id': null})
+            .eq('id', rumahAsal['id']);
+      }
+
+      // 3️⃣ Jika pindah rumah → isi rumah baru dengan keluargaId
+      if (rumahBaruId != null) {
+        await client
+            .from('rumah')
+            .update({'keluarga_id': keluargaId})
+            .eq('id', rumahBaruId);
+      }
+    } catch (e) {
+      throw Exception("Gagal mengupdate rumah keluarga: $e");
     }
   }
 }
