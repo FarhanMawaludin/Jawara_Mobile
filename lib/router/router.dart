@@ -1,4 +1,5 @@
 // lib/route.dart (updated with register flow)
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/iuran/kategori_iuran_page.dart';
@@ -12,6 +13,13 @@ import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/detai
 import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/tagihan.dart';
 import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
 import 'package:jawaramobile/features/pengaturan/presentation/pages/settings_page.dart';
+import 'package:jawaramobile/features/kegiatan/presentations/pages/kegiatan.dart';
+import 'package:jawaramobile/features/kegiatan/presentations/pages/tambah_kegiatan_page.dart';
+import 'package:jawaramobile/features/kegiatan/presentations/pages/daftar_kegiatan.dart';
+
+// Broadcast imports
+import 'package:jawaramobile/features/broadcast/presentations/pages/daftar_broadcast.dart';
+import 'package:jawaramobile/features/broadcast/presentations/pages/tambah_broadcast_page.dart';
 
 // Warga imports
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/detail_keluarga/keluarga_detail.dart';
@@ -48,8 +56,10 @@ import '../features/register/presentations/pages/register_step3_rumah.dart';
 // Warga
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_keluarga/daftar_keluarga_page.dart';
 
-final GoRouter router = GoRouter(
-  initialLocation: '/',
+final router = GoRouter(
+  // Di development mode langsung ke /kegiatan, di production ke /login
+  initialLocation: kDebugMode ? '/kegiatan' : '/login',
+  
   routes: [
     GoRoute(path: '/', builder: (context, state) => const OnboardingPage()),
     GoRoute(path: '/login', builder: (context, state) => LoginPage()),
@@ -88,7 +98,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/kegiatan',
           name: 'kegiatan',
-          builder: (context, state) => const WargaPage(),
+          builder: (context, state) => const KegiatanPage(),
         ),
         GoRoute(
           path: '/pengaturan',
@@ -225,6 +235,31 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/keuangan/statistik/statistik',
       builder: (context, state) => const StatistikPage(),
+    ),
+
+    // Kegiatan Routes
+    GoRoute(
+      path: '/kegiatan/tambah-kegiatan',
+      builder: (context, state) => const TambahKegiatanPage(),
+    ),
+      GoRoute(
+      path: '/kegiatan/daftar-kegiatan',
+      name: 'daftar-kegiatan',
+      builder: (context, state) => const DaftarKegiatanPage(),
+    ),
+
+    // ============================================
+    // BROADCAST ROUTES - TAMBAHKAN DISINI
+    // ============================================
+    GoRoute(
+      path: '/broadcast/tambah-broadcast',
+      name: 'tambah-broadcast',
+      builder: (context, state) => const TambahBroadcastPage(),
+    ),
+    GoRoute(
+      path: '/broadcast/daftar-broadcast',
+      name: 'daftar-broadcast',
+      builder: (context, state) => const DaftarBroadcastPage(),
     ),
   ],
 );

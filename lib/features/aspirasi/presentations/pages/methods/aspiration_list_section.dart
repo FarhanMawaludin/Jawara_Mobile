@@ -45,12 +45,14 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
       context: context,
       builder: (context) {
         return StatefulBuilder(builder: (context, setStateDialog) {
-          // date range removed — only status filter remains
 
           return AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('Filter Aspirasi'),
+            title: Text(
+              'Filter Aspirasi',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, fontSize: 20),
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -61,10 +63,15 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
                   for (final s in statuses)
                     RadioListTile<String>(
                       dense: true,
-                      title: Text(s),
+                      title: Text(
+                        s,
+                        style: TextStyle(
+                          color: tempStatus == s ? Colors.deepPurpleAccent[400] : null,
+                        ),
+                      ),
                       value: s,
                       groupValue: tempStatus,
-                      activeColor: Colors.grey[700],
+                      activeColor: Colors.deepPurpleAccent[400],
                       onChanged: (v) => setStateDialog(() => tempStatus = v ?? 'All'),
                     ),
                   const SizedBox(height: 8),
@@ -84,7 +91,7 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: Colors.deepPurpleAccent[400],
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
