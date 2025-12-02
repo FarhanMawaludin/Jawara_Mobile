@@ -1,7 +1,7 @@
 class Metodepembayaran {
   final int id;
   final String namaMetode;
-  final bool tipe; // Enum 
+  final bool tipe; // Enum bank / e-wallet / qris
   final int nomorRekening;
   final String namaPemilik;
   final String fotoBarcode;

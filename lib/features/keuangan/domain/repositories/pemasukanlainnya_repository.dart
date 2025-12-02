@@ -1,4 +1,4 @@
-import '../../data/models/pemasukanlainnya_model.dart';
+import '../entities/pemasukanlainnya.dart';
 
 abstract class PemasukanLainnyaRepository {
   Future<List<PemasukanLainnya>> getAllPemasukan();

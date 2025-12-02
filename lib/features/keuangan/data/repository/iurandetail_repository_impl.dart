@@ -5,7 +5,7 @@ import '../datasources/iurandetail_remote_datasource.dart';
 class IuranDetailRepositoryImpl implements IuranDetailRepository {
   final IuranDetailDatasource datasource;
 
-  IuranDetailRepositoryImpl(this.datasource);
+  IuranDetailRepositoryImpl({required this.datasource});
 
   @override
   Future<List<IuranDetail>> getByKeluarga(int keluargaId) {

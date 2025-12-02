@@ -35,15 +35,14 @@ class LainnyaPage extends StatelessWidget {
             SizedBox(height: 10),
             MenuCard(items: [
               {'icon': CupertinoIcons.arrow_up_right, 'label': 'Daftar Pengeluaran', 'route': '/daftar-pengeluaran', 'color': Colors.red},
-              {'icon': CupertinoIcons.add_circled, 'label': 'Tambah Pengeluaran', 'route': '/tambah-pengeluaran', 'color': Colors.red},
+              {'icon': CupertinoIcons.add_circled, 'label': 'Tambah Pengeluaran', 'route': '/keuangan/pengeluaran/tambah-pengeluaran', 'color': Colors.red},
             ]),
             SizedBox(height: 20),
 
             SectionTitle(title: "Laporan Keuangan"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': CupertinoIcons.arrow_down_left, 'label': 'Laporan Pemasukkan', 'color': Colors.green},
-              {'icon': CupertinoIcons.arrow_up_right, 'label': 'Laporan Pengeluaran',  'color': Colors.red},
+              {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi','route': '/keuangan/transaction/mutasi ' ,'color': Colors.black},
               {'icon': CupertinoIcons.printer, 'label': 'Cetak Laporan', 'color': Colors.black},
               {'icon': CupertinoIcons.chart_bar, 'label': 'Statistik', 'route': '/keuangan/statistik/statistik', 'color': Colors.black},
             ]),

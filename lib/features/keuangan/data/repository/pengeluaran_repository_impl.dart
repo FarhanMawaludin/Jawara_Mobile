@@ -23,10 +23,11 @@ class PengeluaranRepositoryImpl implements PengeluaranRepository {
   Future<void> createPengeluaran(Pengeluaran data) async {
     await datasource.insert(PengeluaranModel(
       id: data.id,
-      nama: data.nama,
+      namaPengeluaran: data.namaPengeluaran,
       jumlah: data.jumlah,
-      tanggal: data.tanggal,
-      catatan: data.catatan,
+      tanggalPengeluaran: data.tanggalPengeluaran,
+      kategoriPengeluaran: data.kategoriPengeluaran,
+      buktiPengeluaran: data.buktiPengeluaran,
     ));
   }
 
@@ -34,10 +35,11 @@ class PengeluaranRepositoryImpl implements PengeluaranRepository {
   Future<void> updatePengeluaran(Pengeluaran data) async {
     await datasource.update(PengeluaranModel(
       id: data.id,
-      nama: data.nama,
+      namaPengeluaran: data.namaPengeluaran,
       jumlah: data.jumlah,
-      tanggal: data.tanggal,
-      catatan: data.catatan,
+      tanggalPengeluaran: data.tanggalPengeluaran,
+      kategoriPengeluaran: data.kategoriPengeluaran,
+      buktiPengeluaran: data.buktiPengeluaran,
     ));
   }
 

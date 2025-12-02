@@ -8,8 +8,10 @@ import 'package:jawaramobile/features/keuangan/presentations/pages/lainya_page.d
 import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/detail_pemasukan.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/pemasukan_lain.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/tambah_pemasukkan.dart';
+import 'package:jawaramobile/features/keuangan/presentations/pages/pengeluaran/tambah_pengeluaran.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/detail_tagihan.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/tagihan.dart';
+import 'package:jawaramobile/features/keuangan/presentations/pages/mutasi/mutasi_page.dart';
 import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
 import 'package:jawaramobile/features/pengaturan/presentation/pages/settings_page.dart';
 
@@ -196,7 +198,7 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/keuangan/tagihan/tagihan',
-      builder: (context, state) => const TagihanPage(),
+      builder: (context, state) =>  TagihanPage(),
     ),
     GoRoute(
       path: '/keuangan/tagihan/detail',
@@ -213,6 +215,14 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/keuangan/pemasukkan/tambah-pemasukkan',
       builder: (context, state) => const TambahPemasukanPage(),
+    ),
+    GoRoute(
+      path: '/keuangan/pengeluaran/tambah-pengeluaran',
+      builder: (context, state) => const TambahPengeluaranPage(),
+    ),
+    GoRoute(
+      path: '/keuangan/transaction/mutasi',
+      builder: (context, state) => const MutasiPage(transactions: [],),
     ),
     GoRoute(
       path: '/keuangan/statistik/statistik',

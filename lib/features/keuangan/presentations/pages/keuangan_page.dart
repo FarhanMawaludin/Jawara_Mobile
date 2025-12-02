@@ -20,8 +20,8 @@ class KeuanganPage extends StatelessWidget {
       {'icon': CupertinoIcons.doc, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan', 'warna': Colors.black},
       {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain', 'warna': Colors.green},
       {'icon': CupertinoIcons.add, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'warna': Colors.green},
-      {'icon': CupertinoIcons.arrow_up_right, 'label': 'Daftar Pengeluaran', 'route': '/daftar-pengeluaran', 'warna': Colors.red},
-      {'icon': CupertinoIcons.add, 'label': 'Tambah Pengeluaran', 'route': '/tambah-pengeluaran', 'warna': Colors.red},
+      {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi Keuangan', 'route': '/keuangan/transaction/mutasi', 'warna': Colors.black},
+      {'icon': CupertinoIcons.add, 'label': 'Tambah Pengeluaran', 'route': '/keuangan/pengeluaran/tambah-pengeluaran', 'warna': Colors.red},
       {'icon': CupertinoIcons.bars, 'label': 'Lainnya', 'route': '/keuangan/lainnya', 'warna': Colors.black},
     ];
 

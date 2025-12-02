@@ -1,13 +1,13 @@
 class Iurandetail {
-  int? id;
-  int? keluargaId;
-  int? tagihIuranId;
-  int? metodePembayaranId;
+  final int id;
+  final int keluargaId;
+  final int tagihIuranId;
+  final int metodePembayaranId;
 
   Iurandetail({
-    this.id,
-    this.keluargaId,
-    this.tagihIuranId,
-    this.metodePembayaranId,
+    required this.id,
+    required this.keluargaId,
+    required this.tagihIuranId,
+    required this.metodePembayaranId,
   });
 }

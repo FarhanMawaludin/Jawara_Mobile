@@ -1,4 +1,4 @@
-class PengeluaranLainnya {
+class PemasukanLainnya {
   final int id;
   final String namaPemasukan;
   final double kategoriPemasukan;
@@ -6,7 +6,7 @@ class PengeluaranLainnya {
   final double jumlah;
   final String buktiPemasukan;
 
-    PengeluaranLainnya({
+    PemasukanLainnya({
       required this.id,
       required this.namaPemasukan,
       required this.kategoriPemasukan,

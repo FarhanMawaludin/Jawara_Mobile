@@ -3,29 +3,33 @@ import '../../domain/entities/pengeluaran.dart';
 class PengeluaranModel extends Pengeluaran {
   PengeluaranModel({
     required super.id,
-    required super.nama,
+    required super.namaPengeluaran,
     required super.jumlah,
-    required super.tanggal,
-    super.catatan,
+    required super.tanggalPengeluaran,
+    required super.kategoriPengeluaran,
+    required super.buktiPengeluaran,
   });
 
   factory PengeluaranModel.fromJson(Map<String, dynamic> json) {
     return PengeluaranModel(
       id: json['id'],
-      nama: json['nama'],
+      namaPengeluaran: json['nama'],
+      kategoriPengeluaran: (json['kategori'] as num).toDouble(),
       jumlah: (json['jumlah'] as num).toDouble(),
-      tanggal: DateTime.parse(json['tanggal']),
-      catatan: json['catatan'],
+      tanggalPengeluaran: DateTime.parse(json['tanggal']),
+      buktiPengeluaran: json['bukti pengeluaran'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nama': nama,
+      'nama': namaPengeluaran,
+      'kategori': kategoriPengeluaran,
+      'bukti': buktiPengeluaran,
       'jumlah': jumlah,
-      'tanggal': tanggal.toIso8601String(),
-      'catatan': catatan,
+      'tanggal': tanggalPengeluaran.toIso8601String(),
+      'bukti pengeluaran': buktiPengeluaran,
     };
   }
 }
