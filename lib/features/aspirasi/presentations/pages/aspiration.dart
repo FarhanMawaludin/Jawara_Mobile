@@ -43,8 +43,6 @@ class AspirationPage extends StatelessWidget {
             ),
           ),
 
-          // Top search removed — using the search inside the list section
-
           // Content area (list scrolls independently)
           const Expanded(
             child: AspirationListSection(),

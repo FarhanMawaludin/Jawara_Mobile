@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/log_activity_providers.dart';
 
-// Top-level date helpers so widgets can reuse them without requiring state access.
+// Small date helpers used by the UI.
 String _formatDateShort(DateTime t) {
   const months = [
     '',
@@ -48,39 +50,33 @@ String _formatDateLong(DateTime t) {
 
 
 /// Clean Log Aktivitas screen with grouping, search, and category chips.
-class LogActivityPage extends StatefulWidget {
+class LogActivityPage extends ConsumerStatefulWidget {
   const LogActivityPage({super.key});
 
   @override
-  State<LogActivityPage> createState() => _LogActivityPageState();
+  ConsumerState<LogActivityPage> createState() => _LogActivityPageState();
 }
 
-class _LogActivityPageState extends State<LogActivityPage> {
+class _LogActivityPageState extends ConsumerState<LogActivityPage> {
   final TextEditingController _searchController = TextEditingController();
-
-  final List<_ActivityItem> _all = [
-    _ActivityItem(title: 'Menambahkan iuran baru: Harian', actor: 'Admin Jawara', time: DateTime(2025, 10, 19), category: 'Iuran'),
-    _ActivityItem(title: 'Menambahkan iuran baru: Kerja Bakti', actor: 'Admin Jawara', time: DateTime(2025, 10, 19), category: 'Iuran'),
-    _ActivityItem(title: 'Mendownload laporan keuangan', actor: 'Admin Jawara', time: DateTime(2025, 10, 19), category: 'Laporan'),
-    _ActivityItem(title: 'Menyetujui registrasi dari : Keluarga Farhan', actor: 'Admin Jawara', time: DateTime(2025, 10, 19), category: 'Registrasi'),
-    _ActivityItem(title: 'Menugaskan tagihan : Mingguan periode Oktober 2025 sebesar Rp. 12', actor: 'Admin Jawara', time: DateTime(2025, 10, 18), category: 'Tagihan'),
-    _ActivityItem(title: 'Menghapus transfer channel: Bank Mega', actor: 'Admin Jawara', time: DateTime(2025, 10, 18), category: 'Transfer'),
-    _ActivityItem(title: 'Menambahkan rumah baru dengan alamat: Jl. Merbabu', actor: 'Admin Jawara', time: DateTime(2025, 10, 18), category: 'Registrasi'),
-    _ActivityItem(title: 'Mengubah iuran: Agustusan', actor: 'Admin Jawara', time: DateTime(2025, 10, 17), category: 'Iuran'),
-    _ActivityItem(title: 'Membuat broadcast baru: DJ BAWS', actor: 'Admin Jawara', time: DateTime(2025, 10, 17), category: 'Broadcast'),
-    _ActivityItem(title: 'Menambahkan pengeluaran : Arka sebesar Rp. 6', actor: 'Admin Jawara', time: DateTime(2025, 10, 17), category: 'Pengeluaran'),
-  ];
-
-  List<_ActivityItem> get _filtered {
-    final q = _searchController.text.toLowerCase();
-    if (q.isEmpty) return _all;
-    return _all.where((a) => a.title.toLowerCase().contains(q) || a.actor.toLowerCase().contains(q) || a.category.toLowerCase().contains(q)).toList();
-  }
+  String _query = '';
+  
+  // Data is fetched via `logActivityListProvider` and filtered in the UI.
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _query = _searchController.text;
+      });
+    });
   }
 
   String _formatDate(DateTime t) => _formatDateLong(t);
@@ -94,22 +90,59 @@ class _LogActivityPageState extends State<LogActivityPage> {
     return _formatDate(d);
   }
 
+  
+
   // use top-level helpers: _categoryColorFor / _categoryIconFor
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final items = _filtered;
+    final asyncList = ref.watch(logActivityListProvider);
 
-    // group items by date (date-only)
-    final groups = <DateTime, List<_ActivityItem>>{};
-    for (final it in items) {
-      final d = DateTime(it.time.year, it.time.month, it.time.day);
-      groups.putIfAbsent(d, () => []).add(it);
-    }
-    final sortedDates = groups.keys.toList()..sort((a, b) => b.compareTo(a));
+    return asyncList.when(
+      data: (items) {
+        // Determine current signed-in user id (if available) so we can show 'Anda'
+        final supa = ref.read(supabaseClientProviderForLog);
+        final String? currentUid = supa.auth.currentUser?.id;
 
-      return Scaffold(
+        // Map DB models to local _ActivityItem for existing UI (no details)
+        String actorLabelFor(m) {
+          final String actor = m.actor;
+          final String? userId = m.userId;
+          if (actor.isNotEmpty) return actor;
+          if (userId != null && userId.isNotEmpty) {
+            if (currentUid != null && userId == currentUid) return 'Admin';
+            return userId.length >= 8 ? '${userId.substring(0, 8)}...' : userId;
+          }
+          return 'Sistem';
+        }
+
+        final mapped = items
+            .map((m) => _ActivityItem(
+                  title: m.title,
+                  actor: actorLabelFor(m),
+                  time: m.createdAt,
+                  category: m.category.isNotEmpty ? m.category : 'Lainnya',
+                ))
+            .toList();
+
+        final q = _query.trim().toLowerCase();
+        final filtered = mapped.where((a) {
+          final title = a.title.toLowerCase();
+          final actor = a.actor.toLowerCase();
+          final matchesQuery = q.isEmpty || title.contains(q) || actor.contains(q);
+          return matchesQuery;
+        }).toList();
+
+        // group items by date (date-only)
+        final groups = <DateTime, List<_ActivityItem>>{};
+        for (final it in filtered) {
+          final d = DateTime(it.time.year, it.time.month, it.time.day);
+          groups.putIfAbsent(d, () => []).add(it);
+        }
+        final sortedDates = groups.keys.toList()..sort((a, b) => b.compareTo(a));
+
+        return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           // explicit leading so we can reduce space between back icon and title
@@ -138,8 +171,9 @@ class _LogActivityPageState extends State<LogActivityPage> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       child: Row(
@@ -148,13 +182,12 @@ class _LogActivityPageState extends State<LogActivityPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
-                              controller: _searchController,  
+                              controller: _searchController,
                               decoration: const InputDecoration(
                                 hintText: 'Cari...',
                                 border: InputBorder.none,
                                 isDense: true,
                               ),
-                              onChanged: (_) => setState(() {}),
                             ),
                           ),
                           if (_searchController.text.isNotEmpty)
@@ -172,45 +205,76 @@ class _LogActivityPageState extends State<LogActivityPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: const Icon(Icons.filter_list, size: 20, color: Colors.black54),
-                  ),
+                  
                 ],
               ),
             ),
+            const SizedBox(height: 4),
             Expanded(
-              child: items.isEmpty
+              child: filtered.isEmpty
                   ? Center(child: Padding(padding: const EdgeInsets.all(24.0), child: Text('Tidak ada aktivitas.', style: theme.textTheme.bodyLarge)))
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                      itemCount: sortedDates.length,
-                      itemBuilder: (context, idx) {
-                        final dateKey = sortedDates[idx];
-                        final list = groups[dateKey]!..sort((a, b) => b.time.compareTo(a.time));
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6.0),
-                              child: Text(
-                                _groupLabel(dateKey),
-                                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                            ...list.map((it) => Padding(padding: const EdgeInsets.only(bottom: 12.0), child: _FamilyCard(item: it))),
-                          ],
-                        );
-                      },
+                          padding: const EdgeInsets.only(bottom: 16),
+                          itemCount: sortedDates.length,
+                          itemBuilder: (context, idx) {
+                            final dateKey = sortedDates[idx];
+                            final list = groups[dateKey]!..sort((a, b) => b.time.compareTo(a.time));
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                                  child: Text(
+                                    _groupLabel(dateKey),
+                                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                ...list.map((it) => Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 12), child: _FamilyCard(item: it))),
+                              ],
+                            );
+                          },
                     ),
             ),
           ],
         ),
+      ),
+        );
+      },
+      loading: () => Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            icon: const Icon(Icons.arrow_back_ios, size: 18),
+            onPressed: () => Navigator.maybePop(context),
+          ),
+          title: const Text('Log Aktivitas'),
+          titleSpacing: 0,
+          centerTitle: false,
+          elevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+        ),
+        body: const SafeArea(child: Center(child: CircularProgressIndicator())),
+      ),
+      error: (err, st) => Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            icon: const Icon(Icons.arrow_back_ios, size: 18),
+            onPressed: () => Navigator.maybePop(context),
+          ),
+          title: const Text('Log Aktivitas'),
+          titleSpacing: 0,
+          centerTitle: false,
+          elevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+        ),
+        body: SafeArea(child: Center(child: Padding(padding: const EdgeInsets.all(24.0), child: Text('Gagal memuat aktivitas: $err')))),
       ),
     );
   }
@@ -225,9 +289,6 @@ class _ActivityItem {
   _ActivityItem({required this.title, required this.time, required this.actor, this.category = 'Lainnya'});
 }
 
-// _ActivityCard removed — replaced by _FamilyCard above which reuses the same data.
-
-// New family-style card used to display items in the requested model UI.
 class _FamilyCard extends StatelessWidget {
   final _ActivityItem item;
   const _FamilyCard({required this.item});
@@ -235,11 +296,6 @@ class _FamilyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // For this mock UI we reuse item.title as the family name and hardcode other details
-  final familyName = item.title;
-  // derive role in a simple deterministic way from data
-  final role = 'Admin';
-
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -254,12 +310,13 @@ class _FamilyCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Text(
-                    familyName,
+                    item.title,
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -267,16 +324,22 @@ class _FamilyCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(Icons.person, size: 16, color: Colors.grey),
                 const SizedBox(width: 6),
-                Text(role, style: theme.textTheme.bodySmall),
+                Expanded(child: Text(item.actor, style: theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis)),
                 const SizedBox(width: 12),
-                // show a compact date so top-level helpers are referenced
-                Text(_formatDateShort(item.time), style: theme.textTheme.bodySmall?.copyWith(color: _colorWithAlpha(theme.textTheme.bodySmall?.color, 0.7))),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: Text(
+                    _formatDateShort(item.time),
+                    style: theme.textTheme.bodySmall?.copyWith(color: _colorWithAlpha(theme.textTheme.bodySmall?.color, 0.7)),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
           ],
         ),
       ),

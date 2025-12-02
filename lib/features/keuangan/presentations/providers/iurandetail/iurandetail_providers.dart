@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Iuran Detail Providers
 //===============================================================================
 // Repository
+import '../../../data/models/iurandetail_model.dart';
 import '../../../data/repository/iurandetail_repository_impl.dart';
 import '../../../data/datasources/iurandetail_remote_datasource.dart';
 import '../../../domain/repositories/iurandetail_repository.dart';
@@ -52,5 +53,45 @@ final getIuranByKeluargaProvider =
 
 
 //===============================================================================
-// End of Iuran Detail Providers  
+// Notifier for Iuran Detail List
 //===============================================================================
+
+class IuranDetailNotifier
+    extends StateNotifier<AsyncValue<List<IuranDetail>>> {
+  final GetIuranByKeluarga getByKeluarga;
+  final CreateIuranDetail create;
+  final UpdateIuranDetail update;
+  final DeleteIuranDetail delete;
+
+  IuranDetailNotifier({
+    required this.getByKeluarga,
+    required this.create,
+    required this.update,
+    required this.delete,
+  }) : super(const AsyncValue.loading());
+
+  Future<void> fetchByKeluarga(int keluargaId) async {
+    try {
+      state = const AsyncValue.loading();
+      final data = await getByKeluarga(keluargaId);
+      state = AsyncValue.data(data);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> addIuranDetail(IuranDetail data) async {
+    await create(data);
+    // Optionally refresh the list after creation
+  }
+
+  Future<void> editIuranDetail(IuranDetail data) async {
+    await update(data);
+    // Optionally refresh the list after update
+  }
+
+  Future<void> removeIuranDetail(int id) async {
+    await delete(id);
+    // Optionally refresh the list after deletion
+  }
+}

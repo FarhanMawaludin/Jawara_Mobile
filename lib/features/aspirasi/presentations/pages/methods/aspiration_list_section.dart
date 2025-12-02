@@ -18,8 +18,7 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
   late final TextEditingController _searchController;
   String _query = '';
   String _statusFilter = 'All';
-  DateTime? _fromDate;
-  DateTime? _toDate;
+  
 
   @override
   void initState() {
@@ -41,37 +40,19 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
   void _showFilterDialog(BuildContext context) {
     final statuses = ['All', 'Pending', 'In Progress', 'Resolved'];
     String tempStatus = _statusFilter;
-    DateTime? tempFrom = _fromDate;
-    DateTime? tempTo = _toDate;
 
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(builder: (context, setStateDialog) {
-          Future<void> pickFrom() async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: tempFrom ?? DateTime.now(),
-              firstDate: DateTime(2000),
-              lastDate: DateTime.now(),
-            );
-            if (picked != null) setStateDialog(() => tempFrom = picked);
-          }
-
-          Future<void> pickTo() async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: tempTo ?? DateTime.now(),
-              firstDate: DateTime(2000),
-              lastDate: DateTime.now().add(const Duration(days: 365)),
-            );
-            if (picked != null) setStateDialog(() => tempTo = picked);
-          }
 
           return AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('Filter Aspirasi'),
+            title: Text(
+              'Filter Aspirasi',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, fontSize: 20),
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -82,43 +63,20 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
                   for (final s in statuses)
                     RadioListTile<String>(
                       dense: true,
-                      title: Text(s),
+                      title: Text(
+                        s,
+                        style: TextStyle(
+                          color: tempStatus == s ? Colors.deepPurpleAccent[400] : null,
+                        ),
+                      ),
                       value: s,
                       groupValue: tempStatus,
-                      activeColor: Colors.grey[700],
+                      activeColor: Colors.deepPurpleAccent[400],
                       onChanged: (v) => setStateDialog(() => tempStatus = v ?? 'All'),
                     ),
                   const SizedBox(height: 8),
-                  const Text('Rentang Tanggal'),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.grey[800],
-                              side: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            onPressed: pickFrom,
-                            child: Text(tempFrom == null ? 'Dari' : tempFrom!.toLocal().toString().split(' ')[0]),
-                          ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.grey[800],
-                              side: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            onPressed: pickTo,
-                            child: Text(tempTo == null ? 'Sampai' : tempTo!.toLocal().toString().split(' ')[0]),
-                          ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
                   TextButton.icon(
-                    onPressed: () => setStateDialog(() { tempStatus = 'All'; tempFrom = null; tempTo = null; }),
+                    onPressed: () => setStateDialog(() { tempStatus = 'All'; }),
                     icon: Icon(Icons.clear, size: 18, color: Colors.grey[700]),
                     label: Text('Reset filter', style: TextStyle(color: Colors.grey[800])),
                   ),
@@ -133,15 +91,13 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: Colors.deepPurpleAccent[400],
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () {
                   setState(() {
                     _statusFilter = tempStatus;
-                    _fromDate = tempFrom;
-                    _toDate = tempTo;
                   });
                   Navigator.pop(context);
                 },
@@ -171,11 +127,8 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
           var matchesStatus = _statusFilter == 'All' || e.status.toLowerCase() == _statusFilter.toLowerCase();
 
           // date range filter
-          var created = e.createdAt;
-          var matchesFrom = _fromDate == null || !created.isBefore(_fromDate!);
-          var matchesTo = _toDate == null || !created.isAfter(_toDate!);
-
-          return matchesQuery && matchesStatus && matchesFrom && matchesTo;
+          // no date filtering anymore
+          return matchesQuery && matchesStatus;
         }).toList();
 
         // Ensure newest items appear first (sort by createdAt desc)
@@ -233,9 +186,7 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         older.sort((a, b) => b.date.compareTo(a.date));
 
         addSection('Terbaru', latest);
-        addSection('Dalam 7 Hari', week);
-        addSection('Dalam 1 Tahun', year);
-        addSection('Lebih dari 1 Tahun', older);
+        addSection('7 Hari Terakhir', week);
 
         return Column(
           children: [
