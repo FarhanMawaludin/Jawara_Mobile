@@ -4,6 +4,7 @@ import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspir
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart' as ui_model;
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/search_bar.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/providers/aspirasi_providers.dart';
+import 'package:intl/intl.dart';
 
 // pagination removed — list will show all items
 
@@ -138,8 +139,8 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         final now = DateTime.now();
         final latest = <ui_model.AspirationItem>[]; // <=24h
         final week = <ui_model.AspirationItem>[]; // >24h && <=7d
-        final year = <ui_model.AspirationItem>[]; // >7d && <=365d
-        final older = <ui_model.AspirationItem>[]; // >365d
+        // For items older than 7 days, group them by their calendar date
+        final Map<DateTime, List<ui_model.AspirationItem>> dayGroups = {};
 
         for (final e in filtered) {
           final ui = ui_model.AspirationItem(
@@ -154,10 +155,9 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
             latest.add(ui);
           } else if (diff.inDays <= 7) {
             week.add(ui);
-          } else if (diff.inDays <= 365) {
-            year.add(ui);
           } else {
-            older.add(ui);
+            final key = DateTime(e.createdAt.year, e.createdAt.month, e.createdAt.day);
+            dayGroups.putIfAbsent(key, () => []).add(ui);
           }
         }
 
@@ -182,11 +182,19 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         // Ensure each bucket is sorted newest-first
         latest.sort((a, b) => b.date.compareTo(a.date));
         week.sort((a, b) => b.date.compareTo(a.date));
-        year.sort((a, b) => b.date.compareTo(a.date));
-        older.sort((a, b) => b.date.compareTo(a.date));
 
         addSection('Terbaru', latest);
         addSection('7 Hari Terakhir', week);
+
+        // For older items, create a section per calendar date (newest date first)
+        final dayKeys = dayGroups.keys.toList();
+        dayKeys.sort((a, b) => b.compareTo(a));
+        for (final d in dayKeys) {
+          final itemsForDay = dayGroups[d]!;
+          itemsForDay.sort((a, b) => b.date.compareTo(a.date));
+          final title = DateFormat('dd MMMM yyyy').format(d);
+          addSection(title, itemsForDay);
+        }
 
         return Column(
           children: [
