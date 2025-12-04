@@ -101,11 +101,11 @@ class Lainnya extends StatelessWidget {
                       onTap: () => context.push('/warga/aspirasi'),
                     ),
 
-                    MenuItemWidget(
-                      icon: HeroiconsOutline.documentCheck,
-                      label: "Penerimaan Warga",
-                      onTap: () => context.push('/warga/penerimaan-warga'),
-                    ),
+                    // MenuItemWidget(
+                    //   icon: HeroiconsOutline.documentCheck,
+                    //   label: "Penerimaan Warga",
+                    //   onTap: () => context.push('/warga/penerimaan-warga'),
+                    // ),
 
                     MenuItemWidget(
                       icon: HeroiconsOutline.userMinus,

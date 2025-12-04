@@ -58,8 +58,9 @@ import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_
 
 final router = GoRouter(
   // Di development mode langsung ke /kegiatan, di production ke /login
-  initialLocation: kDebugMode ? '/kegiatan' : '/login',
-  
+  // initialLocation: kDebugMode ? '/kegiatan' : '/login',
+  // initialLocation: '/',
+
   routes: [
     GoRoute(path: '/', builder: (context, state) => const OnboardingPage()),
     GoRoute(path: '/login', builder: (context, state) => LoginPage()),
@@ -185,10 +186,10 @@ final router = GoRouter(
       path: '/warga/tambah-mutasi',
       builder: (context, state) => const TambahMutasiPage(),
     ),
-    GoRoute(
-      path: '/warga/penerimaan-warga',
-      builder: (context, state) => const PenerimaanWargaPage(),
-    ),
+    // GoRoute(
+    //   path: '/warga/penerimaan-warga',
+    //   builder: (context, state) => const PenerimaanWargaPage(),
+    // ),
 
     GoRoute(
       path: '/warga/tambah-warga',
