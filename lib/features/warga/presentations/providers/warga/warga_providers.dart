@@ -17,6 +17,7 @@ import '../../../domain/usecases/warga/update_warga.dart';
 import '../../../domain/usecases/warga/delete_warga.dart';
 import '../../../domain/usecases/warga/search_warga.dart';
 import '../../../domain/usecases/warga/get_warga_by_keluarga.dart';
+import '../../../domain/usecases/warga/get_statistik_warga.dart';
 
 // =========================================================
 // SUPABASE CLIENT PROVIDER
@@ -76,6 +77,10 @@ final searchWargaUseCaseProvider = Provider<SearchWarga>((ref) {
 
 final getWargaByKeluargaUseCaseProvider = Provider<GetWargaByKeluarga>((ref) {
   return GetWargaByKeluarga(ref.read(wargaRepositoryProvider));
+});
+
+final getStatistikWargaUseCaseProvider = Provider<GetStatistikWarga>((ref) {
+  return GetStatistikWarga(ref.read(wargaRepositoryProvider));
 });
 
 // =========================================================
