@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jawaramobile/features/keuangan/domain/entities/tagihiuran.dart';
+import 'package:jawaramobile/features/keuangan/presentations/widgets/pdf/tagihan_pdf_generator.dart';
 
 class TagihanPage extends StatelessWidget {
-  const TagihanPage({super.key});
+  TagihanPage({super.key});
 
-  final List<Map<String, dynamic>> iuranList = const [
-    {
-      "nama": "Keluarga Raudhli Firdaus Naufal",
-      "kategori": "Mingguan",
-      "tanggal": "30 September 2025",
-      "nominal": 50000,
-      "status": "Belum Bayar"
-    },
-    {
-      "nama": "Keluarga Raudhli Firdaus Naufal",
-      "kategori": "Agustusan",
-      "tanggal": "10 Oktober 2025",
-      "nominal": 50000,
-      "status": "Belum Bayar"
-    },
+  final List<TagihIuran> iuranList = [
+    TagihIuran(
+      id: 1,
+      createdAt: DateTime.now(),
+      kategoriId: "Mingguan",
+      jumlah: 50000,
+      tanggalTagihan: DateTime(2025, 9, 30),
+      nama: "Keluarga Raudhli Firdaus Naufal",
+      keluargaId: 1,
+      statusTagihan: "Belum Bayar",
+      buktiBayar: null,
+      tanggalBayar: null,
+    ),
   ];
 
   @override
@@ -28,7 +28,11 @@ class TagihanPage extends StatelessWidget {
         title: const Text("Iuran"),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.print)),
+          IconButton(
+              onPressed: () {
+                TagihanPdfGenerator.printPDF(iuranList);
+              },
+              icon: const Icon(Icons.print)),
           IconButton(onPressed: () {}, icon: const Icon(Icons.filter_list)),
         ],
       ),
@@ -37,6 +41,7 @@ class TagihanPage extends StatelessWidget {
         itemCount: iuranList.length,
         itemBuilder: (context, index) {
           final item = iuranList[index];
+
           return Card(
             margin: const EdgeInsets.only(bottom: 16),
             shape: RoundedRectangleBorder(
@@ -47,30 +52,43 @@ class TagihanPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item["nama"],
-                      style:
-                          const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(
+                    item.nama,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+
                   const SizedBox(height: 8),
+
+                  // Row kategori + tanggal
                   Row(
                     children: [
                       const Icon(Icons.calendar_today, size: 16),
                       const SizedBox(width: 4),
-                      Text(item["kategori"]),
+                      Text(item.kategoriId),
                       const SizedBox(width: 16),
                       const Icon(Icons.date_range, size: 16),
                       const SizedBox(width: 4),
-                      Text(item["tanggal"]),
+                      Text(
+                        "${item.tanggalTagihan.day}-${item.tanggalTagihan.month}-${item.tanggalTagihan.year}",
+                      ),
                     ],
                   ),
+
                   const SizedBox(height: 8),
+
+                  // Nominal
                   Text(
-                    "Rp ${item["nominal"]}",
+                    "Rp ${item.jumlah}",
                     style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.deepPurple),
                   ),
+
                   const SizedBox(height: 8),
+
+                  // Status + Detail button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -81,8 +99,10 @@ class TagihanPage extends StatelessWidget {
                         ),
                         padding:
                             const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text(item["status"],
-                            style: const TextStyle(color: Colors.amber)),
+                        child: Text(
+                          item.statusTagihan,
+                          style: const TextStyle(color: Colors.amber),
+                        ),
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -92,7 +112,10 @@ class TagihanPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: () {
-                          context.push('/keuangan/tagihan/detail', extra: item);
+                          context.push(
+                            '/keuangan/tagihan/detail',
+                            extra: item,
+                          );
                         },
                         child: const Text("Detail"),
                       ),

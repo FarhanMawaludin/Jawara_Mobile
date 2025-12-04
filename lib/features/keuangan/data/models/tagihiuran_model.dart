@@ -1,49 +1,49 @@
-class TagihIuran {
-  final int id;
-  final int kategoriIuranId;
-  final int keluargaId;
-  final DateTime tanggalTagihan;
-  final double jumlah;
-  final String statusTagihan; // enum: 'belum_bayar', 'sudah_bayar'
-  final DateTime? tanggalBayar;
-  final String? buktiBayar;
+import '../../domain/entities/tagihiuran.dart';
 
-  TagihIuran({
-    required this.id,
-    required this.kategoriIuranId,
-    required this.keluargaId,
-    required this.tanggalTagihan,
-    required this.jumlah,
-    required this.statusTagihan,
-    this.tanggalBayar,
-    this.buktiBayar,
+
+class TagihIuranModel extends TagihIuran {
+  TagihIuranModel({
+    required super.id,
+    required super.createdAt,
+    required super.kategoriId,
+    required super.jumlah,
+    required super.tanggalTagihan,
+    required super.nama,
+    required super.keluargaId,
+    required super.statusTagihan,
+    super.buktiBayar,
+    super.tanggalBayar,
   });
 
-  factory TagihIuran.fromJson(Map<String, dynamic> json) {
-    return TagihIuran(
+  factory TagihIuranModel.fromJson(Map<String, dynamic> json) {
+    return TagihIuranModel(
       id: json['id'],
-      kategoriIuranId: json['kategori_iuran_id'],
-      keluargaId: json['keluarga_id'],
+      createdAt: DateTime.parse(json['created_at']),
+      kategoriId: json['kategori_id'],
+      jumlah: double.tryParse(json['jumlah'].toString()) ?? 0.0,
       tanggalTagihan: DateTime.parse(json['tanggal_tagihan']),
-      jumlah: (json['jumlah'] as num).toDouble(),
+      nama: json['nama'],
+      keluargaId: json['keluarga_id'],
       statusTagihan: json['status_tagihan'],
+      buktiBayar: json['bukti_bayar'],
       tanggalBayar: json['tanggal_bayar'] != null
           ? DateTime.parse(json['tanggal_bayar'])
           : null,
-      buktiBayar: json['bukti_bayar'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'kategori_iuran_id': kategoriIuranId,
-      'keluarga_id': keluargaId,
-      'tanggal_tagihan': tanggalTagihan.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'kategori_id': kategoriId,
       'jumlah': jumlah,
+      'tanggal_tagihan': tanggalTagihan.toIso8601String(),
+      'bukti_bayar': buktiBayar,
+      'nama': nama,
+      'keluarga_id': keluargaId,
       'status_tagihan': statusTagihan,
       'tanggal_bayar': tanggalBayar?.toIso8601String(),
-      'bukti_bayar': buktiBayar,
     };
   }
 }
