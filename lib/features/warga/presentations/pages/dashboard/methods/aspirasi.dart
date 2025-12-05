@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../aspirasi/presentations/providers/aspirasi_providers.dart';
 import '../../../../../aspirasi/data/models/aspiration_model.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration_detail.dart';
-import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart' as ui_model;
+import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart'
+    as ui_model;
 
 class Aspirasi extends ConsumerWidget {
   const Aspirasi({super.key});
@@ -30,35 +31,40 @@ class Aspirasi extends ConsumerWidget {
         children: [
           // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 "Pesan Warga",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      context.push('/warga/aspirasi');
-                    },
-                    child: Text(
+              const SizedBox(width: 16),
+
+              InkWell(
+                onTap: () {
+                  context.push('/warga/aspirasi');
+                },
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
                       "Lihat Semua",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Colors.deepPurpleAccent[400],
+                        color: Colors.deepPurpleAccent,
                       ),
                     ),
-                  ),
-                  Icon(
-                    HeroiconsMini.chevronRight,
-                    size: 24,
-                    color: Colors.deepPurpleAccent[400],
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Icon(
+                        HeroiconsMini.chevronRight,
+                        size: 24, 
+                        color: Colors.deepPurpleAccent,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -70,7 +76,8 @@ class Aspirasi extends ConsumerWidget {
             data: (items) {
               if (items.isEmpty) return const Text('Belum ada pesan.');
               // show up to 3 latest
-              final latest = List<AspirationModel>.from(items)..sort((a,b) => b.createdAt.compareTo(a.createdAt));
+              final latest = List<AspirationModel>.from(items)
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
               final show = latest.take(3).toList();
               return Column(
                 children: show.map((e) {
@@ -92,7 +99,9 @@ class Aspirasi extends ConsumerWidget {
                         message: e.message,
                       );
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => AspirationDetailPage(item: item)),
+                        MaterialPageRoute(
+                          builder: (_) => AspirationDetailPage(item: item),
+                        ),
                       );
                     },
                     child: tile,
@@ -100,7 +109,10 @@ class Aspirasi extends ConsumerWidget {
                 }).toList(),
               );
             },
-            loading: () => const SizedBox(height: 56, child: Center(child: CircularProgressIndicator())),
+            loading: () => const SizedBox(
+              height: 56,
+              child: Center(child: CircularProgressIndicator()),
+            ),
             error: (err, st) => Text('Gagal memuat pesan: $err'),
           ),
         ],
@@ -129,7 +141,15 @@ class Aspirasi extends ConsumerWidget {
           borderRadius: BorderRadius.circular(100),
           child: imageUrl != null && imageUrl.isNotEmpty
               ? Image.network(imageUrl, fit: BoxFit.cover)
-              : Center(child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?', style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w600))),
+              : Center(
+                  child: Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                    style: TextStyle(
+                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
         ),
       ),
       title: Text(

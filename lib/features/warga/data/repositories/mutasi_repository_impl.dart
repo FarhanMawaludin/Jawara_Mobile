@@ -63,4 +63,13 @@ class MutasiRepositoryImpl implements MutasiRepository {
       throw Exception("Gagal mencari data Mutasi: $e");
     }
   }
+
+  @override
+  Future<void> updateRumah(int keluargaId, int? rumahId) async {
+    try {
+      await remoteDataSource.updateRumah(keluargaId, rumahId);
+    } catch (e) {
+      throw Exception("Gagal mengupdate rumah keluarga: $e");
+    }
+  }
 }

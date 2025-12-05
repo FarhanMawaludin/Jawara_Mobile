@@ -17,7 +17,7 @@ class KategoriIuranPage extends StatelessWidget {
         title: const Text('Kategori Iuran'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(''),
+          onPressed: () => context.pop(),
         ),
       ),
      body: Padding(
@@ -61,7 +61,7 @@ class KategoriIuranPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => context.go('/keuangan/iuran/tambah-iuran'),
+                  onPressed: () => context.push('/keuangan/iuran/tambah-iuran'),
                   icon: const Icon(Icons.add),
                   label: const Text("Tambah Iuran"),
                 ),
