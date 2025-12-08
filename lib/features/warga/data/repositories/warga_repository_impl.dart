@@ -33,10 +33,10 @@ class WargaRepositoryImpl implements WargaRepository {
   }
 
   @override
-Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
-  final response = await remoteDataSource.getWargaByKeluargaId(keluargaId);
-  return response;
-}
+  Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
+    final response = await remoteDataSource.getWargaByKeluargaId(keluargaId);
+    return response;
+  }
 
   @override
   Future<void> createWarga(Warga warga) async {
@@ -89,5 +89,15 @@ Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
   @override
   Future<void> deleteWarga(int id) async {
     await remoteDataSource.deleteWarga(id);
+  }
+
+  @override
+  Future<int> countKeluarga() async {
+    return await remoteDataSource.countKeluarga();
+  }
+
+  @override
+  Future<int> countWarga() async {
+    return await remoteDataSource.countWarga();
   }
 }

@@ -9,4 +9,6 @@ abstract class WargaRepository {
   Future<void> deleteWarga(int id);
   Future<List<Warga>> searchWarga(String keyword);
   Future<List<Warga>> getWargaByKeluargaId(int keluargaId); 
+  Future<int> countKeluarga();
+  Future<int> countWarga();
 }

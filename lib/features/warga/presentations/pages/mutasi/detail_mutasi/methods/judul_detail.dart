@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 class JudulDetail extends StatelessWidget {
-  const JudulDetail({super.key});
+  final String namaKeluarga;
+  final bool pindah;
+  const JudulDetail({super.key, required this.namaKeluarga, required this.pindah});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class JudulDetail extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Keluarga Mara Nunez",
+                namaKeluarga,
                 style: TextStyle(
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w600,
@@ -30,23 +32,18 @@ class JudulDetail extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Row(
-                children: [
-                  Icon(
-                    HeroiconsOutline.checkBadge,
-                    size: 18,
-                    color: Colors.green[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Pindah Rumah",
-                    style: TextStyle(
-                      color: Colors.green[600],
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              Icon(
+                HeroiconsOutline.checkBadge,
+                size: 18,
+                color: pindah ? Colors.green[600] : Colors.grey[500],
+              ),
+              const SizedBox(width: 4),
+              Text(
+                pindah ? "Pindah Rumah" : "Keluar Perumahan",
+                style: TextStyle(
+                  color: pindah ? Colors.green[600] : Colors.grey[600],
+                  fontSize: 12,
+                ),
               ),
             ],
           ),

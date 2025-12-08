@@ -46,8 +46,9 @@ class DetailWargaPage extends ConsumerWidget {
           ),
           error: (err, stack) => Center(child: Text("Error: $err")),
           data: (w) {
-            if (w == null)
+            if (w == null) {
               return const Center(child: Text("Data tidak ditemukan"));
+            }
 
             return SingleChildScrollView(
               child: Padding(

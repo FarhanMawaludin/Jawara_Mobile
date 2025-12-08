@@ -61,9 +61,9 @@ class KategoriIuranPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => context.go('/keuangan/iuran/tambah-iuran'),
+                  onPressed: () => context.push('/keuangan/iuran/tambah-iuran'),
                   icon: const Icon(Icons.add),
-                  label: const Text("Tambah"),
+                  label: const Text("Tambah Iuran"),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(

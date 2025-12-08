@@ -13,12 +13,25 @@ class PemasukanLainPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_alt_outlined),
-            onPressed: () {},
+       actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xFF635BFF), // Warna ungu seperti contoh
+                borderRadius: BorderRadius.circular(12), // Membuat kotak rounded
+              ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.filter_alt_outlined,
+                color: Colors.white, // warna icon jadi putih
+              ),
+              onPressed: () {},
+              ),
+            ),
           ),
         ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

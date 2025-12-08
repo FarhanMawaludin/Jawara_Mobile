@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/iuran/kategori_iuran_page.dart';
 
 class TambahIuranPage extends StatefulWidget {
@@ -13,6 +14,7 @@ class _TambahIuranPageState extends State<TambahIuranPage> {
   final List<String> jenisIuran = [
     "Iuran Bulanan",
     "Iuran Khusus",
+    "Iuran Lainnya",
   ];
 
   void resetForm() {
@@ -28,7 +30,7 @@ class _TambahIuranPageState extends State<TambahIuranPage> {
         title: const Text("Tagih Iuran"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Padding(
@@ -42,7 +44,7 @@ class _TambahIuranPageState extends State<TambahIuranPage> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: selectedIuran,
+              initialValue: selectedIuran,
               items: jenisIuran.map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
