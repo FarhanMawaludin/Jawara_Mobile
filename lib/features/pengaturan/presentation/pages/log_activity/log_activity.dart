@@ -2,54 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/log_activity_providers.dart';
 
-// Small date helpers used by the UI.
-String _formatDateShort(DateTime t) {
-  const months = [
-    '',
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des'
-  ];
-  return '${t.day} ${months[t.month]} ${t.year}';
-}
+const _monthsShort = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const _monthsLong = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-Color? _colorWithAlpha(Color? c, double opacity) {
-  if (c == null) return null;
-  final a = (opacity * 255).round().clamp(0, 255);
-  return c.withAlpha(a);
-}
+String _formatDate(DateTime t, List<String> months) => '${t.day} ${months[t.month]} ${t.year}';
+String _formatDateShort(DateTime t) => _formatDate(t, _monthsShort);
+String _formatDateLong(DateTime t) => _formatDate(t, _monthsLong);
+Color? _colorWithAlpha(Color? c, double opacity) => c?.withAlpha((opacity * 255).round().clamp(0, 255));
 
-String _formatDateLong(DateTime t) {
-  const months = [
-    '',
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember'
-  ];
-  return '${t.day} ${months[t.month]} ${t.year}';
-}
-
-
-
-/// Clean Log Aktivitas screen with grouping, search, and category chips.
 class LogActivityPage extends ConsumerStatefulWidget {
   const LogActivityPage({super.key});
 
@@ -72,27 +32,52 @@ class _LogActivityPageState extends ConsumerState<LogActivityPage> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(() {
-      setState(() {
-        _query = _searchController.text;
-      });
-    });
+    _searchController.addListener(() => setState(() => _query = _searchController.text));
   }
 
-  String _formatDate(DateTime t) => _formatDateLong(t);
+  PreferredSizeWidget _buildAppBar() => AppBar(
+    leading: IconButton(
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      icon: const Icon(Icons.arrow_back_ios, size: 18),
+      onPressed: () => Navigator.maybePop(context),
+    ),
+    title: const Text('Log Aktivitas'),
+    titleSpacing: 0,
+    centerTitle: false,
+    elevation: 0,
+    backgroundColor: Colors.white,
+    foregroundColor: Colors.black87,
+  );
+
+  Widget _buildSearchField() => Container(
+    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    child: Row(
+      children: [
+        const Icon(Icons.search, size: 20, color: Colors.grey),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            controller: _searchController,
+            decoration: const InputDecoration(hintText: 'Cari...', border: InputBorder.none, isDense: true),
+          ),
+        ),
+        if (_searchController.text.isNotEmpty)
+          GestureDetector(
+            onTap: () { _searchController.clear(); setState(() {}); },
+            child: const Padding(padding: EdgeInsets.symmetric(horizontal: 8.0), child: Icon(Icons.close, size: 18, color: Colors.grey)),
+          )
+      ],
+    ),
+  );
 
   String _groupLabel(DateTime d) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yday = today.subtract(const Duration(days: 1));
-    if (d == today) return 'Hari ini';
-    if (d == yday) return 'Kemarin';
-    return _formatDate(d);
+    return d == today ? 'Hari ini' : d == yday ? 'Kemarin' : _formatDateLong(d);
   }
-
-  
-
-  // use top-level helpers: _categoryColorFor / _categoryIconFor
 
   @override
   Widget build(BuildContext context) {
@@ -144,71 +129,12 @@ class _LogActivityPageState extends ConsumerState<LogActivityPage> {
 
         return Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          // explicit leading so we can reduce space between back icon and title
-          leading: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-            icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => Navigator.maybePop(context),
-          ),
-          title: const Text('Log Aktivitas'),
-          // remove default title padding so title sits close to the leading icon
-          titleSpacing: 0,
-          centerTitle: false,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-        ),
+        appBar: _buildAppBar(),
       body: SafeArea(
         child: Column(
           children: [
             const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.search, size: 20, color: Colors.grey),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              decoration: const InputDecoration(
-                                hintText: 'Cari...',
-                                border: InputBorder.none,
-                                isDense: true,
-                              ),
-                            ),
-                          ),
-                          if (_searchController.text.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                _searchController.clear();
-                                setState(() {});
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Icon(Icons.close, size: 18, color: Colors.grey),
-                              ),
-                            )
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                ],
-              ),
-            ),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0), child: _buildSearchField()),
             const SizedBox(height: 4),
             Expanded(
               child: filtered.isEmpty
@@ -242,38 +168,12 @@ class _LogActivityPageState extends ConsumerState<LogActivityPage> {
       },
       loading: () => Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          leading: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-            icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => Navigator.maybePop(context),
-          ),
-          title: const Text('Log Aktivitas'),
-          titleSpacing: 0,
-          centerTitle: false,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-        ),
+        appBar: _buildAppBar(),
         body: const SafeArea(child: Center(child: CircularProgressIndicator())),
       ),
       error: (err, st) => Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          leading: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-            icon: const Icon(Icons.arrow_back_ios, size: 18),
-            onPressed: () => Navigator.maybePop(context),
-          ),
-          title: const Text('Log Aktivitas'),
-          titleSpacing: 0,
-          centerTitle: false,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-        ),
+        appBar: _buildAppBar(),
         body: SafeArea(child: Center(child: Padding(padding: const EdgeInsets.all(24.0), child: Text('Gagal memuat aktivitas: $err')))),
       ),
     );

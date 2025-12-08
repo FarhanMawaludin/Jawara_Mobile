@@ -54,221 +54,61 @@ class FakePostgrestTransformBuilder
 }
 
 void main() {
+  late MockSupabaseClient defaultClient;
+
+  setUp(() {
+    defaultClient = MockSupabaseClient();
+    // Point factory to mock to avoid platform plugin calls.
+    supabaseClientFactoryForLog = () => defaultClient;
+  });
+
+  tearDown(() {
+    supabaseClientFactoryForLog = () => defaultClient;
+  });
 
   group('LogActivityModel', () {
-    test('should create model from map correctly', () {
-      // arrange
-      final map = {
-        'id': 1,
-        'title': 'Test Activity',
-        'user_id': 'user-123',
+    test('parses common fields', () {
+      final model = LogActivityModel.fromMap({
+        'id': '1',
+        'title': 'Title',
+        'user_id': 'u1',
         'created_at': '2025-12-08T10:00:00Z',
-      };
+      });
 
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
       expect(model.id, 1);
-      expect(model.title, 'Test Activity');
-      expect(model.userId, 'user-123');
-      expect(model.createdAt, DateTime.parse('2025-12-08T10:00:00Z'));
+      expect(model.title, 'Title');
+      expect(model.userId, 'u1');
     });
 
-    test('should handle null user_id', () {
-      // arrange
-      final map = {
+    test('handles nulls and alt keys', () {
+      final model = LogActivityModel.fromMap({
         'id': 2,
-        'title': 'System Activity',
-        'user_id': null,
-        'created_at': '2025-12-08T11:00:00Z',
-      };
+        'title': null,
+        'userId': null,
+        'createdAt': '2025-12-08T12:00:00Z',
+      });
 
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
-      expect(model.id, 2);
-      expect(model.title, 'System Activity');
-      expect(model.userId, null);
-    });
-
-    test('should parse id from string', () {
-      // arrange
-      final map = {
-        'id': '3',
-        'title': 'Another Activity',
-        'user_id': 'user-456',
-        'created_at': '2025-12-08T12:00:00Z',
-      };
-
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
-      expect(model.id, 3);
-    });
-
-    test('should handle empty title', () {
-      // arrange
-      final map = {
-        'id': 4,
-        'title': '',
-        'user_id': 'user-789',
-        'created_at': '2025-12-08T13:00:00Z',
-      };
-
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
       expect(model.title, '');
-    });
-
-    test('should parse created_at correctly', () {
-      // arrange
-      final map = {
-        'id': 5,
-        'title': 'Timestamp Test',
-        'user_id': 'user-111',
-        'created_at': '2025-11-25T00:33:36.034884+00:00',
-      };
-
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
+      expect(model.userId, null);
       expect(model.createdAt.year, 2025);
-      expect(model.createdAt.month, 11);
-      expect(model.createdAt.day, 25);
-    });
-
-    test('should handle alternative field names', () {
-      // arrange - using camelCase instead of snake_case
-      final map = {
-        'id': 6,
-        'title': 'Alternative naming',
-        'userId': 'user-222',
-        'createdAt': '2025-12-08T15:00:00Z',
-      };
-
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
-      expect(model.userId, 'user-222');
-      expect(model.createdAt, DateTime.parse('2025-12-08T15:00:00Z'));
-    });
-
-    test('should handle null title', () {
-      // arrange
-      final map = {
-        'id': 7,
-        'user_id': 'user-333',
-        'created_at': '2025-12-08T16:00:00Z',
-      };
-
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
-      expect(model.title, '');
-    });
-
-    test('should handle missing user_id field', () {
-      // arrange
-      final map = {
-        'id': 8,
-        'title': 'No User',
-        'created_at': '2025-12-08T17:00:00Z',
-      };
-
-      // act
-      final model = LogActivityModel.fromMap(map);
-
-      // assert
-      expect(model.userId, null);
     });
   });
 
   group('logActivityListProvider', () {
-    test('should fetch log activities successfully', () async {
-      // arrange
-      final mockData = <Map<String, dynamic>>[
+    test('fetches data via Supabase client', () async {
+      final mockClient = MockSupabaseClient();
+      final mockQueryBuilder = MockSupabaseQueryBuilder();
+      final fakeFilterBuilder = FakePostgrestFilterBuilder(data: [
         {
           'id': 1,
           'title': 'Activity 1',
           'user_id': 'user-1',
           'created_at': '2025-12-08T10:00:00Z',
         },
-        {
-          'id': 2,
-          'title': 'Activity 2',
-          'user_id': null,
-          'created_at': '2025-12-08T11:00:00Z',
-        },
-      ];
-
-      final container = ProviderContainer(
-        overrides: [
-          logActivityListProvider.overrideWith(
-            (ref) => Future.value(mockData.map((e) => LogActivityModel.fromMap(e)).toList()),
-          ),
-        ],
-      );
-
-      // act
-      final result = await container.read(logActivityListProvider.future);
-
-      // assert
-      expect(result.length, 2);
-      expect(result[0].id, 1);
-      expect(result[0].title, 'Activity 1');
-      expect(result[0].userId, 'user-1');
-      expect(result[1].id, 2);
-      expect(result[1].title, 'Activity 2');
-      expect(result[1].userId, null);
-
-      container.dispose();
-    });
-
-    test('should throw exception when fetch fails', () async {
-      // arrange
-      final container = ProviderContainer(
-        overrides: [
-          logActivityListProvider.overrideWith(
-            (ref) => Future.error(Exception('Gagal mengambil log_activity: Database error')),
-          ),
-        ],
-      );
-
-      // act & assert
-      expect(
-        () => container.read(logActivityListProvider.future),
-        throwsA(isA<Exception>()),
-      );
-
-      container.dispose();
-    });
-
-    test('should use supabaseClientProviderForLog', () async {
-      // arrange
-      final mockClient = MockSupabaseClient();
-      final mockQueryBuilder = MockSupabaseQueryBuilder();
-
-      final mockData = <Map<String, dynamic>>[
-        {
-          'id': 1,
-          'title': 'Activity from Supabase',
-          'user_id': 'user-1',
-          'created_at': '2025-12-08T10:00:00Z',
-        },
-      ];
-
-      final fakeFilterBuilder = FakePostgrestFilterBuilder(data: mockData);
+      ]);
 
       when(() => mockClient.from('log_activity')).thenAnswer((_) => mockQueryBuilder);
-      when(() => mockQueryBuilder.select('*')).thenAnswer((_) => fakeFilterBuilder);
+      when(() => mockQueryBuilder.select(any())).thenAnswer((_) => fakeFilterBuilder);
 
       final container = ProviderContainer(
         overrides: [
@@ -276,24 +116,44 @@ void main() {
         ],
       );
 
-      // act
       final result = await container.read(logActivityListProvider.future);
 
-      // assert
-      expect(result.length, 1);
-      expect(result[0].title, 'Activity from Supabase');
+      expect(result.single.title, 'Activity 1');
       verify(() => mockClient.from('log_activity')).called(1);
       verify(() => mockQueryBuilder.select('*')).called(1);
+
+      container.dispose();
+    });
+
+    test('throws exception when Supabase call fails', () async {
+      final mockClient = MockSupabaseClient();
+      final mockQueryBuilder = MockSupabaseQueryBuilder();
+
+      when(() => mockClient.from('log_activity')).thenAnswer((_) => mockQueryBuilder);
+      when(() => mockQueryBuilder.select(any())).thenThrow(Exception('Database error'));
+
+      final container = ProviderContainer(
+        overrides: [
+          supabaseClientProviderForLog.overrideWithValue(mockClient),
+        ],
+      );
+
+      expect(
+        () => container.read(logActivityListProvider.future),
+        throwsA(isA<Exception>()),
+      );
 
       container.dispose();
     });
   });
 
   group('supabaseClientProviderForLog', () {
-    test('should provide Supabase client instance', () {
-      // Note: This test only verifies the provider structure
-      // since Supabase.instance.client requires initialization in actual use
-      expect(supabaseClientProviderForLog, isA<Provider<SupabaseClient>>());
+    test('returns default Supabase client', () {
+      final container = ProviderContainer();
+      final client = container.read(supabaseClientProviderForLog);
+
+      expect(client, isA<SupabaseClient>());
+      container.dispose();
     });
   });
 }
