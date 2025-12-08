@@ -51,6 +51,7 @@ class AspirationItem {
   final String status;
   final DateTime date;
   final String message;
+  final bool isRead;
 
   AspirationItem({
     required this.sender,
@@ -58,5 +59,6 @@ class AspirationItem {
     required this.status,
     required this.date,
     required this.message,
+    this.isRead = false,
   });
 }

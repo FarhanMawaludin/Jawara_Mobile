@@ -5,6 +5,7 @@ import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspir
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/search_bar.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/providers/aspirasi_providers.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // pagination removed — list will show all items
 
@@ -19,7 +20,14 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
   late final TextEditingController _searchController;
   String _query = '';
   String _statusFilter = 'All';
-  
+  final Set<String> _locallyRead = {};
+  late SharedPreferences _prefs;
+
+  String _makeKey(dynamic e) {
+    // Prefer persistent id if available; fallback to content-based key.
+    final idPart = (e.id != null ? e.id.toString() : null);
+    return idPart ?? '${e.sender}|${e.title}|${e.createdAt.toIso8601String()}';
+  }
 
   @override
   void initState() {
@@ -30,6 +38,23 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         _query = _searchController.text;
       });
     });
+    _loadReadStatus();
+  }
+
+  Future<void> _loadReadStatus() async {
+    _prefs = await SharedPreferences.getInstance();
+    final readList = _prefs.getStringList('aspirasi_read_items') ?? [];
+    setState(() {
+      _locallyRead.addAll(readList);
+    });
+  }
+
+  Future<void> _saveReadStatus(String key) async {
+    final readList = _prefs.getStringList('aspirasi_read_items') ?? [];
+    if (!readList.contains(key)) {
+      readList.add(key);
+      await _prefs.setStringList('aspirasi_read_items', readList);
+    }
   }
 
   @override
@@ -137,42 +162,59 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
 
         // Map filtered domain models to UI items
         final now = DateTime.now();
-        final latest = <ui_model.AspirationItem>[]; // <=24h
-        final week = <ui_model.AspirationItem>[]; // >24h && <=7d
+        final latest = <MapEntry<String, ui_model.AspirationItem>>[]; // <=24h
+        final week = <MapEntry<String, ui_model.AspirationItem>>[]; // >24h && <=7d
         // For items older than 7 days, group them by their calendar date
-        final Map<DateTime, List<ui_model.AspirationItem>> dayGroups = {};
+        final Map<DateTime, List<MapEntry<String, ui_model.AspirationItem>>> dayGroups = {};
 
         for (final e in filtered) {
+          final itemKey = _makeKey(e);
+          final diff = now.difference(e.createdAt);
+          
+          // Hanya pesan terbaru (<=24h) yang bisa ditandai belum dibaca
+          final isLatest = diff.inHours <= 24;
+          final isReadStatus = isLatest ? (e.isRead || _locallyRead.contains(itemKey)) : true;
+          
           final ui = ui_model.AspirationItem(
             sender: e.sender,
             title: e.title,
             status: e.status,
             date: e.createdAt,
             message: e.message,
+            isRead: isReadStatus,
           );
-          final diff = now.difference(e.createdAt);
+          
           if (diff.inHours <= 24) {
-            latest.add(ui);
+            latest.add(MapEntry(itemKey, ui));
           } else if (diff.inDays <= 7) {
-            week.add(ui);
+            week.add(MapEntry(itemKey, ui));
           } else {
-            final key = DateTime(e.createdAt.year, e.createdAt.month, e.createdAt.day);
-            dayGroups.putIfAbsent(key, () => []).add(ui);
+            final dateKey = DateTime(e.createdAt.year, e.createdAt.month, e.createdAt.day);
+            dayGroups.putIfAbsent(dateKey, () => []).add(MapEntry(itemKey, ui));
           }
         }
 
         // Build a flattened list of widgets: section header + items
         final sectionWidgets = <Widget>[];
-        void addSection(String title, List<ui_model.AspirationItem> items) {
-          if (items.isEmpty) return;
+        void addSection(String title, List<MapEntry<String, ui_model.AspirationItem>> entries) {
+          if (entries.isEmpty) return; // Skip empty sections
           sectionWidgets.add(Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
             child: Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
           ));
-          for (var i = 0; i < items.length; i++) {
+          for (var i = 0; i < entries.length; i++) {
+            final entry = entries[i];
             sectionWidgets.add(Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: AspirationListItem(item: items[i]),
+              child: AspirationListItem(
+                item: entry.value,
+                onMarkedRead: () async {
+                  await _saveReadStatus(entry.key);
+                  setState(() {
+                    _locallyRead.add(entry.key);
+                  });
+                },
+              ),
             ));
             // add small separator between items
             sectionWidgets.add(const SizedBox(height: 8));
@@ -180,8 +222,8 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         }
 
         // Ensure each bucket is sorted newest-first
-        latest.sort((a, b) => b.date.compareTo(a.date));
-        week.sort((a, b) => b.date.compareTo(a.date));
+        latest.sort((a, b) => b.value.date.compareTo(a.value.date));
+        week.sort((a, b) => b.value.date.compareTo(a.value.date));
 
         addSection('Terbaru', latest);
         addSection('7 Hari Terakhir', week);
@@ -191,7 +233,7 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
         dayKeys.sort((a, b) => b.compareTo(a));
         for (final d in dayKeys) {
           final itemsForDay = dayGroups[d]!;
-          itemsForDay.sort((a, b) => b.date.compareTo(a.date));
+          itemsForDay.sort((a, b) => b.value.date.compareTo(a.value.date));
           final title = DateFormat('dd MMMM yyyy').format(d);
           addSection(title, itemsForDay);
         }

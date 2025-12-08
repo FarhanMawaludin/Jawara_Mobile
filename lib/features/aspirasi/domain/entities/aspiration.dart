@@ -5,6 +5,7 @@ class Aspiration {
   final String status;
   final DateTime createdAt;
   final String message;
+  final bool isRead;
 
   Aspiration({
     this.id,
@@ -13,5 +14,6 @@ class Aspiration {
     required this.status,
     required this.createdAt,
     required this.message,
+    this.isRead = false,
   });
 }
