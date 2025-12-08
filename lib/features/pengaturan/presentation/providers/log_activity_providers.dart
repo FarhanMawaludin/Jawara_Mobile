@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+typedef SupabaseClientFactory = SupabaseClient Function();
+SupabaseClientFactory supabaseClientFactoryForLog = () => Supabase.instance.client; // overridable in tests
+
 class LogActivityModel {
   final int id;
   final String title;
@@ -25,9 +28,7 @@ class LogActivityModel {
 }
 
 // Provide Supabase client
-final supabaseClientProviderForLog = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
+final supabaseClientProviderForLog = Provider<SupabaseClient>((ref) => supabaseClientFactoryForLog());
 
 // FutureProvider that fetches log_activity rows
 final logActivityListProvider = FutureProvider<List<LogActivityModel>>((ref) async {
