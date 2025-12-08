@@ -13,6 +13,11 @@ class FakeRemote implements AspirationRemoteDataSource {
   FakeRemote(this.list);
   @override
   Future<List<AspirationModel>> getAllAspirations() async => list;
+
+  @override
+  Future<void> markAsRead(int id) async {
+    // No-op for testing
+  }
 }
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
@@ -26,6 +31,11 @@ class FakeRemoteImpl extends AspirationRemoteDataSourceImpl {
 
   @override
   Future<List<AspirationModel>> getAllAspirations() async => list;
+
+  @override
+  Future<void> markAsRead(int id) async {
+    // No-op for testing
+  }
 }
 
 void main() {

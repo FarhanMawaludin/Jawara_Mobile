@@ -46,6 +46,7 @@ Color statusTextColor(String s) {
 }
 
 class AspirationItem {
+  final int? id;
   final String sender;
   final String title;
   final String status;
@@ -54,6 +55,7 @@ class AspirationItem {
   final bool isRead;
 
   AspirationItem({
+    this.id,
     required this.sender,
     required this.title,
     required this.status,

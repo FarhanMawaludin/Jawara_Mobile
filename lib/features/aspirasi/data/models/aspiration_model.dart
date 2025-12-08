@@ -45,7 +45,7 @@ class AspirationModel extends Aspiration {
 
     final message = (map['message'] ?? map['pesan'] ?? map['isi'] ?? map['deskripsi_aspirasi'] ?? '') as String;
     final id = map['id'] is int ? map['id'] as int : (map['id'] is String ? int.tryParse(map['id']) : null);
-    final isRead = map['is_read'] == true || map['isRead'] == true;
+    final isRead = (map['is_read'] ?? map['isRead'] ?? false) == true;
 
     return AspirationModel(
       id: id,

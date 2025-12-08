@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration_detail.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart';
+import 'package:jawaramobile/features/aspirasi/presentations/providers/aspirasi_providers.dart';
 
 
-class AspirationListItem extends StatelessWidget {
+class AspirationListItem extends ConsumerWidget {
   final AspirationItem item;
   final VoidCallback? onMarkedRead;
 
   const AspirationListItem({super.key, required this.item, this.onMarkedRead});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final displayName = item.sender.split('@')[0].trim();
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
+        // Mark as read in database
+        if (item.id != null && !item.isRead) {
+          await ref.read(aspirationRemoteDataSourceProvider).markAsRead(item.id!);
+          ref.invalidate(aspirationListProvider);
+        }
+        
         onMarkedRead?.call();
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => AspirationDetailPage(item: item)),

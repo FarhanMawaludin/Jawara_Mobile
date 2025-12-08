@@ -1,12 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart';
+import 'package:jawaramobile/features/aspirasi/presentations/providers/aspirasi_providers.dart';
 
 
 // Chat-style detail page for aspiration message
-class AspirationDetailPage extends StatelessWidget {
+class AspirationDetailPage extends ConsumerStatefulWidget {
   final AspirationItem item;
 
   const AspirationDetailPage({super.key, required this.item});
+
+  @override
+  ConsumerState<AspirationDetailPage> createState() => _AspirationDetailPageState();
+}
+
+class _AspirationDetailPageState extends ConsumerState<AspirationDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Mark as read when page opens
+    _markAsRead();
+  }
+
+  void _markAsRead() {
+    if (widget.item.id != null && !widget.item.isRead) {
+      ref.read(markAspirationReadProvider(widget.item.id!));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +69,7 @@ class AspirationDetailPage extends StatelessWidget {
                       children: [
                         // Title (status badge removed)
                         Text(
-                          item.title,
+                          widget.item.title,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,
@@ -63,7 +83,7 @@ class AspirationDetailPage extends StatelessWidget {
                               radius: 18,
                               backgroundColor: Colors.purple.shade50,
                               child: Text(
-                                item.sender.isNotEmpty ? item.sender[0].toUpperCase() : '?',
+                                widget.item.sender.isNotEmpty ? widget.item.sender[0].toUpperCase() : '?',
                                 style: const TextStyle(
                                   color: Colors.purple,
                                   fontWeight: FontWeight.bold,
@@ -76,12 +96,12 @@ class AspirationDetailPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    item.sender,
+                                    widget.item.sender,
                                     style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    timeAgo(item.date),
+                                    timeAgo(widget.item.date),
                                     style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
                                   ),
                                 ],
@@ -96,7 +116,7 @@ class AspirationDetailPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(right: 8.0),
                           child: Text(
-                            item.message,
+                            widget.item.message,
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: Colors.grey.shade700,
                               height: 1.8,

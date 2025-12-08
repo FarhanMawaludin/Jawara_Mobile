@@ -16,11 +16,6 @@ class Aspirasi extends ConsumerStatefulWidget {
 }
 
 class _AspirasiState extends ConsumerState<Aspirasi> {
-  final Set<String> _locallyRead = {};
-
-  String _makeKey(AspirationModel e) {
-    return e.id?.toString() ?? '${e.sender}|${e.title}|${e.createdAt.toIso8601String()}';
-  }
 
   String _relativeTime(DateTime dt) {
     final now = DateTime.now();
@@ -93,8 +88,7 @@ class _AspirasiState extends ConsumerState<Aspirasi> {
               return Column(
                 children: show.map((e) {
                   final displayName = (e.sender.split('@').first).trim();
-                  final key = _makeKey(e);
-                  final isRead = e.isRead || _locallyRead.contains(key);
+                  final isRead = e.isRead == true;
                   final tile = _buildMessageTile(
                     imageUrl: null,
                     name: displayName.isNotEmpty ? displayName : 'Warga',
@@ -104,11 +98,14 @@ class _AspirasiState extends ConsumerState<Aspirasi> {
                   );
 
                   return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _locallyRead.add(key);
-                      });
+                    onTap: () async {
+                      if (e.id != null && !isRead) {
+                        await ref.read(aspirationRemoteDataSourceProvider).markAsRead(e.id!);
+                        ref.invalidate(aspirationListProvider);
+                      }
+
                       final item = ui_model.AspirationItem(
+                        id: e.id,
                         sender: e.sender,
                         title: e.title,
                         status: e.status,
@@ -221,6 +218,23 @@ class _AspirasiState extends ConsumerState<Aspirasi> {
               color: isRead ? Colors.grey[500] : Colors.deepPurpleAccent,
             ),
           ),
+          if (!isRead) const SizedBox(height: 4),
+          if (!isRead)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Baru',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
         ],
       ),
     );

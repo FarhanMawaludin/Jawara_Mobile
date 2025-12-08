@@ -4,12 +4,22 @@ import '../models/aspiration_model.dart';
 
 abstract class AspirationRemoteDataSource {
   Future<List<AspirationModel>> getAllAspirations();
+  Future<void> markAsRead(int id);
 }
 
 class AspirationRemoteDataSourceImpl implements AspirationRemoteDataSource {
   final SupabaseClient client;
 
   AspirationRemoteDataSourceImpl(this.client);
+
+  @override
+  Future<void> markAsRead(int id) async {
+    try {
+      await client.from('aspirasi').update({'is_read': true}).eq('id', id);
+    } catch (e) {
+      throw Exception('Gagal mengupdate status baca aspirasi: $e');
+    }
+  }
 
   @override
   Future<List<AspirationModel>> getAllAspirations() async {
