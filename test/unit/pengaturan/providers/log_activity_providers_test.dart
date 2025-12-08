@@ -92,6 +92,87 @@ void main() {
       expect(model.userId, null);
       expect(model.createdAt.year, 2025);
     });
+
+    test('parses integer id', () {
+      final model = LogActivityModel.fromMap({
+        'id': 3,
+        'title': 'Test',
+        'user_id': 'user123',
+        'created_at': '2025-12-08T10:00:00Z',
+      });
+
+      expect(model.id, 3);
+      expect(model.title, 'Test');
+      expect(model.userId, 'user123');
+    });
+
+    test('handles missing fields with defaults', () {
+      final model = LogActivityModel.fromMap({
+        'id': 4,
+        'created_at': '2025-12-08T10:00:00Z',
+      });
+
+      expect(model.id, 4);
+      expect(model.title, '');
+      expect(model.userId, null);
+    });
+
+    test('uses user_id field when both user_id and userId exist', () {
+      final model = LogActivityModel.fromMap({
+        'id': 5,
+        'title': 'Test',
+        'user_id': 'primary_user',
+        'userId': 'alt_user',
+        'created_at': '2025-12-08T10:00:00Z',
+      });
+
+      expect(model.userId, 'primary_user');
+    });
+
+    test('uses userId when user_id is null', () {
+      final model = LogActivityModel.fromMap({
+        'id': 6,
+        'title': 'Test',
+        'user_id': null,
+        'userId': 'alt_user',
+        'created_at': '2025-12-08T10:00:00Z',
+      });
+
+      expect(model.userId, 'alt_user');
+    });
+
+    test('parses createdAt field alternative', () {
+      final model = LogActivityModel.fromMap({
+        'id': 7,
+        'title': 'Test',
+        'createdAt': '2025-12-08T10:00:00Z',
+      });
+
+      expect(model.createdAt.year, 2025);
+    });
+
+    test('converts numeric title to string', () {
+      final model = LogActivityModel.fromMap({
+        'id': 8,
+        'title': 123,
+        'created_at': '2025-12-08T10:00:00Z',
+      });
+
+      expect(model.title, '123');
+    });
+
+    test('toString returns expected format', () {
+      final model = LogActivityModel(
+        id: 1,
+        title: 'Test',
+        userId: 'user1',
+        createdAt: DateTime(2025, 12, 8),
+      );
+
+      expect(model, isA<LogActivityModel>());
+      expect(model.id, 1);
+      expect(model.title, 'Test');
+    });
   });
 
   group('logActivityListProvider', () {
