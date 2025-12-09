@@ -5,7 +5,6 @@ import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/filte
 void main() {
   group('showAspirationFilterDialog', () {
     testWidgets('displays filter options and applies selection', (tester) async {
-      String? result;
       var appliedStatus = '';
 
       await tester.pumpWidget(
@@ -14,7 +13,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  result = await showAspirationFilterDialog(
+                  await showAspirationFilterDialog(
                     context,
                     currentStatus: 'All',
                     onApply: (status) => appliedStatus = status,

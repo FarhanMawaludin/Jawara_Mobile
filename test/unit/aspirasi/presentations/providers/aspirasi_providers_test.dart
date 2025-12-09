@@ -15,6 +15,9 @@ class FakeRemote implements AspirationRemoteDataSource {
   Future<List<AspirationModel>> getAllAspirations() async => list;
 
   @override
+  Future<List<AspirationModel>> getAspirationsByWarga(int wargaId) async => list;
+
+  @override
   Future<void> markAsRead(int id) async {
     // No-op for testing
   }
@@ -31,6 +34,9 @@ class FakeRemoteImpl extends AspirationRemoteDataSourceImpl {
 
   @override
   Future<List<AspirationModel>> getAllAspirations() async => list;
+
+  @override
+  Future<List<AspirationModel>> getAspirationsByWarga(int wargaId) async => list;
 
   @override
   Future<void> markAsRead(int id) async {
