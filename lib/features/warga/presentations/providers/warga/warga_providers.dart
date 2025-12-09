@@ -32,7 +32,8 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 // DATASOURCE PROVIDER
 // =========================================================
 final wargaRemoteDataSourceProvider = Provider<WargaRemoteDataSourceImpl>((
-  ref,) {
+  ref,
+) {
   final client = ref.read(supabaseClientProvider);
   return WargaRemoteDataSourceImpl(client);
 });
@@ -82,6 +83,8 @@ final getWargaByKeluargaUseCaseProvider = Provider<GetWargaByKeluarga>((ref) {
 
 final getStatistikWargaUseCaseProvider = Provider<GetStatistikWarga>((ref) {
   return GetStatistikWarga(ref.read(wargaRepositoryProvider));
+});
+
 final countKeluargaUseCaseProvider = Provider<CountKeluarga>((ref) {
   return CountKeluarga(ref.read(wargaRepositoryProvider));
 });
@@ -109,12 +112,20 @@ final keluargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
 // =========================================================
 // PROVIDER: Get Warga by ID
 // =========================================================
-final wargaDetailProvider = FutureProvider.family((ref, int id) async {
+final wargaDetailProvider = FutureProvider.family<WargaModel, int>((
+  ref,
+  id,
+) async {
   final usecase = ref.read(getWargaByIdUseCaseProvider);
-  return await usecase(id);
+  final warga = await usecase(id);
+  if (warga == null) {
+    throw Exception("Warga not found");
+  }
+  return warga as WargaModel;
 });
+
 // =========================================================
-// PROVIDER: Get Warga by Keluarga ID
+// PROVIDER: Get Warga by Keluarga
 // =========================================================
 final wargaByKeluargaProvider = FutureProvider.family<List<WargaModel>, int>((
   ref,
@@ -126,50 +137,36 @@ final wargaByKeluargaProvider = FutureProvider.family<List<WargaModel>, int>((
 });
 
 // =========================================================
-// PROVIDERS: SEARCH WARGA
+// SEARCH WARGA
 // =========================================================
-
-// Input user saat mengetik
 final searchInputProvider = StateProvider<String>((ref) => "");
-
-// Keyword yang benar-benar dipakai untuk search (saat klik tombol Cari)
 final searchKeywordProvider = StateProvider<String>((ref) => "");
 
-// FutureProvider hasil search berdasarkan searchKeywordProvider
 final searchWargaProvider = FutureProvider.autoDispose<List<WargaModel>>((
   ref,
 ) async {
   final keyword = ref.watch(searchKeywordProvider);
-
-  // Jika belum ada keyword (belum ditekan tombol Cari)
   if (keyword.isEmpty) return [];
 
   final usecase = ref.read(searchWargaUseCaseProvider);
-  final results = await usecase(keyword);
-
-  return results.cast<WargaModel>();
+  return (await usecase(keyword)).cast<WargaModel>();
 });
 
 // =========================================================
-// PROVIDER: COUNT KELUARGA
+// COUNT PROVIDER
 // =========================================================
 final totalKeluargaProvider = FutureProvider<int>((ref) async {
-  final usecase = ref.watch(countKeluargaUseCaseProvider);
+  final usecase = ref.read(countKeluargaUseCaseProvider);
   return await usecase();
 });
 
-// =========================================================
-// PROVIDER: COUNT WARGA
-// =========================================================
 final totalWargaProvider = FutureProvider<int>((ref) async {
-  final usecase = ref.watch(countWargaUseCaseProvider);
+  final usecase = ref.read(countWargaUseCaseProvider);
   return await usecase();
 });
 
-
-
 // =========================================================
-// STATE UNTUK FORM / CREATE / UPDATE WARGA
+// FORM STATE
 // =========================================================
 
 class WargaFormState {
@@ -270,7 +267,6 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
   }
 }
 
-// Provider untuk Form
 final wargaFormProvider =
     StateNotifierProvider<WargaFormNotifier, WargaFormState>((ref) {
       return WargaFormNotifier();

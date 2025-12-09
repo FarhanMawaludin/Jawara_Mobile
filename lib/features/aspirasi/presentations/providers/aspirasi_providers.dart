@@ -34,16 +34,16 @@ final aspirationListProvider = FutureProvider<List<AspirationModel>>((ref) async
 });
 
 // Provider untuk filter aspirasi by warga
-final aspirationByWargaProvider = FutureProvider.family<List<AspirationModel>, int>((ref, wargaId) async {
-  final ds = ref.read(aspirationRemoteDataSourceProvider);
-  final list = await ds.getAspirationsByWarga(wargaId);
-  return list;
-});
+// final aspirationByWargaProvider = FutureProvider.family<List<AspirationModel>, int>((ref, wargaId) async {
+//   final ds = ref.read(aspirationRemoteDataSourceProvider);
+//   // final list = await ds.getAspirationsByWarga(wargaId);
+//   // return list;
+// });
 
 // Provider untuk mark as read
 final markAspirationReadProvider = FutureProvider.family<void, int>((ref, id) async {
   final ds = ref.read(aspirationRemoteDataSourceProvider);
-  await ds.markAsRead(id);
+  // await ds.markAsRead(id);
   // Invalidate the list so it refreshes
   ref.invalidate(aspirationListProvider);
 });

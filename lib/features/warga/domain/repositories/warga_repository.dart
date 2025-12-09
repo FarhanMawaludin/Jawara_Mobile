@@ -14,7 +14,6 @@ abstract class WargaRepository {
   /// Menghasilkan statistik warga. Implementasi dapat memanggil RPC database
   /// atau menghitung client-side dari tabel `warga`.
   Future<StatistikWarga> getStatistikWarga();
-  Future<List<Warga>> getWargaByKeluargaId(int keluargaId); 
   Future<int> countKeluarga();
   Future<int> countWarga();
 }

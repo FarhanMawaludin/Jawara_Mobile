@@ -28,9 +28,6 @@ class WargaRepositoryImpl implements WargaRepository {
   @override
   Future<List<Warga>> searchWarga(String keyword) async {
     final result = await remoteDataSource.searchWarga(keyword);
-
-    // result = List<WargaModel>
-    // Domain butuh List<Warga>, tapi WargaModel extends Warga
     return result;
   }
 
@@ -102,6 +99,9 @@ class WargaRepositoryImpl implements WargaRepository {
     } catch (e) {
       throw Exception('Gagal mengambil statistik warga: $e');
     }
+  } // ← KURUNG INI YANG KAMU LUPA
+
+  @override
   Future<int> countKeluarga() async {
     return await remoteDataSource.countKeluarga();
   }
