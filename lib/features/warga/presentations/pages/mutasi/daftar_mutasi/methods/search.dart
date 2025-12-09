@@ -46,7 +46,7 @@ class _SearchRumahWidgetState extends ConsumerState<Search> {
               ref.read(searchMutasiInputProvider.notifier).state = value;
             },
             decoration: InputDecoration(
-              hintText: 'Cari rumah...',
+              hintText: 'Cari mutasi...',
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 12,
                 horizontal: 16,

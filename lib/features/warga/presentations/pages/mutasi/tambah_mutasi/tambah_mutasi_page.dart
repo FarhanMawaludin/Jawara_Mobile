@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
 import 'package:jawaramobile/features/warga/data/models/mutasi_model.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/mutasi/mutasi_providers.dart';
@@ -54,20 +56,21 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          leading: IconButton(
+            icon: const Icon(HeroiconsMini.arrowLeft),
+            onPressed: () => context.pop(),
+          ),
+          title: const Text(
+            'Tambah Mutasi',
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.white,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(height: 1, color: Colors.grey[300]),
+          ),
         ),
-        title: const Text(
-          'Buat Mutasi Keluarga',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey[300], height: 1),
-        ),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -90,7 +93,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                     : null,
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               // ==========================
               // PILIH KELUARGA (FILTER)
@@ -106,12 +109,10 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                         );
 
                         if (selectedJenisMutasi == "pindah_rumah") {
-                          // keluarga yang pernah pindah_rumah boleh muncul lagi
                           return true;
                         }
 
                         if (selectedJenisMutasi == "keluar_perumahan") {
-                          // keluarga yang sudah pernah mutasi sama sekali → sembunyikan
                           return mutasiKeluarga.isEmpty;
                         }
 
@@ -151,7 +152,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                 error: (e, _) => Text("Error load mutasi: $e"),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               // ==========================
               // RUMAH ASAL (AUTO)
@@ -178,7 +179,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                   error: (e, _) => Text("Gagal memuat rumah: $e"),
                 ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               // ==========================
               // RUMAH BARU (FILTER RUMAH ASAL)
@@ -237,7 +238,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                   error: (e, _) => Text("Error load rumah: $e"),
                 ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               InputField(
                 label: "Alasan Mutasi",
@@ -247,7 +248,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                     v == null || v.isEmpty ? "Alasan wajib diisi" : null,
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               GestureDetector(
                 onTap: _selectDate,
@@ -312,11 +313,11 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: const Color(0xFF6750A4),
+                    backgroundColor: Colors.deepPurpleAccent[400]
                   ),
                   child: const Text(
                     "Simpan",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
                 ),
               ),

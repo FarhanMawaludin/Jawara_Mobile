@@ -46,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               fit: BoxFit.contain,
               controller: _lottieController,
               onLoaded: (composition) {
-                _lottieController.duration = composition.duration ~/ 3; 
+                _lottieController.duration = composition.duration ~/ 10; 
                 _lottieController.forward();
               },
             ),
