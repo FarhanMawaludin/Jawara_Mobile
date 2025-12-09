@@ -22,17 +22,21 @@ class CardWarga extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          // -----------------------------------------------------
-          // NAMA + VERIFIED
-          // -----------------------------------------------------
+    return GestureDetector(
+      onTap: () {
+        context.push('/warga/aspirasi?wargaId=$wargaId');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            // -----------------------------------------------------
+            // NAMA + VERIFIED
+            // -----------------------------------------------------
           Row(
             children: [
               Text(
@@ -172,6 +176,7 @@ class CardWarga extends ConsumerWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }
