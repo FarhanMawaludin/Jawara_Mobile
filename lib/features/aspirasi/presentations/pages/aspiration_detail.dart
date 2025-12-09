@@ -41,8 +41,8 @@ class AspirationDetailPage extends StatelessWidget {
                   child: Container(
                     constraints: const BoxConstraints(maxWidth: 520),
                     margin: const EdgeInsets.symmetric(
-                      vertical: 24,
-                      horizontal: 24,
+                      vertical: 20,
+                      horizontal: 20,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +52,7 @@ class AspirationDetailPage extends StatelessWidget {
                           item.title,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                            fontSize: 26,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -77,12 +77,12 @@ class AspirationDetailPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     item.sender,
-                                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400, fontSize: 14),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 1),
                                   Text(
                                     timeAgo(item.date),
-                                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600, fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -90,7 +90,7 @@ class AspirationDetailPage extends StatelessWidget {
                             // Overflow menu removed as requested
                           ],
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 24),
 
                         // Message (plain, grey text to match screenshot)
                         Padding(

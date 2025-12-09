@@ -367,7 +367,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6750A4),
+                    backgroundColor:  Colors.deepPurpleAccent[400],
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: _onSimpan,

@@ -879,7 +879,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.0"
-<<<<<<< HEAD
   printing:
     dependency: "direct main"
     description:
@@ -888,7 +887,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.14.2"
-=======
   process:
     dependency: transitive
     description:
@@ -905,7 +903,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
->>>>>>> d48aec269ac00a11cff33f951918e8e681692750
   pub_semver:
     dependency: transitive
     description:

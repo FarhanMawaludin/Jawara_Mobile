@@ -142,12 +142,12 @@ class CardWarga extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: isSmall ? 14 : 16, color: Colors.grey[800]),
+              Icon(icon, size: isSmall ? 16 : 18, color: Colors.grey[800]),
               const SizedBox(width: 4),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: isSmall ? 13 : 14,
+                  fontSize: isSmall ? 15 : 16,
                   color: Colors.grey[800],
                   fontWeight: FontWeight.w400,
                 ),
@@ -162,7 +162,7 @@ class CardWarga extends ConsumerWidget {
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: isSmall ? 17 : 20,
+                  fontSize: isSmall ? 18 : 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey[900],
                 ),
@@ -171,7 +171,7 @@ class CardWarga extends ConsumerWidget {
               Text(
                 suffix,
                 style: TextStyle(
-                  fontSize: isSmall ? 11 : 12,
+                  fontSize: isSmall ? 14 : 16,
                   color: Colors.grey[500],
                 ),
               ),
