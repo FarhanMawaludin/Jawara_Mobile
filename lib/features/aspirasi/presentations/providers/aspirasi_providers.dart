@@ -43,7 +43,7 @@ final aspirationListProvider = FutureProvider<List<AspirationModel>>((ref) async
 // Provider untuk mark as read
 final markAspirationReadProvider = FutureProvider.family<void, int>((ref, id) async {
   final ds = ref.read(aspirationRemoteDataSourceProvider);
-  // await ds.markAsRead(id);
-  // Invalidate the list so it refreshes
+  await ds.markAsRead(id);
+  // Refresh list after marking as read
   ref.invalidate(aspirationListProvider);
 });
