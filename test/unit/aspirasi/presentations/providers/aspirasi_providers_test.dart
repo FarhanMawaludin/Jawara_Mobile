@@ -39,7 +39,44 @@ class FakeRemoteImpl extends AspirationRemoteDataSourceImpl {
 }
 
 void main() {
-  test('supabaseClientProviderForAspirasi is used to construct datasource', () {
+  test('supabaseClientProviderForAspirasi returns supabase instance', () {
+    final mockClient = MockSupabaseClient();
+
+    final container = ProviderContainer(overrides: [
+      supabaseClientProviderForAspirasi.overrideWithValue(mockClient),
+    ]);
+
+    addTearDown(container.dispose);
+
+    final client = container.read(supabaseClientProviderForAspirasi);
+    expect(client, equals(mockClient));
+  });
+
+  test('supabaseClientProviderForAspirasi can be overridden for testing', () {
+    final mockClient1 = MockSupabaseClient();
+    final mockClient2 = MockSupabaseClient();
+
+    final container = ProviderContainer(overrides: [
+      supabaseClientProviderForAspirasi.overrideWithValue(mockClient1),
+    ]);
+
+    addTearDown(container.dispose);
+
+    final client1 = container.read(supabaseClientProviderForAspirasi);
+    expect(client1, mockClient1);
+
+    // Test that override works with different instances
+    final container2 = ProviderContainer(overrides: [
+      supabaseClientProviderForAspirasi.overrideWithValue(mockClient2),
+    ]);
+    addTearDown(container2.dispose);
+
+    final client2 = container2.read(supabaseClientProviderForAspirasi);
+    expect(client2, mockClient2);
+    expect(client1 == client2, isFalse);
+  });
+
+  test('aspirationRemoteDataSourceProvider uses client from provider', () {
     final mockClient = MockSupabaseClient();
 
     final container = ProviderContainer(overrides: [

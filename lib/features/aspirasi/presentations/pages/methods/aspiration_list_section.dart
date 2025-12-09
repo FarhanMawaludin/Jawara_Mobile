@@ -9,7 +9,9 @@ import 'package:intl/intl.dart';
 // is_read status persisted in DB; local set only for instant UI.
 
 class AspirationListSection extends ConsumerStatefulWidget {
-  const AspirationListSection({super.key});
+  final int? wargaId;
+
+  const AspirationListSection({super.key, this.wargaId});
 
   @override
   ConsumerState<AspirationListSection> createState() => _AspirationListSectionState();
@@ -118,7 +120,10 @@ class _AspirationListSectionState extends ConsumerState<AspirationListSection> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncList = ref.watch(aspirationListProvider);
+    // Use different provider based on wargaId
+    final asyncList = widget.wargaId != null 
+      ? ref.watch(aspirationByWargaProvider(widget.wargaId!))
+      : ref.watch(aspirationListProvider);
 
     return asyncList.when(
       data: (items) {

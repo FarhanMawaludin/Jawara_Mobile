@@ -199,7 +199,12 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/warga/aspirasi',
-      builder: (context, state) => const AspirationPage(),
+      builder: (context, state) {
+        final wargaId = state.uri.queryParameters['wargaId'];
+        return AspirationPage(
+          wargaId: wargaId != null ? int.tryParse(wargaId) : null,
+        );
+      },
     ),
 
     // Keuangan Routes

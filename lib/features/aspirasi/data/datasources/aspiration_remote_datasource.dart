@@ -4,6 +4,7 @@ import '../models/aspiration_model.dart';
 
 abstract class AspirationRemoteDataSource {
   Future<List<AspirationModel>> getAllAspirations();
+  Future<List<AspirationModel>> getAspirationsByWarga(int wargaId);
   Future<void> markAsRead(int id);
 }
 
@@ -43,12 +44,32 @@ class AspirationRemoteDataSourceImpl implements AspirationRemoteDataSource {
     }
   }
 
+  @override
+  Future<List<AspirationModel>> getAspirationsByWarga(int wargaId) async {
+    try {
+      final List<dynamic> aspirasiRaw = await fetchRawAspirationByWarga(wargaId);
+      final mapped = AspirationRemoteDataSourceImpl.parseRaw(aspirasiRaw);
+      return mapped;
+    } catch (e) {
+      throw Exception('Gagal mengambil data aspirasi warga: $e');
+    }
+  }
+
   // Extracted to a separate method to make the network/query layer
   // easier to mock or override in tests. By default this performs the
   // same supabase query as before.
   @visibleForTesting
   Future<List<dynamic>> fetchRawAspirasi() async {
     return await client.from('aspirasi').select().order('created_at', ascending: false) as List<dynamic>;
+  }
+
+  @visibleForTesting
+  Future<List<dynamic>> fetchRawAspirationByWarga(int wargaId) async {
+    return await client
+        .from('aspirasi')
+        .select()
+        .eq('warga_id', wargaId)
+        .order('created_at', ascending: false) as List<dynamic>;
   }
 
   // Exposed helper to parse raw rows from the DB into models.

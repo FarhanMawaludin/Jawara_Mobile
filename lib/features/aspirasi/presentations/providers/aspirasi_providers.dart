@@ -7,9 +7,7 @@ import '../../domain/usecases/get_all_aspirations.dart';
 import '../../data/models/aspiration_model.dart';
 
 // SUPABASE CLIENT PROVIDER
-final supabaseClientProviderForAspirasi = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
+final supabaseClientProviderForAspirasi = Provider<SupabaseClient>((ref) => Supabase.instance.client);
 
 // DATASOURCE
 final aspirationRemoteDataSourceProvider = Provider<AspirationRemoteDataSourceImpl>((ref) {
@@ -32,6 +30,13 @@ final getAllAspirationsProvider = Provider<GetAllAspirations>((ref) {
 final aspirationListProvider = FutureProvider<List<AspirationModel>>((ref) async {
   final ds = ref.read(aspirationRemoteDataSourceProvider);
   final list = await ds.getAllAspirations();
+  return list;
+});
+
+// Provider untuk filter aspirasi by warga
+final aspirationByWargaProvider = FutureProvider.family<List<AspirationModel>, int>((ref, wargaId) async {
+  final ds = ref.read(aspirationRemoteDataSourceProvider);
+  final list = await ds.getAspirationsByWarga(wargaId);
   return list;
 });
 
