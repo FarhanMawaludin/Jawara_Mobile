@@ -10,6 +10,9 @@ abstract class WargaRemoteDataSource {
   Future<void> deleteWarga(int id);
   Future<List<WargaModel>> searchWarga(String keyword);
   Future<List<WargaModel>> getWargaByKeluargaId(int keluargaId);
+
+  /// Mengambil statistik warga dari backend (RPC) atau fallback ke perhitungan client-side.
+  Future<Map<String, dynamic>> getStatistikWarga();
   Future<int> countKeluarga();
   Future<int> countWarga();
 }
@@ -196,6 +199,94 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
   }
 
   @override
+  Future<Map<String, dynamic>> getStatistikWarga() async {
+    try {
+      // Coba panggil RPC di database terlebih dahulu
+      final rpcResp = await client.rpc('get_statistik_warga');
+
+      if (rpcResp != null) {
+        // Beberapa RPC mengembalikan list dengan single object
+        if (rpcResp is List && rpcResp.isNotEmpty) {
+          return Map<String, dynamic>.from(rpcResp.first as Map);
+        }
+
+        if (rpcResp is Map) {
+          return Map<String, dynamic>.from(rpcResp as Map);
+        }
+      }
+    } catch (e) {
+      // Jika RPC gagal (misal fungsi tidak tersedia), fallback ke client-side
+      // kita tidak langsung throw di sini
+      print('RPC get_statistik_warga gagal: $e');
+    }
+
+    // Fallback: ambil semua warga dan hitung statistik di client
+    try {
+      final List<WargaModel> list = await getAllWarga();
+
+      final Set<int?> keluargaIds = {};
+      int laki = 0, perempuan = 0, aktif = 0, nonaktif = 0;
+      int kepala = 0, ibu = 0, anak = 0;
+      final Map<String, int> agamaMap = {};
+      final Map<String, int> pendidikanMap = {};
+      final Map<String, int> pekerjaanMap = {};
+
+      for (final w in list) {
+        keluargaIds.add(w.keluargaId);
+
+        final jk = (w.jenisKelamin ?? '').toLowerCase();
+        if (jk.startsWith('l'))
+          laki++;
+        else if (jk.startsWith('p'))
+          perempuan++;
+
+        final st = (w.status ?? '').toLowerCase();
+        if (st == 'aktif' || st == '1')
+          aktif++;
+        else
+          nonaktif++;
+
+        final role = (w.roleKeluarga ?? '').toLowerCase();
+        if (role.contains('kepala'))
+          kepala++;
+        else if (role.contains('ibu') || role.contains('istri'))
+          ibu++;
+        else if (role.contains('anak'))
+          anak++;
+
+        if ((w.agama ?? '').isNotEmpty) {
+          agamaMap[w.agama!] = (agamaMap[w.agama!] ?? 0) + 1;
+        }
+
+        if ((w.pendidikan ?? '').isNotEmpty) {
+          pendidikanMap[w.pendidikan!] =
+              (pendidikanMap[w.pendidikan!] ?? 0) + 1;
+        }
+
+        if ((w.pekerjaan ?? '').isNotEmpty) {
+          pekerjaanMap[w.pekerjaan!] = (pekerjaanMap[w.pekerjaan!] ?? 0) + 1;
+        }
+      }
+
+      final map = <String, dynamic>{
+        'total_warga': list.length,
+        'total_keluarga': keluargaIds.length,
+        'laki': laki,
+        'perempuan': perempuan,
+        'aktif': aktif,
+        'nonaktif': nonaktif,
+        'kepala_keluarga': kepala,
+        'ibu_rumah_tangga': ibu,
+        'anak': anak,
+        'agama': agamaMap,
+        'pendidikan': pendidikanMap,
+        'pekerjaan': pekerjaanMap,
+      };
+
+      return map;
+    } catch (e) {
+      throw Exception('Gagal membuat statistik (fallback): $e');
+    }
   Future<int> countKeluarga() async {
     final List data = await client
         .from('warga')

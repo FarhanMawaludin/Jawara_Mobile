@@ -1,7 +1,9 @@
 import '../../domain/entities/warga.dart';
+import '../../domain/entities/statistik.dart';
 import '../../domain/repositories/warga_repository.dart';
 import '../datasources/warga_remote_datasource.dart';
 import '../models/warga_model.dart';
+import '../models/statistik_warga_model.dart';
 
 class WargaRepositoryImpl implements WargaRepository {
   final WargaRemoteDataSource remoteDataSource;
@@ -92,6 +94,14 @@ class WargaRepositoryImpl implements WargaRepository {
   }
 
   @override
+  Future<StatistikWarga> getStatistikWarga() async {
+    try {
+      final map = await (remoteDataSource as WargaRemoteDataSourceImpl)
+          .getStatistikWarga();
+      return StatistikWargaModel.fromMap(map);
+    } catch (e) {
+      throw Exception('Gagal mengambil statistik warga: $e');
+    }
   Future<int> countKeluarga() async {
     return await remoteDataSource.countKeluarga();
   }
