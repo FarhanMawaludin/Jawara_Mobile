@@ -47,6 +47,8 @@ dependencies:
   latlong2: ^0.9.1
   shimmer: ^3.0.0
   flutter_staggered_animations: ^1.1.1
+  http_mock_adapter: ^0.6.1
+  dio: ^5.9.0
   
 
 dev_dependencies:
@@ -69,6 +71,9 @@ dev_dependencies:
   image_picker: ^1.2.0
   mocktail: ^1.0.4
   coverage_viewer: ^0.0.1
+  test: ^1.26.2
+  shared_preferences: ^2.2.2
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

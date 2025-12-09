@@ -4,6 +4,7 @@ enum KategoriKegiatan {
   olahraga,
   pendidikan,
   kesehatan,
+  lingkungan,
   lainnya;
 
   String get displayName {
@@ -18,6 +19,8 @@ enum KategoriKegiatan {
         return 'Pendidikan';
       case KategoriKegiatan.kesehatan:
         return 'Kesehatan';
+      case KategoriKegiatan.lingkungan:
+        return 'Lingkungan';
       case KategoriKegiatan.lainnya:
         return 'Lainnya';
     }
@@ -37,6 +40,8 @@ enum KategoriKegiatan {
         return KategoriKegiatan.pendidikan;
       case 'kesehatan':
         return KategoriKegiatan.kesehatan;
+      case 'lingkungan':
+        return KategoriKegiatan.lingkungan;
       default:
         return KategoriKegiatan.lainnya;
     }
