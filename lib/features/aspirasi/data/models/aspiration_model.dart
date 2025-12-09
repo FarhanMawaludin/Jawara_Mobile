@@ -9,7 +9,8 @@ class AspirationModel extends Aspiration {
     required String status,
     required DateTime createdAt,
     required String message,
-  }) : super(id: id, sender: sender, title: title, status: status, createdAt: createdAt, message: message);
+    bool isRead = false,
+  }) : super(id: id, sender: sender, title: title, status: status, createdAt: createdAt, message: message, isRead: isRead);
 
   factory AspirationModel.fromMap(Map<String, dynamic> map) {
     // Map DB columns from Supabase schema. Use the actual column names seen
@@ -44,6 +45,7 @@ class AspirationModel extends Aspiration {
 
     final message = (map['message'] ?? map['pesan'] ?? map['isi'] ?? map['deskripsi_aspirasi'] ?? '') as String;
     final id = map['id'] is int ? map['id'] as int : (map['id'] is String ? int.tryParse(map['id']) : null);
+    final isRead = (map['is_read'] ?? map['isRead'] ?? false) == true;
 
     return AspirationModel(
       id: id,
@@ -52,6 +54,7 @@ class AspirationModel extends Aspiration {
       status: status,
       createdAt: createdAt,
       message: message,
+      isRead: isRead,
     );
   }
 
@@ -63,6 +66,7 @@ class AspirationModel extends Aspiration {
       'status': status,
       'created_at': createdAt.toIso8601String(),
       'message': message,
+      'is_read': isRead,
     };
   }
 }

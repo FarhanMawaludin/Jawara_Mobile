@@ -102,5 +102,12 @@ class WargaRepositoryImpl implements WargaRepository {
     } catch (e) {
       throw Exception('Gagal mengambil statistik warga: $e');
     }
+  Future<int> countKeluarga() async {
+    return await remoteDataSource.countKeluarga();
+  }
+
+  @override
+  Future<int> countWarga() async {
+    return await remoteDataSource.countWarga();
   }
 }

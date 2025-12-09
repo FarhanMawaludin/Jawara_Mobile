@@ -7,4 +7,5 @@ abstract class MutasiRepository {
   Future<Mutasi?> getMutasiById(int id);
   Future<void> createMutasi(Mutasi mutasi);
   Future<List<Mutasi>> searchMutasi(String keyword);
+  Future<void> updateRumah(int keluargaId, int? rumahId);
 }

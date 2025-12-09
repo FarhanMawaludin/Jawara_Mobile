@@ -14,6 +14,7 @@ class _TambahIuranPageState extends State<TambahIuranPage> {
   final List<String> jenisIuran = [
     "Iuran Bulanan",
     "Iuran Khusus",
+    "Iuran Lainnya",
   ];
 
   void resetForm() {

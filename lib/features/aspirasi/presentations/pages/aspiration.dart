@@ -5,7 +5,9 @@ import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspir
 
 
 class AspirationPage extends StatelessWidget {
-  const AspirationPage({super.key});
+  final int? wargaId;
+
+  const AspirationPage({super.key, this.wargaId});
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +45,9 @@ class AspirationPage extends StatelessWidget {
             ),
           ),
 
-          // Top search removed — using the search inside the list section
-
           // Content area (list scrolls independently)
-          const Expanded(
-            child: AspirationListSection(),
+          Expanded(
+            child: AspirationListSection(wargaId: wargaId),
           ),
         ],
       ),

@@ -39,7 +39,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   final List<String> _roleKeluargaOptions = [
     'Kepala Keluarga',
     'Ibu Rumah Tangga',
-    'Anak'
+    'Anak',
   ];
   final List<String> _statusOptions = ['aktif', 'tidak aktif'];
   final List<String> _golDarahOptions = ['A', 'B', 'AB', 'O'];
@@ -50,7 +50,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
     'Katolik',
     'Hindu',
     'Buddha',
-    'Konghucu'
+    'Konghucu',
   ];
 
   final List<String> _pendidikanOptions = [
@@ -64,7 +64,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
     'D4',
     'S1',
     'S2',
-    'S3'
+    'S3',
   ];
 
   @override
@@ -81,8 +81,9 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       final resp = await client.from('keluarga').select('id, nama_keluarga');
 
       if (resp is List) {
-        _keluargaList =
-            resp.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        _keluargaList = resp
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
       }
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -173,6 +174,10 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       final client = ref.read(supabaseClientProvider);
       await client.from('warga').insert(data).select();
 
+      ref.invalidate(getAllWargaProvider);
+      ref.invalidate(totalKeluargaProvider);
+      ref.invalidate(totalWargaProvider);
+
       if (mounted) {
         _show("Data warga berhasil disimpan");
         Navigator.pop(context, true);
@@ -188,23 +193,26 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
 
   @override
   Widget build(BuildContext context) {
-    final keluargaNames =
-        _keluargaList.map((e) => e['nama_keluarga'].toString()).toList();
+    final keluargaNames = _keluargaList
+        .map((e) => e['nama_keluarga'].toString())
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context)),
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
           "Tambah Warga",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(color: Colors.grey[300], height: 1)),
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.grey[300], height: 1),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -220,8 +228,9 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                   setState(() {
                     _selectedKeluargaName = val;
                     final f = _keluargaList.firstWhere(
-                        (m) => m['nama_keluarga'] == val,
-                        orElse: () => {});
+                      (m) => m['nama_keluarga'] == val,
+                      orElse: () => {},
+                    );
                     _selectedKeluargaId = f['id'];
                   });
                 },
@@ -251,55 +260,54 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 onChanged: (v) => _tempatLahir = v,
               ),
 
-
               const SizedBox(height: 14),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Tanggal Lahir",
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,   
-                    fontSize: 16,                  
-                    color: Color(0xFF1A1A1A),      
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
               ),
               const SizedBox(height: 6),
 
-
-          InkWell(
-            onTap: _pickTanggalLahir,
-            child: IgnorePointer(
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: _tanggalLahir == null
-                      ? "Pilih Tanggal Lahir"
-                      : "${_tanggalLahir!.day}-${_tanggalLahir!.month}-${_tanggalLahir!.year}",
-                  hintStyle: TextStyle(
-                    color: Colors.grey[400],    
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+              InkWell(
+                onTap: _pickTanggalLahir,
+                child: IgnorePointer(
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      hintText: _tanggalLahir == null
+                          ? "Pilih Tanggal Lahir"
+                          : "${_tanggalLahir!.day}-${_tanggalLahir!.month}-${_tanggalLahir!.year}",
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: Colors.grey[400]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: Colors.deepPurpleAccent,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 16,
+                      ),
+                      suffixIcon: const Icon(Icons.calendar_today),
+                    ),
+                    validator: (_) =>
+                        _tanggalLahir == null ? "Tanggal lahir wajib" : null,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: Colors.grey[400]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Colors.deepPurpleAccent),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 16,
-                  ),
-                  suffixIcon: const Icon(Icons.calendar_today),
                 ),
-                validator: (_) =>
-                    _tanggalLahir == null ? "Tanggal lahir wajib" : null,
               ),
-            ),
-          ),
-
 
               InputField(
                 label: "Golongan Darah",
@@ -359,7 +367,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6750A4),
+                    backgroundColor:  Colors.deepPurpleAccent[400],
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: _onSimpan,
@@ -368,7 +376,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

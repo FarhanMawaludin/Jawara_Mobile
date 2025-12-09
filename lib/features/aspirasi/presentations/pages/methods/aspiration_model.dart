@@ -46,17 +46,21 @@ Color statusTextColor(String s) {
 }
 
 class AspirationItem {
+  final int? id;
   final String sender;
   final String title;
   final String status;
   final DateTime date;
   final String message;
+  final bool isRead;
 
   AspirationItem({
+    this.id,
     required this.sender,
     required this.title,
     required this.status,
     required this.date,
     required this.message,
+    this.isRead = false,
   });
 }

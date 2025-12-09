@@ -13,6 +13,8 @@ abstract class WargaRemoteDataSource {
 
   /// Mengambil statistik warga dari backend (RPC) atau fallback ke perhitungan client-side.
   Future<Map<String, dynamic>> getStatistikWarga();
+  Future<int> countKeluarga();
+  Future<int> countWarga();
 }
 
 class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
@@ -110,18 +112,54 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
   @override
   Future<void> updateWarga(WargaModel warga) async {
-    final response = await client
-        .from('warga')
-        .update(warga.toMap())
-        .eq('id', warga.id); // Hapus
-
-    if (response.error != null) throw response.error!;
+    try {
+      await client
+          .from('warga')
+          .update(warga.toMap())
+          .eq('id', warga.id)
+          .select();
+    } catch (e) {
+      throw Exception("Gagal update warga: $e");
+    }
   }
 
   @override
   Future<void> deleteWarga(int id) async {
-    final response = await client.from('warga').delete().eq('id', id);
-    if (response.error != null) throw response.error!;
+    // 1. Ambil data warga yang mau dihapus
+    final data = await client
+        .from('warga')
+        .select('id, role_keluarga, keluarga_id')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (data == null) {
+      throw Exception("Warga tidak ditemukan");
+    }
+
+    final role = data['role_keluarga'] as String?;
+    final keluargaId = data['keluarga_id'] as int?;
+
+    // Validasi role
+    if (role == null) {
+      throw Exception("role_keluarga null");
+    }
+
+    // Jika kepala keluarga → hapus keluarga + semua anggota
+    if (role == 'kepala_keluarga') {
+      if (keluargaId == null) {
+        throw Exception("keluarga_id null untuk kepala keluarga");
+      }
+
+      // 1. Hapus semua anggota keluarga
+      await client.from('warga').delete().eq('keluarga_id', keluargaId);
+
+      // 2. Hapus data keluarga di tabel keluarga
+      await client.from('keluarga').delete().eq('id', keluargaId);
+    }
+    // Jika bukan kepala keluarga → hanya hapus satu orang
+    else {
+      await client.from('warga').delete().eq('id', id);
+    }
   }
 
   @override
@@ -142,7 +180,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
             nomor_rumah
           )
         ''')
-          .ilike('nama', '%$keyword%'); // search by nama (case-insensitive)
+          .ilike('nama', '%$keyword%');
 
       return data.map((json) => WargaModel.fromMap(json)).toList();
     } catch (e) {
@@ -249,5 +287,19 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
     } catch (e) {
       throw Exception('Gagal membuat statistik (fallback): $e');
     }
+  Future<int> countKeluarga() async {
+    final List data = await client
+        .from('warga')
+        .select('id')
+        .eq('role_keluarga', 'kepala_keluarga');
+
+    return data.length;
+  }
+
+  @override
+  Future<int> countWarga() async {
+    final List data = await client.from('warga').select('id');
+
+    return data.length;
   }
 }
