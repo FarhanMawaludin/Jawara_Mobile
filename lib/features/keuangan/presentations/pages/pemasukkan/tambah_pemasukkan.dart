@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../domain/entities/pemasukanlainnya.dart';
 import '../../providers/pemasukanlainnya/pemasukanlainnya_providers.dart';
 
@@ -91,6 +92,12 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
         // Kirim ke Notifier → Usecase → Repository → Supabase
         final notifier = ref.read(pemasukanNotifierProvider.notifier);
         await notifier.createData(pemasukan);
+
+        // Log activity
+        await ref
+            .read(logActivityNotifierProvider.notifier)
+            .createLogWithCurrentUser(
+                title: 'Menambahkan pemasukan: ${_namaController.text.trim()}');
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

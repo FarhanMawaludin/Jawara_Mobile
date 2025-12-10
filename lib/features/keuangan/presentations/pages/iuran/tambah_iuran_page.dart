@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../providers/tagihiuran/tagihiuran_providers.dart';
 import '../../providers/ketegoriiuran/ketegoriiuran_providers.dart';
 
@@ -38,6 +39,12 @@ class _TambahIuranPageState extends ConsumerState<TambahIuranPage> {
       nama: namaIuranController.text.trim(),
       jumlah: 0, // atau dari input
     );
+
+    // Log activity
+    await ref
+        .read(logActivityNotifierProvider.notifier)
+        .createLogWithCurrentUser(
+            title: 'Menambahkan iuran: ${namaIuranController.text.trim()}');
 
     if (!mounted) return;
 
