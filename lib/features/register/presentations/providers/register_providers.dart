@@ -1,7 +1,9 @@
 // lib/presentation/providers/register_providers.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/mutasi/mutasi_providers.dart';
 
+import '../../../warga/domain/entities/rumah.dart';
 import '../../domain/usecases/register_account.dart';
 import '../../domain/usecases/create_keluarga_and_warga.dart';
 import '../../domain/usecases/create_rumah.dart';
@@ -9,14 +11,12 @@ import '../../domain/usecases/create_rumah.dart';
 import '../../data/repositories/register_repository_impl.dart';
 import '../../data/datasources/supabase_remote_datasource.dart';
 
-
 // =========================================================
 // REPOSITORY PROVIDER
 // =========================================================
 final registerRepositoryProvider = Provider<RegisterRepositoryImpl>((ref) {
   return RegisterRepositoryImpl(SupabaseRemoteDatasource());
 });
-
 
 // =========================================================
 // USECASE PROVIDERS
@@ -33,7 +33,17 @@ final createRumahProvider = Provider<CreateRumah>((ref) {
   return CreateRumah(ref.read(registerRepositoryProvider));
 });
 
+final registerCheckEmailProvider =
+    FutureProvider.family<bool, String>((ref, email) async {
+  final supabase = ref.read(supabaseClientProvider);
 
+  final result = await supabase.rpc(
+    'check_email_exists',
+    params: {'email_input': email},
+  );
+
+  return result == true;
+});
 // =========================================================
 // STATE FINAL (AKAN DIKIRIM KE SERVER DI STEP 3)
 // =========================================================
@@ -91,8 +101,6 @@ class RegisterState {
   }
 }
 
-
-
 // =========================================================
 // NOTIFIER: FINAL REGISTER PROCESS
 // =========================================================
@@ -122,19 +130,53 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
   }
 
   // 🚀 STEP 3: Submit semua data ke Supabase
-  Future<void> submitAll(WidgetRef ref) async {
-    // Satukan cache → state final
+  // Future<void> submitAll(WidgetRef ref) async {
+  //   // Satukan cache → state final
+  //   collectAllFromCache(ref);
+
+  //   final accountUC = ref.read(registerAccountProvider);
+  //   final keluargaUC = ref.read(createKeluargaAndWargaProvider);
+  //   final rumahUC = ref.read(createRumahProvider);
+
+  //   // 1. Register akun
+  //   final userId = await accountUC.call(
+  //     state.email!,
+  //     state.password!,
+  //   );
+
+  //   // 2. Insert keluarga + warga pertama
+  //   final keluargaId = await keluargaUC.call(
+  //     nama: state.nama!,
+  //     nik: state.nik!,
+  //     jenisKelamin: state.jenisKelamin!,
+  //     tanggalLahir: state.tanggalLahir!,
+  //     roleKeluarga: state.roleKeluarga,
+  //     userId: userId!,
+  //   );
+
+  //   // 3. Insert rumah
+  //   await rumahUC.call(
+  //     keluargaId: keluargaId,
+  //     blok: state.blok!,
+  //     nomorRumah: state.nomorRumah!,
+  //     alamatLengkap: state.alamatLengkap!,
+  //   );
+
+  //   // Bersihkan setelah sukses
+  //   reset();
+  // }
+
+  Future<int> submitAll(WidgetRef ref, {Rumah? selectedRumah}) async {
+    // Satukan semua cache ke state final
     collectAllFromCache(ref);
 
     final accountUC = ref.read(registerAccountProvider);
     final keluargaUC = ref.read(createKeluargaAndWargaProvider);
     final rumahUC = ref.read(createRumahProvider);
+    final updateRumahUC = ref.read(updateKeluargaRumahProvider);
 
-    // 1. Register akun
-    final userId = await accountUC.call(
-      state.email!,
-      state.password!,
-    );
+    // 1. Register akun → dapat userId
+    final userId = await accountUC.call(state.email!, state.password!);
 
     // 2. Insert keluarga + warga pertama
     final keluargaId = await keluargaUC.call(
@@ -146,16 +188,32 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
       userId: userId!,
     );
 
-    // 3. Insert rumah
-    await rumahUC.call(
-      keluargaId: keluargaId,
-      blok: state.blok!,
-      nomorRumah: state.nomorRumah!,
-      alamatLengkap: state.alamatLengkap!,
-    );
+    // ================================
+    // 3. LOGIC RUMAH
+    // ================================
 
-    // Bersihkan setelah sukses
+    if (selectedRumah == null) {
+      // -----------------------------------------------------
+      // INPUT MANUAL → CREATE rumah baru
+      // -----------------------------------------------------
+      await rumahUC.call(
+        keluargaId: keluargaId,
+        blok: state.blok!,
+        nomorRumah: state.nomorRumah!,
+        alamatLengkap: state.alamatLengkap!,
+      );
+    } else {
+      // -----------------------------------------------------
+      // DROPDOWN DIPILIH → UPDATE rumah existing
+      // tidak create baru
+      // -----------------------------------------------------
+      await updateRumahUC(keluargaId, selectedRumah.id!);
+    }
+
+    // Bersihkan cache
     reset();
+
+    return keluargaId;
   }
 
   void reset() {
@@ -163,15 +221,11 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
   }
 }
 
-
 // Provider final register state
 final registerStateProvider =
     StateNotifierProvider<RegisterNotifier, RegisterState>((ref) {
-  return RegisterNotifier();
-});
-
-
-
+      return RegisterNotifier();
+    });
 
 // =========================================================
 // ============= CACHE: STEP 1 (email & password) ===========
@@ -204,11 +258,7 @@ class RegisterStep1Cache {
 class RegisterStep1CacheNotifier extends StateNotifier<RegisterStep1Cache> {
   RegisterStep1CacheNotifier() : super(RegisterStep1Cache());
 
-  void updateCache({
-    String? email,
-    String? password,
-    String? confirmPassword,
-  }) {
+  void updateCache({String? email, String? password, String? confirmPassword}) {
     state = state.copyWith(
       email: email,
       password: password,
@@ -220,12 +270,11 @@ class RegisterStep1CacheNotifier extends StateNotifier<RegisterStep1Cache> {
 }
 
 final registerStep1CacheProvider =
-    StateNotifierProvider<RegisterStep1CacheNotifier, RegisterStep1Cache>((ref) {
-  return RegisterStep1CacheNotifier();
-});
-
-
-
+    StateNotifierProvider<RegisterStep1CacheNotifier, RegisterStep1Cache>((
+      ref,
+    ) {
+      return RegisterStep1CacheNotifier();
+    });
 
 // =========================================================
 // ============= CACHE: STEP 2 (data warga) =================
@@ -280,12 +329,11 @@ class RegisterStep2CacheNotifier extends StateNotifier<RegisterStep2Cache> {
 }
 
 final registerStep2CacheProvider =
-    StateNotifierProvider<RegisterStep2CacheNotifier, RegisterStep2Cache>((ref) {
-  return RegisterStep2CacheNotifier();
-});
-
-
-
+    StateNotifierProvider<RegisterStep2CacheNotifier, RegisterStep2Cache>((
+      ref,
+    ) {
+      return RegisterStep2CacheNotifier();
+    });
 
 // =========================================================
 // ============= CACHE: STEP 3 (data rumah) =================
@@ -318,11 +366,7 @@ class RegisterStep3Cache {
 class RegisterStep3CacheNotifier extends StateNotifier<RegisterStep3Cache> {
   RegisterStep3CacheNotifier() : super(RegisterStep3Cache());
 
-  void updateCache({
-    String? blok,
-    String? nomorRumah,
-    String? alamatLengkap,
-  }) {
+  void updateCache({String? blok, String? nomorRumah, String? alamatLengkap}) {
     state = state.copyWith(
       blok: blok,
       nomorRumah: nomorRumah,
@@ -334,6 +378,8 @@ class RegisterStep3CacheNotifier extends StateNotifier<RegisterStep3Cache> {
 }
 
 final registerStep3CacheProvider =
-    StateNotifierProvider<RegisterStep3CacheNotifier, RegisterStep3Cache>((ref) {
-  return RegisterStep3CacheNotifier();
-});
+    StateNotifierProvider<RegisterStep3CacheNotifier, RegisterStep3Cache>((
+      ref,
+    ) {
+      return RegisterStep3CacheNotifier();
+    });
