@@ -1,33 +1,32 @@
-import '../../domain/entities/transaction.dart';
-import '../../domain/repositories/transaction_repository.dart';
-import '../models/transaction_model.dart';
+import '../../domain/entities/mutasi.dart';
+import '../../domain/repositories/mutasi_repository.dart';
+import '../models/mutasi_model.dart';
 
 
 /// `pemasukanDatasource.getAll` dan `pengeluaranDatasource.getAll`.
-class TransactionRepositoryImpl implements TransactionRepository {
+class MutasiRepositoryImpl implements MutasiRepository {
   final Future<List<Map<String, dynamic>>> Function() fetchPemasukan;
   final Future<List<Map<String, dynamic>>> Function() fetchPengeluaran;
 
 
-  TransactionRepositoryImpl({
+  MutasiRepositoryImpl({
     required this.fetchPemasukan,
     required this.fetchPengeluaran,
   });
 
 
-  @override
-  Future<List<Transaction>> getAllTransactions() async {
+  Future<List<Mutasi>> getAllMutasi() async {
     final pemasukanRows = await fetchPemasukan();
     final pengeluaranRows = await fetchPengeluaran();
 
 
     final pemasukanModels = pemasukanRows
-      .map((r) => TransactionModel.fromPemasukan(r))
+      .map((r) => MutasiModel.fromPemasukan(r))
       .toList();
 
 
     final pengeluaranModels = pengeluaranRows
-    .map((r) => TransactionModel.fromPengeluaran(r))
+    .map((r) => MutasiModel.fromPengeluaran(r))
     .toList();
 
 

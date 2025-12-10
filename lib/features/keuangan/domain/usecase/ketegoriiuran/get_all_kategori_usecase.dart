@@ -5,7 +5,7 @@ class GetAllKategoriUsecase {
   final KategoriIuranRepository repository;
   GetAllKategoriUsecase(this.repository);
 
-  Future<List<KategoriIuran>> call() async {
+  Future<List<KategoriIuranModel>> call() async {
     return await repository.getAllKategori();
   }
 }

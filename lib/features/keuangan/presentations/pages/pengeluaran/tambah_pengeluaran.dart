@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
+import '../../../domain/entities/pengeluaran.dart';
+import '../../providers/pengeluaran/pengeluaran_providers.dart';
 
-class TambahPengeluaranPage extends StatefulWidget {
+class TambahPengeluaranPage extends ConsumerStatefulWidget {
   const TambahPengeluaranPage({super.key});
 
   @override
-  State<TambahPengeluaranPage> createState() => _TambahPengeluaranPageState();
+  ConsumerState<TambahPengeluaranPage> createState() => _TambahPengeluaranPageState();
 }
 
-class _TambahPengeluaranPageState extends State<TambahPengeluaranPage> {
+class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _tanggalController = TextEditingController();
@@ -19,10 +22,13 @@ class _TambahPengeluaranPageState extends State<TambahPengeluaranPage> {
   File? _buktiFile;
 
   final List<String> _kategoriList = [
-    'Gaji',
-    'Bonus',
-    'Investasi',
-    'Lainnya',
+    'Operasional',
+    'Kegiatan Sosial',
+    'Pemeliharan Fasilitas',
+    'Pembangunan',
+    'Kegiatan Warga',
+    'Keamanan dan Kebersihan',
+    'lain-lain',
   ];
 
   Future<void> _pickTanggal() async {
@@ -61,11 +67,36 @@ class _TambahPengeluaranPageState extends State<TambahPengeluaranPage> {
     });
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      // Simulasi submit
+  void _submitForm() async {
+    if (_formKey.currentState!.validate() && _kategori != null) {
+      try {
+        final pengeluaran = Pengeluaran(
+          id: 0,
+          createdAt: DateTime.now(),
+          namaPengeluaran: _namaController.text.trim(),
+          jumlah: double.parse(_nominalController.text),
+          kategoriPengeluaran: _kategori!,
+          tanggalPengeluaran: DateTime.now(),
+          buktiPengeluaran: _buktiFile?.path ?? '',
+        );
+
+        // Kirim ke provider
+        await ref.read(pengeluaranNotifierProvider.notifier).create(pengeluaran);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Pengeluaran berhasil disimpan!')),
+          );
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } else if (_kategori == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pemasukan berhasil disimpan!')),
+        const SnackBar(content: Text('Kategori wajib dipilih')),
       );
     }
   }

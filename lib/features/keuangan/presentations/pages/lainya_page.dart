@@ -42,8 +42,8 @@ class LainnyaPage extends StatelessWidget {
             SectionTitle(title: "Laporan Keuangan"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi','route': '/keuangan/transaction/mutasi ' ,'color': Colors.black},
-              {'icon': CupertinoIcons.printer, 'label': 'Cetak Laporan', 'color': Colors.black},
+              {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi','route': '/keuangan/mutasi/mutasi' ,'color': Colors.black},
+              {'icon': CupertinoIcons.printer, 'label': 'Cetak Laporan', 'route': '/keuangan/mutasi/cetak-laporan-mutasi','color': Colors.black},
               {'icon': CupertinoIcons.chart_bar, 'label': 'Statistik', 'route': '/keuangan/statistik/statistik', 'color': Colors.black},
             ]),
             SizedBox(height: 20),
@@ -51,8 +51,8 @@ class LainnyaPage extends StatelessWidget {
             SectionTitle(title: "Channel Transfer"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': CupertinoIcons.rectangle_stack, 'label': 'Daftar Channel', 'color': Colors.black},
-              {'icon': CupertinoIcons.creditcard, 'label': 'Tambah Channel', 'color': Colors.black},
+              {'icon': CupertinoIcons.rectangle_stack, 'label': 'Daftar Channel', 'route': '/keuangan/metodepembayaran/daftar-metodepembayaran' ,'color': Colors.black},
+              {'icon': CupertinoIcons.creditcard, 'label': 'Tambah Channel', 'route': '/keuangan/metodepembayaran/tambah-metodepembayaran', 'color': Colors.black},
             ]),
           ],
         ),

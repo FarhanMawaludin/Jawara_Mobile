@@ -21,6 +21,17 @@ final iuranDetailRepositoryProvider =
     datasource: IuranDetailDatasource(),
   );
 });
+// Data Source Provider
+final iuranDetailDatasourceProvider = Provider<IuranDetailDatasource>((ref) {
+  return IuranDetailDatasource();
+});
+
+// Family Provider untuk get iuran detail by keluarga
+final iuranDetailByKeluargaProvider =
+    FutureProvider.family<List<IuranDetail>, int>((ref, keluargaId) async {
+  final usecase = ref.watch(iuranDetailDatasourceProvider);
+  return await usecase.getByKeluarga(keluargaId);
+});
 
 /// CREATE
 final createIuranDetailProvider = Provider<CreateIuranDetail>((ref) {
@@ -50,6 +61,7 @@ final getIuranByKeluargaProvider =
     ref.read(iuranDetailRepositoryProvider),
   );
 });
+
 
 
 //===============================================================================

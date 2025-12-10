@@ -8,27 +8,27 @@ class MetodePembayaranRepositoryImpl implements MetodePembayaranRepository {
   MetodePembayaranRepositoryImpl(this.datasource);
 
   @override
-  Future<List<MetodePembayaran>> getAllMetode() {
+  Future<List<MetodePembayaranModel>> getAllMetode() {
     return datasource.getAll();
   }
 
   @override
-  Future<MetodePembayaran?> getMetodeById(int id) {
+  Future<MetodePembayaranModel?> getMetodeById(int id) {
     return datasource.getById(id);
   }
 
   @override
-  Future<bool> createMetode(MetodePembayaran data) async {
-    return datasource.insert(data);
+  Future<void> createMetode(MetodePembayaranModel data) {
+    return datasource.create(data);
   }
 
   @override
-  Future<bool> updateMetode(MetodePembayaran data) {
+  Future<void> updateMetode(MetodePembayaranModel data) {
     return datasource.update(data);
   }
 
   @override
-  Future<bool> deleteMetode(int id) {
+  Future<void> deleteMetode(int id) {
     return datasource.delete(id);
   }
 }

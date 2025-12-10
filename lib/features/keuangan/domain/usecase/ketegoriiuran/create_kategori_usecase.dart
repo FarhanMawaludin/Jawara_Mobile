@@ -6,7 +6,7 @@ class CreateKategoriUsecase {
 
   CreateKategoriUsecase(this.repository);
 
-  Future<KategoriIuran?> call(KategoriIuran data) async {
+  Future<KategoriIuranModel?> call(KategoriIuranModel data) async {
     return await repository.createKategori(data);
   }
 }

@@ -1,28 +1,33 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
+import '../../../domain/entities/pemasukanlainnya.dart';
+import '../../providers/pemasukanlainnya/pemasukanlainnya_providers.dart';
 
-class TambahPemasukanPage extends StatefulWidget {
+class TambahPemasukanPage extends ConsumerStatefulWidget {
   const TambahPemasukanPage({super.key});
 
   @override
-  State<TambahPemasukanPage> createState() => _TambahPemasukanPageState();
+  ConsumerState<TambahPemasukanPage> createState() => _TambahPemasukanPageState();
 }
 
-class _TambahPemasukanPageState extends State<TambahPemasukanPage> {
+class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _nominalController = TextEditingController();
 
   String? _kategori;
-  File? _buktiFile;
+  File? _buktiPemasukan;
 
   final List<String> _kategoriList = [
-    'Gaji',
-    'Bonus',
-    'Investasi',
-    'Lainnya',
+    'Donasi',
+    'Dana Bantuan Pemerintah',
+    'Sumbangan',
+    'Swadaya',
+    'Hasil Uang Kampung',
+    'Pendapatan Lainnya',
   ];
 
   Future<void> _pickTanggal() async {
@@ -46,7 +51,7 @@ class _TambahPemasukanPageState extends State<TambahPemasukanPage> {
 
     if (pickedFile != null) {
       setState(() {
-        _buktiFile = File(pickedFile.path);
+        _buktiPemasukan = File(pickedFile.path);
       });
     }
   }
@@ -57,18 +62,50 @@ class _TambahPemasukanPageState extends State<TambahPemasukanPage> {
       _tanggalController.clear();
       _nominalController.clear();
       _kategori = null;
-      _buktiFile = null;
+      _buktiPemasukan = null;
     });
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Simulasi submit
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pemasukan berhasil disimpan!')),
-      );
+      // Pastikan ada kategori
+      if (_kategori == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kategori belum dipilih')),
+        );
+        return;
+      }
+
+      try {
+        // Buat entity
+        final pemasukan = PemasukanLainnya(
+          id: 0,
+          createdAt: DateTime.now(),
+          namaPemasukan: _namaController.text.trim(),
+          kategoriPemasukan: _kategori!,
+          tanggalPemasukan: DateTime.now(),
+          jumlah: double.parse(_nominalController.text),
+          buktiPemasukan: _buktiPemasukan?.path ?? '',
+        );
+
+        // Kirim ke Notifier → Usecase → Repository → Supabase
+        final notifier = ref.read(pemasukanNotifierProvider.notifier);
+        await notifier.createData(pemasukan);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Pemasukan berhasil disimpan!')),
+          );
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +210,7 @@ class _TambahPemasukanPageState extends State<TambahPemasukanPage> {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.deepPurple.withOpacity(0.05),
                   ),
-                  child: _buktiFile == null
+                  child: _buktiPemasukan == null
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
@@ -188,7 +225,7 @@ class _TambahPemasukanPageState extends State<TambahPemasukanPage> {
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(
-                            _buktiFile!,
+                            _buktiPemasukan!,
                             fit: BoxFit.cover,
                             width: double.infinity,
                           ),

@@ -1,31 +1,23 @@
-import '../../domain/entities/transaction.dart';
+import '../../domain/entities/mutasi.dart';
 
-class TransactionModel extends Transaction {
-  TransactionModel({
-    required int id,
-    required TransactionType jenis,
-    required String nama,
-    String? kategori,
-    required DateTime tanggal,
-    required double jumlah,
-    String? bukti,
-  }) : super(
-          id: id,
-          jenis: jenis,
-          nama: nama,
-          kategori: kategori,
-          tanggal: tanggal,
-          jumlah: jumlah,
-          bukti: bukti,
-        );
+class MutasiModel extends Mutasi {
+  MutasiModel({
+    required super.id,
+    required super.jenis,
+    required super.nama,
+    super.kategori,
+    required super.tanggal,
+    required super.jumlah,
+    super.bukti,
+  });
 
   // ==========================
   //   PEMASUKAN MAPPING
   // ==========================
-  factory TransactionModel.fromPemasukan(Map<String, dynamic> row) {
-    return TransactionModel(
+  factory MutasiModel.fromPemasukan(Map<String, dynamic> row) {
+    return MutasiModel(
       id: row['id'] as int,
-      jenis: TransactionType.pemasukan,
+      jenis: MutasiType.pemasukan,
       nama: (row['nama_pemasukan'] ?? '') as String,
       kategori: row['kategori_pemasukan'] as String?,
       tanggal: DateTime.parse(row['tanggal_pemasukan'] as String),
@@ -39,13 +31,13 @@ class TransactionModel extends Transaction {
   // ==========================
   //   PENGELUARAN MAPPING
   // ==========================
-  factory TransactionModel.fromPengeluaran(Map<String, dynamic> row) {
-    return TransactionModel(
+  factory MutasiModel.fromPengeluaran(Map<String, dynamic> row) {
+    return MutasiModel(
       id: row['id'] as int,
-      jenis: TransactionType.pengeluaran,
+      jenis: MutasiType.pengeluaran,
 
       // NOTE: di DB kolomnya sama: nama_pemasukan (tidak masalah)
-      nama: (row['nama_pemasukan'] ?? '') as String,
+      nama: (row['nama_pengeluaran'] ?? '') as String,
 
       // kategori pengeluaran jika ada, kalau tidak -> "-"
       kategori: row['kategori_pengeluaran'] as String? ?? "-",
@@ -68,9 +60,10 @@ class TransactionModel extends Transaction {
   // ==========================
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      // Jangan kirim 'id' saat insert, biarkan database auto-generate
+      if (id != 0) 'id': id,
       'jenis':
-          jenis == TransactionType.pemasukan ? 'pemasukan' : 'pengeluaran',
+          jenis == MutasiType.pemasukan ? 'pemasukan' : 'pengeluaran',
       'nama': nama,
       'kategori': kategori,
       'tanggal': tanggal.toIso8601String(),

@@ -6,7 +6,7 @@ class GetPemasukanByIdUsecase {
 
   GetPemasukanByIdUsecase(this.repository);
 
-  Future<PemasukanLainnya?> call(int id) async {
-    return await repository.getPemasukanById(id);
+  Future<PemasukanLainnya?> call(int id) {
+    return repository.getPemasukanById(id);
   }
 }
