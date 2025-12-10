@@ -18,15 +18,15 @@ class _AspirationDetailPageState extends ConsumerState<AspirationDetailPage> {
   @override
   void initState() {
     super.initState();
-    // Mark as read when page opens
-    // _markAsRead();
+    _markAsRead();
   }
 
-  // void _markAsRead() {
-  //   if (widget.item.id != null && !widget.item.isRead) {
-  //     ref.read(markAspirationReadProvider(widget.item.id!));
-  //   }
-  // }
+  void _markAsRead() {
+    final id = widget.item.id;
+    if (id != null && !widget.item.isRead) {
+      Future.microtask(() => ref.read(markAspirationReadProvider(id).future));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

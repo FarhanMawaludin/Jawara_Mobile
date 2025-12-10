@@ -197,15 +197,15 @@ final router = GoRouter(
       path: '/warga/tambah-warga',
       builder: (context, state) => const TambahWargaPage(),
     ),
-    // GoRoute(
-    //   path: '/warga/aspirasi',
-    //   builder: (context, state) {
-    //     final wargaId = state.uri.queryParameters['wargaId'];
-    //     return AspirationPage(
-    //       // wargaId: wargaId != null ? int.tryParse(wargaId) : null,
-    //     );
-    //   },
-    // ),
+    GoRoute(
+      path: '/warga/aspirasi',
+      builder: (context, state) {
+        final wargaId = state.uri.queryParameters['wargaId'];
+        return AspirationPage(
+          wargaId: wargaId != null ? int.tryParse(wargaId) : null,
+        );
+      },
+    ),
 
     // Keuangan Routes
     GoRoute(
