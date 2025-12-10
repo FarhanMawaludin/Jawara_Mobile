@@ -1,62 +1,78 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../../../domain/entities/tagihiuran.dart';
+
+// ✅ Import IuranDetail
+import '../../../data/models/iurandetail_model.dart';
 
 class TagihanPdfGenerator {
-  static Future<void> printPDF(List<TagihIuran> data) async {
+  static Future<void> printPDF(List<IuranDetail> iuranDetailList) async {
     final pdf = pw.Document();
 
     pdf.addPage(
       pw.Page(
-        margin: const pw.EdgeInsets.all(20),
-        build: (context) {
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              // Header
               pw.Text(
-                "Laporan Tagihan",
+                'Daftar Tagihan Iuran',
                 style: pw.TextStyle(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
               pw.SizedBox(height: 20),
 
-              pw.Table.fromTextArray(
+              // Table
+              pw.TableHelper.fromTextArray(
+                headers: ['Nama', 'Kategori', 'Tanggal', 'Jumlah', 'Status'],
                 headerStyle: pw.TextStyle(
                   fontWeight: pw.FontWeight.bold,
-                  fontSize: 10,
+                  fontSize: 12,
                 ),
-                cellStyle: const pw.TextStyle(fontSize: 9),
-                headerDecoration: pw.BoxDecoration(
-                  color: PdfColor.fromInt(0xFFEFEFEF),
+                cellStyle: const pw.TextStyle(fontSize: 10),
+                headerDecoration: const pw.BoxDecoration(
+                  color: PdfColors.grey300,
                 ),
-                border: pw.TableBorder.all(color: PdfColor.fromInt(0xFFCCCCCC)),
-                headers: [
-                  "No",
-                  "Nama Keluarga",
-                  "Kategori",
-                  "ID Tagihan",
-                  "Nominal",
-                  "Tanggal Tagihan",
-                  "Status",
-                ],
-                data: List.generate(data.length, (index) {
-                  final item = data[index];
-
+                cellAlignment: pw.Alignment.centerLeft,
+                data: iuranDetailList.map((item) {
+                  // ✅ Akses data dari relasi tagihIuran
+                  final tagihan = item.tagihIuran;
+                  
                   return [
-                    (index + 1).toString(),
-                    item.nama,
-                    item.kategoriId,
-                    "TG${item.id.toString().padLeft(8, '0')}",
-                    "Rp ${item.jumlah.toStringAsFixed(0)}",
-                    "${item.tanggalTagihan.day} "
-                        "${_bulan(item.tanggalTagihan.month)} "
-                        "${item.tanggalTagihan.year}",
-                    item.statusTagihan,
+                    tagihan?.nama ?? '-', // ✅ Dari tagihIuran
+                    tagihan?.kategoriId.toString() ?? '-', // ✅ Dari tagihIuran
+                    tagihan?.tanggalTagihan != null
+                        ? '${tagihan!.tanggalTagihan.day}/${tagihan.tanggalTagihan.month}/${tagihan.tanggalTagihan.year}'
+                        : '-', // ✅ Dari tagihIuran
+                    'Rp ${_formatRupiah((tagihan?.jumlah ?? 0).toInt())}', // ✅ Dari tagihIuran
+                    item.statusPembayaran, // ✅ Dari iuranDetail
                   ];
-                }),
+                }).toList(),
+              ),
+
+              pw.SizedBox(height: 20),
+
+              // Footer
+              pw.Text(
+                'Total Tagihan: ${iuranDetailList.length} item',
+                style: pw.TextStyle(
+                  fontSize: 12,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+
+              pw.SizedBox(height: 10),
+
+              pw.Text(
+                'Total Nominal: Rp ${_formatRupiah(_calculateTotal(iuranDetailList))}',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
             ],
           );
@@ -64,28 +80,25 @@ class TagihanPdfGenerator {
       ),
     );
 
+    // Print or save PDF
     await Printing.layoutPdf(
       onLayout: (format) async => pdf.save(),
     );
   }
 
-  // Fungsi bantu format bulan
-  static String _bulan(int bulan) {
-    const bulanList = [
-      "",
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember"
-    ];
-    return bulanList[bulan];
+  // ✅ Helper untuk format rupiah
+  static String _formatRupiah(int amount) {
+    return amount.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
+  }
+
+  // ✅ Helper untuk hitung total
+ static int _calculateTotal(List<IuranDetail> list) {
+  return list.fold<int>(
+    0, 
+    (sum, item) => sum + ((item.tagihIuran?.jumlah ?? 0).toInt()),
+    );
   }
 }

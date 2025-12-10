@@ -7,6 +7,7 @@ import 'widgets/form_tambah/lokasi.dart';
 import 'widgets/form_tambah/penganggunjawab.dart';
 import 'widgets/form_tambah/kategori_kegiatan.dart';
 import 'widgets/form_tambah/deskripsi_kegiatan.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahKegiatanPage extends ConsumerStatefulWidget {
   const TambahKegiatanPage({super.key});
@@ -78,6 +79,12 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
 
       // Tampilkan hasil
       if (result['success']) {
+        // BUAT LOG ACTIVITY
+        final namaKegiatan = ref.read(kegiatanFormProvider).namaKegiatan;
+        await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+          title: 'Menambahkan kegiatan baru: $namaKegiatan',
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Kegiatan berhasil ditambahkan'),

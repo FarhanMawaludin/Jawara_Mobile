@@ -5,6 +5,7 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 import 'package:jawaramobile/core/component/bottom_alert.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class CardWarga extends ConsumerWidget {
   final String nama;
@@ -151,6 +152,11 @@ class CardWarga extends ConsumerWidget {
                         /// PANGGIL USECASE DENGAN PROVIDER YANG BENAR
                         final delete = ref.read(deleteWargaUseCaseProvider);
                         await delete(wargaId);
+
+                        // BUAT LOG ACTIVITY
+                        await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+                          title: 'Menghapus warga: $nama',
+                        );
 
                         // Refresh list warga
                         ref.invalidate(wargaListProvider);

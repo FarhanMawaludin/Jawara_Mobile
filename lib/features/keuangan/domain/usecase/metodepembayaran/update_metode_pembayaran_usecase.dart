@@ -4,6 +4,6 @@ import '../../repositories/metodepembayaran_repository.dart';
 class UpdateMetodePembayaranUsecase {
   final MetodePembayaranRepository repository;
   UpdateMetodePembayaranUsecase(this.repository);
-  Future<bool> call(MetodePembayaran data) async => 
+  Future<void> call(MetodePembayaranModel data) async => 
   await repository.updateMetode(data);
 }

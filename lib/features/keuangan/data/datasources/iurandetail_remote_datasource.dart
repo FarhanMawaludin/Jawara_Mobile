@@ -7,7 +7,7 @@ class IuranDetailDatasource {
   Future<List<IuranDetail>> getByKeluarga(int keluargaId) async {
     final res = await supabase
         .from('iuran_detail')
-        .select('*, tagih_iuran(*), metode_pembayaran(*)')
+        .select('*, tagih_iuran(*)')
         .eq('keluarga_id', keluargaId);
 
     return (res as List)

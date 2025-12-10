@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 import 'package:jawaramobile/features/warga/data/models/mutasi_model.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/mutasi/mutasi_providers.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
@@ -296,6 +297,14 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                             ? null
                             : rumahBaruId,
                       );
+
+                      // Log activity
+                      await ref
+                          .read(logActivityNotifierProvider.notifier)
+                          .createLogWithCurrentUser(
+                              title:
+                                  'Menambahkan mutasi ${selectedJenisMutasi}: ${alasanController.text.trim()}');
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Mutasi berhasil disimpan"),

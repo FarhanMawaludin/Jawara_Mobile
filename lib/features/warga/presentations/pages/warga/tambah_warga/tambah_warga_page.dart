@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahWargaPage extends ConsumerStatefulWidget {
   const TambahWargaPage({super.key});
@@ -173,6 +174,11 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
     try {
       final client = ref.read(supabaseClientProvider);
       await client.from('warga').insert(data).select();
+
+      // BUAT LOG ACTIVITY SETELAH BERHASIL MENAMBAH WARGA
+      await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+        title: 'Menambahkan warga baru: $_nama',
+      );
 
       ref.invalidate(getAllWargaProvider);
       ref.invalidate(totalKeluargaProvider);

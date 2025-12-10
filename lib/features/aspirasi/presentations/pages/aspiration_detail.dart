@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/providers/aspirasi_providers.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 
 // Chat-style detail page for aspiration message
@@ -24,7 +25,15 @@ class _AspirationDetailPageState extends ConsumerState<AspirationDetailPage> {
   void _markAsRead() {
     final id = widget.item.id;
     if (id != null && !widget.item.isRead) {
-      Future.microtask(() => ref.read(markAspirationReadProvider(id).future));
+      Future.microtask(() async {
+        await ref.read(markAspirationReadProvider(id).future);
+        // Log activity
+        await ref
+            .read(logActivityNotifierProvider.notifier)
+            .createLogWithCurrentUser(
+                title:
+                    'Membaca aspirasi dari ${widget.item.sender}');
+      });
     }
   }
 

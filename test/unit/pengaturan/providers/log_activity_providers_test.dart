@@ -14,6 +14,11 @@ class MockSupabaseQueryBuilder extends Mock implements SupabaseQueryBuilder {}
 class MockPostgrestFilterBuilder extends Mock
     implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {}
 
+class MockGoTrueClient extends Mock implements GoTrueClient {}
+
+class MockUser extends Mock implements User {}
+
+
 class FakePostgrestFilterBuilder
     extends Fake
     implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {
@@ -237,4 +242,9 @@ void main() {
       container.dispose();
     });
   });
+
+  // TODO: Add integration tests for LogActivityNotifier.createLog and createLogWithCurrentUser
+  // These methods require complex mocking of Supabase insert operations
+  // For now, they are tested manually or via integration tests
 }
+

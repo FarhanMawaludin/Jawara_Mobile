@@ -1,13 +1,15 @@
 class Pengeluaran {
- final int id;
+  final int id;
+  final DateTime createdAt;
   final String namaPengeluaran;
-  final double kategoriPengeluaran;
+  final String kategoriPengeluaran;
   final DateTime tanggalPengeluaran;
   final double jumlah;
   final String buktiPengeluaran;
 
   Pengeluaran({
     required this.id,
+    required this.createdAt,
     required this.namaPengeluaran,
     required this.jumlah,
     required this.tanggalPengeluaran,

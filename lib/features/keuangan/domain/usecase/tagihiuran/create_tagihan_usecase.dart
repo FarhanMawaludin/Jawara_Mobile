@@ -1,4 +1,3 @@
-import '../../entities/tagihiuran.dart';
 import '../../repositories/tagihiuran_repository.dart';
 
 class CreateTagihanUsecase {
@@ -6,7 +5,24 @@ class CreateTagihanUsecase {
 
   CreateTagihanUsecase(this.repository);
 
-  Future<bool> call(TagihIuran data) async {
-    return await repository.createTagihan(data);
+  Future<void> call({
+    required int kategoriId,
+    required String nama,
+    required int jumlah,
+  }) async {
+    // Bisa tambahkan validasi bisnis logic di sini
+    if (nama.trim().isEmpty) {
+      throw Exception('Nama iuran tidak boleh kosong');
+    }
+
+    if (jumlah < 0) {
+      throw Exception('Jumlah tidak boleh negatif');
+    }
+
+    await repository.createTagihanForAllKeluarga(
+      kategoriId: kategoriId,
+      nama: nama,
+      jumlah: jumlah,
+    );
   }
 }

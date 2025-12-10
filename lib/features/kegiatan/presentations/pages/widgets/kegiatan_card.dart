@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/date_formatter.dart';
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../data/models/kegiatan_model.dart';
 import '../../providers/kegiatan_list.dart'; // PASTIKAN IMPORT INI
 
@@ -250,6 +251,12 @@ class KegiatanCard extends ConsumerWidget {
     notifier.removeById(kegiatan.id);
 
     final result = await notifier.deleteById(kegiatan.id);
+
+    // Log activity
+    await ref
+        .read(logActivityNotifierProvider.notifier)
+        .createLogWithCurrentUser(
+            title: 'Menghapus kegiatan: ${kegiatan.namaKegiatan}');
 
     if (!context.mounted) return;
 

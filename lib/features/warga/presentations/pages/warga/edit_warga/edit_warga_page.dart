@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/features/warga/domain/entities/warga.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class EditWargaPage extends ConsumerStatefulWidget {
   final int wargaId;
@@ -362,6 +363,11 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
 
                     try {
                       await updateWarga(warga);
+
+                      // BUAT LOG ACTIVITY SETELAH BERHASIL UPDATE WARGA
+                      await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+                        title: 'Mengubah data warga: ${namaController.text}',
+                      );
 
                       showBottomAlert(
                         context: context,
