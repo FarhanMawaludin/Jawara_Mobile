@@ -46,21 +46,21 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
   @override
   Future<List<WargaModel>> getAllKeluarga() async {
     try {
-      final List<dynamic> data = await client
+      final data = await client
           .from('warga')
           .select('''
-          *,
-          keluarga:keluarga_id (
-            id,
-            nama_keluarga
-          ),
-          rumah:alamat_rumah_id (
-            id,
-            alamat_lengkap,
-            blok,
-            nomor_rumah
-          )
-        ''')
+      *,
+      keluarga:keluarga_id!left (
+        id,
+        nama_keluarga
+      ),
+      rumah:alamat_rumah_id!left (
+        id,
+        alamat_lengkap,
+        blok,
+        nomor_rumah
+      )
+    ''')
           .eq('role_keluarga', 'kepala_keluarga');
 
       return data.map((json) => WargaModel.fromMap(json)).toList();
@@ -208,7 +208,8 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
       final jk = (w.jenisKelamin ?? '').toLowerCase();
       if (jk.startsWith('l'))
         laki++;
-      else if (jk.startsWith('p')) perempuan++;
+      else if (jk.startsWith('p'))
+        perempuan++;
 
       final st = (w.status ?? '').toLowerCase();
       if (st == 'aktif' || st == '1')
@@ -221,7 +222,8 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
         kepala++;
       else if (role.contains('ibu') || role.contains('istri'))
         ibu++;
-      else if (role.contains('anak')) anak++;
+      else if (role.contains('anak'))
+        anak++;
 
       if ((w.agama ?? '').isNotEmpty) {
         agama[w.agama!] = (agama[w.agama!] ?? 0) + 1;
@@ -254,8 +256,10 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
 
   @override
   Future<int> countKeluarga() async {
-    final data =
-        await client.from('warga').select('id').eq('role_keluarga', 'kepala_keluarga');
+    final data = await client
+        .from('warga')
+        .select('id')
+        .eq('role_keluarga', 'kepala_keluarga');
 
     return data.length;
   }
