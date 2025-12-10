@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
 import 'package:jawaramobile/features/warga/domain/entities/rumah.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class EditRumahPage extends ConsumerStatefulWidget {
   final int rumahId;
@@ -112,6 +113,11 @@ class _EditRumahPageState extends ConsumerState<EditRumahPage> {
                       );
 
                       await updateRumah(rumah);
+
+                      // BUAT LOG ACTIVITY
+                      await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+                        title: 'Mengubah data rumah: Blok ${blokController.text} No. ${nomorRumahController.text}',
+                      );
 
                       ref.invalidate(rumahListProvider);
 
