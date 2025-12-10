@@ -9,7 +9,6 @@ class TagihIuranModel extends TagihIuran {
     required super.jumlah,
     required super.tanggalTagihan,
     required super.nama,
-    required super.keluargaId,
     required super.statusTagihan,
     super.buktiBayar,
     super.tanggalBayar,
@@ -23,7 +22,6 @@ class TagihIuranModel extends TagihIuran {
       jumlah: double.tryParse(json['jumlah'].toString()) ?? 0.0,
       tanggalTagihan: DateTime.parse(json['tanggal_tagihan']),
       nama: json['nama'],
-      keluargaId: json['keluarga_id'],
       statusTagihan: json['status_tagihan'],
       buktiBayar: json['bukti_bayar'],
       tanggalBayar: json['tanggal_bayar'] != null
@@ -34,14 +32,14 @@ class TagihIuranModel extends TagihIuran {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      // Jangan kirim 'id' saat insert, biarkan database auto-generate
+      if (id != 0) 'id': id,
       'created_at': createdAt.toIso8601String(),
       'kategori_id': kategoriId,
       'jumlah': jumlah,
       'tanggal_tagihan': tanggalTagihan.toIso8601String(),
       'bukti_bayar': buktiBayar,
       'nama': nama,
-      'keluarga_id': keluargaId,
       'status_tagihan': statusTagihan,
       'tanggal_bayar': tanggalBayar?.toIso8601String(),
     };

@@ -1,8 +1,8 @@
 import 'package:jawaramobile/features/keuangan/data/models/metodepembayaran_model.dart';
 abstract class MetodePembayaranRepository {
-  Future<List<MetodePembayaran>> getAllMetode();
-  Future<MetodePembayaran?> getMetodeById(int id);
-  Future<bool> createMetode(MetodePembayaran data);
-  Future<bool> updateMetode(MetodePembayaran data);
-  Future<bool> deleteMetode(int id);
+  Future<List<MetodePembayaranModel>> getAllMetode();
+  Future<MetodePembayaranModel?> getMetodeById(int id);
+  Future<void> createMetode(MetodePembayaranModel data);
+  Future<void> updateMetode(MetodePembayaranModel data);
+  Future<void> deleteMetode(int id);
 }

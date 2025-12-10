@@ -1,9 +1,9 @@
 import '../../../data/models/metodepembayaran_model.dart';
 import '../../repositories/metodepembayaran_repository.dart';
 
-class GetMetodePembayaranUsecase {
+class GetAllMetodePembayaranUsecase {
   final MetodePembayaranRepository repository;
-  GetMetodePembayaranUsecase(this.repository);
-  Future<List<MetodePembayaran>> call() async 
+  GetAllMetodePembayaranUsecase(this.repository);
+  Future<List<MetodePembayaranModel>> call() async 
   => await repository.getAllMetode();
 }

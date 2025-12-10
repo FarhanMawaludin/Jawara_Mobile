@@ -5,7 +5,7 @@ class GetKategoriByIdUsecase {
   final KategoriIuranRepository repository;
   GetKategoriByIdUsecase(this.repository);
 
-  Future<KategoriIuran?> call(int id) async {
+  Future<KategoriIuranModel?> call(int id) async {
     return await repository.getKategoriById(id);
   }
 }

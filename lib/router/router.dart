@@ -10,7 +10,6 @@ import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/de
 import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/pemasukan_lain.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/tambah_pemasukkan.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/pengeluaran/tambah_pengeluaran.dart';
-import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/detail_tagihan.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/tagihan.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/mutasi/mutasi_page.dart';
 import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
@@ -51,6 +50,11 @@ import '../features/auth/presentations/pages/login_page.dart';
 import 'package:jawaramobile/features/main_shell.dart';
 
 // Register
+
+import '../features/keuangan/presentations/pages/metodepembayaran/daftar_channel_metodepembayaran.dart' show DaftarChannelMetodepembayaran;
+import '../features/keuangan/presentations/pages/metodepembayaran/tambah_metodepembayaran.dart';
+import '../features/keuangan/presentations/pages/mutasi/cetak_laporan_mutasi.dart';
+import '../features/keuangan/presentations/pages/statistik/statistik.dart';
 import '../features/register/presentations/pages/register_step1_account.dart';
 import '../features/register/presentations/pages/register_step2_warga.dart';
 import '../features/register/presentations/pages/register_step3_rumah.dart';
@@ -216,19 +220,25 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/keuangan/tagihan/tagihan',
-      builder: (context, state) =>  TagihanPage(),
+      builder: (context, state) =>  TagihanPage(keluargaId: 1,),
     ),
     GoRoute(
-      path: '/keuangan/tagihan/detail',
-      builder: (context, state) => const DetailTagihanPage(),
+      path: '/keuangan/tagihan/tagihan/:keluargaId',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['keluargaId']!);
+        return TagihanPage(keluargaId: id);
+      },
     ),
     GoRoute(
       path: '/keuangan/pemasukan-lain',
       builder: (context, state) => const PemasukanLainPage(),
     ),
     GoRoute(
-      path: '/keuangan/pemasukan-lain/detail',
-      builder: (context, state) => const PemasukanLainDetailPage(),
+      path: '/keuangan/pemasukan-lain/detail/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return PemasukanLainDetailPage(id: id);
+      },  
     ),
     GoRoute(
       path: '/keuangan/pemasukkan/tambah-pemasukkan',
@@ -238,14 +248,28 @@ final router = GoRouter(
       path: '/keuangan/pengeluaran/tambah-pengeluaran',
       builder: (context, state) => const TambahPengeluaranPage(),
     ),
+    MutasiPage.route(),
+    // Legacy/alternate path
     GoRoute(
       path: '/keuangan/transaction/mutasi',
-      builder: (context, state) => const MutasiPage(transactions: [],),
+      builder: (context, state) => const MutasiPage(),
     ),
     GoRoute(
       path: '/keuangan/statistik/statistik',
-      builder: (context, state) => const StatistikPage(),
+      builder: (context, state) => const StatistikKeuanganPage(),
     ),
+    GoRoute(
+      path: '/keuangan/metodepembayaran/tambah-metodepembayaran',
+      builder: (context, state) => const TambahMetodePembayaranPage(),
+    ),
+    GoRoute(
+      path: '/keuangan/metodepembayaran/daftar-metodepembayaran',
+      builder: (context, state) => const DaftarChannelMetodepembayaran(),
+    ),
+    GoRoute(
+      path: '/keuangan/mutasi/cetak-laporan-mutasi',
+      builder: (context, state) => const CetakLaporanMutasiPage(),
+     ),
 
     // Kegiatan Routes
     GoRoute(

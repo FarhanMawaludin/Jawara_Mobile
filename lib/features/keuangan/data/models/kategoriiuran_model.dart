@@ -1,28 +1,32 @@
 
-class KategoriIuran {
+class KategoriIuranModel {
   final int id;
-  final String namaIuran;
-  final String kategori; // enum: 'bulanan', 'khusus'
+  final String namaKategori;
+  final String kategoriIuran; // enum: 'bulanan', 'khusus'
+  final DateTime? createdAt;
 
-  KategoriIuran({
+  KategoriIuranModel({
     required this.id,
-    required this.namaIuran,
-    required this.kategori,
+    required this.namaKategori,
+    required this.kategoriIuran,
+    required this.createdAt,
   });
 
-  factory KategoriIuran.fromJson(Map<String, dynamic> json) {
-    return KategoriIuran(
-      id: json['id'],
-      namaIuran: json['nama_iuran'],
-      kategori: json['kategori'],
+   factory KategoriIuranModel.fromJson(Map<String, dynamic> json) {
+    return KategoriIuranModel(
+      id: json['id'] as int,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      namaKategori: json['nama_kategori'] as String? ?? '',
+      kategoriIuran: json['kategori_iuran'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nama_iuran': namaIuran,
-      'kategori': kategori,
+      'created_at': createdAt?.toIso8601String(),
+      'nama_kategori': namaKategori,
+      'kategori_iuran': kategoriIuran,
     };
   }
 }

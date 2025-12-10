@@ -10,22 +10,22 @@ class KategoriIuranRepositoryImpl implements KategoriIuranRepository {
   KategoriIuranRepositoryImpl(this.datasource);
 
   @override
-  Future<List<KategoriIuran>> getAllKategori() async {
+  Future<List<KategoriIuranModel>> getAllKategori() async {
     return await datasource.getAll();
   }
 
   @override
-  Future<KategoriIuran?> getKategoriById(int id) async {
+  Future<KategoriIuranModel?> getKategoriById(int id) async {
     return await datasource.getById(id);
   }
 
   @override
-  Future<KategoriIuran?> createKategori(KategoriIuran data) async {
+  Future<KategoriIuranModel?> createKategori(KategoriIuranModel data) async {
     return await datasource.create(data);
   }
 
   @override
-  Future<KategoriIuran?> updateKategori(int id, KategoriIuran data) async {
+  Future<KategoriIuranModel?> updateKategori(int id, KategoriIuranModel data) async {
     return await datasource.update(id, data);
   }
 

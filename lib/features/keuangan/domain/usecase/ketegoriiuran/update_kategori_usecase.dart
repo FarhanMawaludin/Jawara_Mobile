@@ -6,7 +6,7 @@ class UpdateKategoriUsecase {
 
   UpdateKategoriUsecase(this.repository);
 
-  Future<KategoriIuran?> call(int id, KategoriIuran data) async {
+  Future<KategoriIuranModel?> call(int id, KategoriIuranModel data) async {
     return await repository.updateKategori(id, data);
   }
 }

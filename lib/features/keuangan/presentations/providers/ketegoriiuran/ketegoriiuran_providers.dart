@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../data/datasources/kategoriiuran_remote_datasource.dart';
 import '../../../data/repository/kategoriiuran_repository_impl.dart';
@@ -24,6 +25,23 @@ final kategoriIuranRepositoryProvider = Provider<KategoriIuranRepositoryImpl>((r
   final datasource = ref.watch(kategoriIuranDatasourceProvider);
   return KategoriIuranRepositoryImpl(datasource);
 });
+
+//
+// LIST KATEGORI PROVIDER
+//
+final kategoriByIdProvider = FutureProvider.family<KategoriIuranModel?, int>((ref, id) async {
+  final res = await Supabase.instance.client
+      .from('kategori_iuran')
+      .select()
+      .eq('id', id)
+      .maybeSingle();
+
+  if (res == null) return null;
+
+  return KategoriIuranModel.fromJson(res);
+});
+
+
 
 //
 // USECASES PROVIDER
@@ -52,7 +70,7 @@ final updateKategoriUsecaseProvider = Provider<UpdateKategoriUsecase>((ref) {
 // ------------------------------------------------------------
 // NOTIFIER UNTUK LIST DATA (READ, CREATE, UPDATE, DELETE)
 // ------------------------------------------------------------
-class KategoriIuranNotifier extends StateNotifier<AsyncValue<List<KategoriIuran>>> {
+class KategoriIuranNotifier extends StateNotifier<AsyncValue<List<KategoriIuranModel>>> {
   final GetAllKategoriUsecase getAll;
   final CreateKategoriUsecase create;
   final UpdateKategoriUsecase update;
@@ -77,7 +95,7 @@ class KategoriIuranNotifier extends StateNotifier<AsyncValue<List<KategoriIuran>
     }
   }
 
-  Future<void> addKategori(KategoriIuran data) async {
+  Future<void> addKategori(KategoriIuranModel data) async {
     try {
       await create(data);
       await loadData();
@@ -86,7 +104,7 @@ class KategoriIuranNotifier extends StateNotifier<AsyncValue<List<KategoriIuran>
     }
   }
 
-  Future<void> updateKategori(int id, KategoriIuran data) async {
+  Future<void> updateKategori(int id, KategoriIuranModel data) async {
     try {
       await update(id, data);
       await loadData();
@@ -106,7 +124,7 @@ class KategoriIuranNotifier extends StateNotifier<AsyncValue<List<KategoriIuran>
 }
 
 final kategoriIuranNotifierProvider = StateNotifierProvider<
-    KategoriIuranNotifier, AsyncValue<List<KategoriIuran>>>((ref) {
+    KategoriIuranNotifier, AsyncValue<List<KategoriIuranModel>>>((ref) {
   return KategoriIuranNotifier(
     getAll: ref.watch(getAllKategoriUsecaseProvider),
     create: ref.watch(createKategoriUsecaseProvider),

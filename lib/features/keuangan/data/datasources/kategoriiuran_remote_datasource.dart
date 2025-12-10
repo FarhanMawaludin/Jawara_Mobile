@@ -7,21 +7,21 @@ class KategoriIuranDatasource {
   // -----------------------------
   // GET ALL
   // -----------------------------
-  Future<List<KategoriIuran>> getAll() async {
+  Future<List<KategoriIuranModel>> getAll() async {
     final response = await supabase
         .from('kategori_iuran')
         .select()
         .order('id', ascending: true);
 
     return response
-        .map<KategoriIuran>((json) => KategoriIuran.fromJson(json))
+        .map<KategoriIuranModel>((json) => KategoriIuranModel.fromJson(json))
         .toList();
   }
 
   // -----------------------------
   // GET BY ID
   // -----------------------------
-  Future<KategoriIuran?> getById(int id) async {
+  Future<KategoriIuranModel?> getById(int id) async {
     final response = await supabase
         .from('kategori_iuran')
         .select()
@@ -29,13 +29,13 @@ class KategoriIuranDatasource {
         .maybeSingle();
 
     if (response == null) return null;
-    return KategoriIuran.fromJson(response);
+    return KategoriIuranModel.fromJson(response);
   }
 
   // -----------------------------
   // CREATE
   // -----------------------------
-  Future<KategoriIuran?> create(KategoriIuran data) async {
+  Future<KategoriIuranModel?> create(KategoriIuranModel data) async {
     try {
       final response = await supabase
           .from('kategori_iuran')
@@ -43,7 +43,7 @@ class KategoriIuranDatasource {
           .select()
           .single();
 
-      return KategoriIuran.fromJson(response);
+      return KategoriIuranModel.fromJson(response);
     } catch (e) {
       return null;
     }
@@ -52,7 +52,7 @@ class KategoriIuranDatasource {
   // -----------------------------
   // UPDATE
   // -----------------------------
-  Future<KategoriIuran?> update(int id, KategoriIuran data) async {
+  Future<KategoriIuranModel?> update(int id, KategoriIuranModel data) async {
     try {
       final response = await supabase
           .from('kategori_iuran')
@@ -62,7 +62,7 @@ class KategoriIuranDatasource {
           .maybeSingle();
 
       if (response == null) return null;
-      return KategoriIuran.fromJson(response);
+      return KategoriIuranModel.fromJson(response);
     } catch (e) {
       return null;
     }

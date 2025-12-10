@@ -1,9 +1,9 @@
 import '../../repositories/pemasukanlainnya_repository.dart';
 
-class DeletePemasukanUsecase {
+class DeletePemasukanLainnyaUsecase {
   final PemasukanLainnyaRepository repository;
 
-  DeletePemasukanUsecase(this.repository);
+  DeletePemasukanLainnyaUsecase(this.repository);
 
   Future<void> call(int id) async {
     return await repository.deletePemasukan(id);

@@ -1,12 +1,13 @@
 class Metodepembayaran {
   final int id;
   final String namaMetode;
-  final bool tipe; // Enum bank / e-wallet / qris
+  final String tipe; // Enum bank / e-wallet / qris
   final int nomorRekening;
   final String namaPemilik;
-  final String fotoBarcode;
+  final String? fotoBarcode;
   final String thumbnail;
   final String catatan;
+  final DateTime? createdAt;
 
   Metodepembayaran({
     required this.id,
@@ -17,5 +18,6 @@ class Metodepembayaran {
     required this.fotoBarcode,
     required this.thumbnail,
     required this.catatan,
+    this.createdAt,
   });
 }
