@@ -1,6 +1,8 @@
 import '../../domain/entities/rumah.dart';
 
 class RumahModel extends Rumah {
+  final Map<String, dynamic>? keluarga; // ← tambahan
+
   RumahModel({
     required super.id,
     super.keluargaId,
@@ -8,6 +10,7 @@ class RumahModel extends Rumah {
     super.nomorRumah,
     super.alamatLengkap,
     required super.createdAt,
+    this.keluarga,
   });
 
   factory RumahModel.fromMap(Map<String, dynamic> map) {
@@ -18,6 +21,9 @@ class RumahModel extends Rumah {
       nomorRumah: map['nomor_rumah'],
       alamatLengkap: map['alamat_lengkap'],
       createdAt: DateTime.parse(map['created_at']),
+
+      // ambil hasil join supabase
+      keluarga: map['keluarga'],
     );
   }
 
