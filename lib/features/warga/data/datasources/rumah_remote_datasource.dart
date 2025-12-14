@@ -29,7 +29,7 @@ class RumahRemoteDataSourceImpl implements RumahRemoteDataSource {
           nama_keluarga
         )
       ''')
-          .order('id', ascending: true);
+          .order('blok', ascending: true);
 
       return data.map((json) => RumahModel.fromMap(json)).toList();
     } catch (e) {

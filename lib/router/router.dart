@@ -63,9 +63,6 @@ import '../features/register/presentations/pages/register_step3_rumah.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_keluarga/daftar_keluarga_page.dart';
 
 final router = GoRouter(
-  // Di development mode langsung ke /kegiatan, di production ke /login
-  // initialLocation: kDebugMode ? '/kegiatan' : '/login',
-  // initialLocation: '/',
 
   routes: [
     GoRoute(path: '/', builder: (context, state) => const OnboardingPage()),

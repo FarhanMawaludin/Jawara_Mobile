@@ -176,11 +176,12 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       await client.from('warga').insert(data).select();
 
       // BUAT LOG ACTIVITY SETELAH BERHASIL MENAMBAH WARGA
-      await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
-        title: 'Menambahkan warga baru: $_nama',
-      );
+      await ref
+          .read(logActivityNotifierProvider.notifier)
+          .createLogWithCurrentUser(title: 'Menambahkan warga baru: $_nama');
 
-      ref.invalidate(getAllWargaProvider);
+      ref.invalidate(wargaListProvider);
+      ref.invalidate(keluargaListProvider);
       ref.invalidate(totalKeluargaProvider);
       ref.invalidate(totalWargaProvider);
 
@@ -373,7 +374,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  Colors.deepPurpleAccent[400],
+                    backgroundColor: Colors.deepPurpleAccent[400],
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: _onSimpan,

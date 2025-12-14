@@ -5,6 +5,7 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
 import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 import 'package:jawaramobile/features/warga/data/models/mutasi_model.dart';
+import 'package:jawaramobile/features/warga/data/models/warga_model.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/mutasi/mutasi_providers.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
@@ -47,6 +48,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
   Widget build(BuildContext context) {
     final keluargaAsync = ref.watch(keluargaListProvider);
     final mutasiAsync = ref.watch(mutasiListProvider);
+    final updateWarga = ref.read(updateWargaUseCaseProvider);
 
     final rumahAsalAsync = selectedKeluargaId == null
         ? null
@@ -57,21 +59,21 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(HeroiconsMini.arrowLeft),
-            onPressed: () => context.pop(),
-          ),
-          title: const Text(
-            'Tambah Mutasi',
-            style: TextStyle(fontWeight: FontWeight.w500),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.white,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(height: 1, color: Colors.grey[300]),
-          ),
+        leading: IconButton(
+          icon: const Icon(HeroiconsMini.arrowLeft),
+          onPressed: () => context.pop(),
         ),
+        title: const Text(
+          'Tambah Mutasi',
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: Colors.grey[300]),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -105,19 +107,15 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                     data: (keluargaList) {
                       // 🔥 Filter keluarga yang belum pernah dimutasi
                       final keluargaFiltered = keluargaList.where((kel) {
-                        final mutasiKeluarga = mutasiList.where(
-                          (m) => m.keluargaId == kel.keluargaId,
+                        // cek apakah keluarga sudah pernah keluar_perumahan
+                        final sudahKeluar = mutasiList.any(
+                          (m) =>
+                              m.keluargaId == kel.keluargaId &&
+                              m.jenisMutasi == "keluar_perumahan",
                         );
 
-                        if (selectedJenisMutasi == "pindah_rumah") {
-                          return true;
-                        }
-
-                        if (selectedJenisMutasi == "keluar_perumahan") {
-                          return mutasiKeluarga.isEmpty;
-                        }
-
-                        return true;
+                        // keluarkan keluarga yang sudah keluar_perumahan
+                        return !sudahKeluar;
                       }).toList();
 
                       return InputField(
@@ -289,8 +287,14 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                     );
 
                     try {
+                      // =========================
+                      // 1. SIMPAN MUTASI
+                      // =========================
                       await ref.read(createMutasiProvider)(mutasi);
 
+                      // =========================
+                      // 2. UPDATE RUMAH KELUARGA
+                      // =========================
                       await ref.read(updateKeluargaRumahProvider)(
                         selectedKeluargaId!,
                         selectedJenisMutasi == "keluar_perumahan"
@@ -298,21 +302,50 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                             : rumahBaruId,
                       );
 
-                      // Log activity
+                      // =========================
+                      // 3. JIKA KELUAR PERUMAHAN
+                      //    NONAKTIFKAN SEMUA WARGA
+                      // =========================
+                      if (selectedJenisMutasi == "keluar_perumahan") {
+                        final wargaList = await ref.read(
+                          wargaByKeluargaProvider(selectedKeluargaId!).future,
+                        );
+
+                        final updateWarga = ref.read(
+                          updateWargaUseCaseProvider,
+                        );
+
+                        for (final warga in wargaList) {
+                          await updateWarga(
+                            warga.copyWith(status: "tidak aktif"),
+                          );
+                        }
+                      }
+
+                      // =========================
+                      // 4. LOG ACTIVITY
+                      // =========================
                       await ref
                           .read(logActivityNotifierProvider.notifier)
                           .createLogWithCurrentUser(
-                              title:
-                                  'Menambahkan mutasi ${selectedJenisMutasi}: ${alasanController.text.trim()}');
+                            title:
+                                'Menambahkan mutasi ${selectedJenisMutasi}: ${alasanController.text.trim()}',
+                          );
 
+                      // =========================
+                      // 5. FEEDBACK + REFRESH
+                      // =========================
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Mutasi berhasil disimpan"),
                         ),
                       );
+
                       ref.invalidate(keluargaListProvider);
                       ref.invalidate(rumahListProvider);
                       ref.invalidate(mutasiListProvider);
+                      ref.invalidate(wargaListProvider);
+
                       Navigator.pop(context);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -320,9 +353,10 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                       );
                     }
                   },
+
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.deepPurpleAccent[400]
+                    backgroundColor: Colors.deepPurpleAccent[400],
                   ),
                   child: const Text(
                     "Simpan",

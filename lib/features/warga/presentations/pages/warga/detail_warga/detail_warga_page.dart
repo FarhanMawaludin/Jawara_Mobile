@@ -99,7 +99,7 @@ class DetailWargaPage extends ConsumerWidget {
                             pendidikan: w.pendidikan ?? "-",
                             pekerjaan: w.pekerjaan ?? "-",
                             peranKeluarga: w.roleKeluarga.toString(),
-                            statusPenduduk: "Aktif",
+                            statusPenduduk: w.status ?? "-",
                           ),
                         ],
                       ),

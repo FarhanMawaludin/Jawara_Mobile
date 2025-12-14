@@ -16,6 +16,7 @@ class HeaderSection extends StatelessWidget {
             children: [
               Text(
                 'Selamat pagi,',
+                key: const Key("Selamat pagi,"),
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
               const SizedBox(height: 4),
