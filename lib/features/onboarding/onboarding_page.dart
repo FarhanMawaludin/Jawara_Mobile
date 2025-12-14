@@ -46,6 +46,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     children: [
                       Text(
                         'Jawara Pintar',
+                        key: const Key('onboarding_title'),
                         style: TextStyle(
                           fontSize: constraints.maxWidth * 0.08,
                           fontWeight: FontWeight.bold,
@@ -101,6 +102,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             // REGISTER BUTTON
                             Expanded(
                               child: GestureDetector(
+                                key: const Key('btn_register'),
                                 onTap: () {
                                   setState(() => isRegisterSelected = true);
                                   Future.delayed(
@@ -126,6 +128,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             // LOGIN BUTTON
                             Expanded(
                               child: GestureDetector(
+                                key: const Key('btn_login'),
                                 onTap: () {
                                   setState(() => isRegisterSelected = false);
                                   Future.delayed(
