@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/pemasukanlainnya/pemasukanlainnya_providers.dart';
 
-class PemasukanLainDetailPage extends StatelessWidget {
-  const PemasukanLainDetailPage({super.key});
+class PemasukanLainDetailPage extends ConsumerWidget {
+  final int id;
+
+  const PemasukanLainDetailPage({
+    super.key,
+    required this.id,
+  });
 
   Widget _buildRow(String label, String value) {
     return Padding(
@@ -18,7 +25,9 @@ class PemasukanLainDetailPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detailState = ref.watch(pemasukanDetailNotifierProvider(id));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Pemasukan Lain"),
@@ -27,29 +36,42 @@ class PemasukanLainDetailPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 1,
-          child: Padding(
+      body: detailState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text("Error: $e")),
+        data: (data) {
+          if (data == null) {
+            return const Center(child: Text("Data tidak ditemukan"));
+          }
+
+          return Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRow("Nama Pemasukan", "IRI75458A501"),
-                _buildRow("Kategori", "Mingguan"),
-                _buildRow("Kategori Dana", "Dana Bantuan Pemerintah"),
-                _buildRow("Tanggal Transaksi", "8 Oktober 2025"),
-                _buildRow("Nominal", "Rp 30.000"),
-                _buildRow("Tanggal Terverifikasi", "-"),
-                _buildRow("Verifikator", "Admin Jawara"),
-              ],
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildRow("Nama Pemasukan", data.namaPemasukan),
+                    _buildRow("Kategori", data.kategoriPemasukan.toString()),
+                    _buildRow("Kategori Dana", "-"),
+                    _buildRow(
+                      "Tanggal Transaksi",
+                      "${data.tanggalPemasukan.day}-${data.tanggalPemasukan.month}-${data.tanggalPemasukan.year}",
+                    ),
+                    _buildRow("Nominal", "Rp ${data.jumlah.toStringAsFixed(0)}"),
+                    _buildRow("Tanggal Terverifikasi", "-"),
+                    _buildRow("Verifikator", "-"),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

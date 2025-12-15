@@ -1,4 +1,4 @@
-import '../../entities/rumah.dart';
+import 'package:jawaramobile/features/warga/data/models/rumah_model.dart';
 import '../../repositories/rumah_repository.dart';
 
 class GetRumahById {
@@ -6,7 +6,7 @@ class GetRumahById {
 
   GetRumahById(this.repository);
 
-  Future<Rumah?> call(int id) async {
-    return await repository.getRumahById(id);
+  Future<RumahModel?> call(int id) {
+    return repository.getRumahById(id);
   }
 }

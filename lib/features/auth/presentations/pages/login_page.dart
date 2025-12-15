@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:jawaramobile/core/component/bottom_alert.dart';
+import 'package:jawaramobile/core/component/bottom_success_alert.dart';
 import '../../../../core/component/InputField.dart';
 import '../providers/login_providers.dart';
 import 'package:lottie/lottie.dart';
@@ -14,34 +15,44 @@ class LoginPage extends ConsumerStatefulWidget {
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage>
+    with SingleTickerProviderStateMixin {
   final emailC = TextEditingController();
   final passC = TextEditingController();
 
   late final ProviderSubscription<AuthState> authSub;
+  late AnimationController _lottieController;
 
   @override
   void initState() {
     super.initState();
+
+    _lottieController = AnimationController(vsync: this);
 
     authSub = ref.listenManual<AuthState>(authControllerProvider, (
       previous,
       next,
     ) {
       if (!next.loading && next.user != null && next.error == null) {
-        showBottomAlert(
+        showBottomSuccessAlert(
           context: context,
           title: "Login Berhasil",
           message: "Selamat datang kembali!",
-          yesText: "Lanjut",
-          onlyYes: true,
           icon: SizedBox(
             height:
-                MediaQuery.of(context).size.height * 0.22, // 22% tinggi layar
-            child: Lottie.asset('assets/lottie/Done.json', fit: BoxFit.contain),
+                MediaQuery.of(context).size.height * 0.22,
+            child: Lottie.asset(
+              'assets/lottie/Done.json',
+              fit: BoxFit.contain,
+              controller: _lottieController,
+              onLoaded: (composition) {
+                _lottieController.duration = composition.duration ~/ 10; 
+                _lottieController.forward();
+              },
+            ),
           ),
-          onYes: () {
-            Navigator.pop(context);
+          duration: const Duration(seconds: 1),
+          onComplete: () {
             context.push('/homepage');
           },
         );
@@ -62,6 +73,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   void dispose() {
+    _lottieController.dispose();
     authSub.close();
     emailC.dispose();
     passC.dispose();
@@ -84,6 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
           title: Text(
             "Login",
+            key: const Key("loginPageTitle"),
             style: TextStyle(
               color: Colors.grey[950],
               fontWeight: FontWeight.w600,
@@ -130,6 +143,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     /// INPUT EMAIL
                     /// ==============================
                     InputField(
+                      key: const Key("emailField"),
                       label: "Email",
                       hintText: "Masukkan email",
                       controller: emailC,
@@ -139,6 +153,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     /// INPUT PASSWORD
                     /// ==============================
                     InputField(
+                      key: const Key("passwordField"),
                       label: "Password",
                       hintText: "Masukkan password",
                       isPassword: true,
@@ -156,6 +171,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             width: double.infinity,
                             height: 50,
                             child: TextButton(
+                              key: const Key("loginButton"),
                               onPressed: () {
                                 final email = emailC.text.trim();
                                 final password = passC.text.trim();
@@ -198,6 +214,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                               child: const Text(
                                 "Login",
+                                key: Key("loginButtonText"),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,

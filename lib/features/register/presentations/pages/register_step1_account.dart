@@ -18,7 +18,6 @@ class RegisterStep1Account extends ConsumerStatefulWidget {
 
 class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -106,7 +105,25 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(HeroiconsMini.arrowLeft, color: Colors.grey[950]),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            showBottomAlert(
+              context: context,
+              title: "Batalkan Registrasi?",
+              message:
+                  "Jika Anda kembali, data akun yang telah diisi akan hilang. Yakin ingin membatalkan registrasi?",
+              yesText: "Ya, batalkan",
+              noText: "Tidak",
+              icon: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.22,
+                child: Lottie.asset("assets/lottie/Failed.json"),
+              ),
+              onYes: () {
+                ref.read(registerStep1CacheProvider.notifier).clearCache();
+                Navigator.pop(context);
+                context.go('/');
+              },
+            );
+          },
         ),
         title: Text(
           'Register',
@@ -182,7 +199,12 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                   label: 'Email',
                   hintText: 'Masukkan Email',
                   controller: _emailController,
-                  validator: (_) => null,
+                  validator: (_) {
+                    final email = _emailController.text.trim();
+                    if (email.isEmpty) return "Email tidak boleh kosong";
+                    if (!_isValidEmail(email)) return "Format email salah";
+                    return null;
+                  },
                 ),
 
                 InputField(
@@ -217,6 +239,32 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                         onlyYes: true,
                         icon: SizedBox(
                           height: MediaQuery.of(context).size.height * 0.22,
+                          child: Lottie.asset('assets/lottie/Failed.json'),
+                        ),
+                        onYes: () => Navigator.pop(context),
+                      );
+                      return;
+                    }
+
+                    // =============================
+                    // CEK EMAIL DI SUPABASE AUTH
+                    // =============================
+                    final email = _emailController.text.trim();
+
+                    final exists = await ref.read(
+                      registerCheckEmailProvider(email).future,
+                    );
+
+                    if (exists) {
+                      showBottomAlert(
+                        context: context,
+                        title: "Email Sudah Terdaftar",
+                        message:
+                            "Email ini sudah digunakan. Silakan gunakan email lain untuk melanjutkan.",
+                        yesText: "Mengerti",
+                        onlyYes: true,
+                        icon: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.22,
                           child: Lottie.asset(
                             'assets/lottie/Failed.json',
                             fit: BoxFit.contain,
@@ -227,15 +275,40 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                       return;
                     }
 
-                    // === Simpan ke cache step 1 ===
-                    ref.read(registerStep1CacheProvider.notifier).updateCache(
-                          email: _emailController.text.trim(),
+                    // =============================
+                    // SIMPAN KE CACHE
+                    // =============================
+                    ref
+                        .read(registerStep1CacheProvider.notifier)
+                        .updateCache(
+                          email: email,
                           password: _passwordController.text.trim(),
                           confirmPassword: _confirmController.text.trim(),
                         );
 
-                    // === Lanjut ke langkah berikutnya ===
-                    context.push('/register/step2');
+                    // =============================
+                    // KONFIRMASI BERHASIL
+                    // =============================
+                    showBottomAlert(
+                      context: context,
+                      title: "Lanjut ke Tahap Berikutnya?",
+                      message:
+                          "Pastikan email dan password yang Anda isi sudah benar.",
+                      yesText: "Lanjutkan",
+                      noText: "Periksa Lagi",
+                      icon: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.22,
+                        child: Lottie.asset(
+                          'assets/lottie/Done.json',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      onYes: () {
+                        Navigator.pop(context);
+                        context.push('/register/step2');
+                      },
+                      onNo: () => Navigator.pop(context),
+                    );
                   },
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(
@@ -247,10 +320,7 @@ class _RegisterStep1AccountState extends ConsumerState<RegisterStep1Account> {
                       ),
                     ),
                     padding: WidgetStateProperty.all(
-                      const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 20,
-                      ),
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                     ),
                     minimumSize: WidgetStateProperty.all(
                       const Size(double.infinity, 50),

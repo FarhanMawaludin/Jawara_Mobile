@@ -1,120 +1,180 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../domain/entities/mutasi.dart';
+import '../../providers/mutasi/mutasi_providers.dart';
 
-class StatistikPage extends StatelessWidget {
-  const StatistikPage({super.key});
+class StatistikKeuanganPage extends ConsumerWidget {
+  const StatistikKeuanganPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mutasiAsync = ref.watch(allTransactionsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Statistik"),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // ===== CARD SUMMARY =====
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                _SummaryCard(
-                  title: "Total Pemasukan",
-                  value: "6",
-                  subtitle: "Keluarga",
-                  icon: Icons.arrow_upward,
-                  color: Colors.green,
+      body: mutasiAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text("Error: $e")),
+        data: (List<Mutasi> data) {
+          // =============================
+          // HITUNG STATISTIK
+          // =============================
+          final totalPemasukan = data
+              .where((m) => m.jenis == MutasiType.pemasukan)
+              .fold<double>(0, (s, m) => s + m.jumlah);
+
+          final totalPengeluaran = data
+              .where((m) => m.jenis == MutasiType.pengeluaran)
+              .fold<double>(0, (s, m) => s + m.jumlah);
+
+          final totalTransaksi = data.length;
+
+          // Line chart (12 bulan)
+          final pemasukanPerBulan = List<double>.filled(12, 0);
+          final pengeluaranPerBulan = List<double>.filled(12, 0);
+
+          for (var m in data) {
+            if (m.jenis == MutasiType.pemasukan) {
+              pemasukanPerBulan[m.tanggal.month - 1] += m.jumlah;
+            } else {
+              pengeluaranPerBulan[m.tanggal.month - 1] += m.jumlah;
+            }
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // ===========================
+                // SUMMARY CARD
+                // ===========================
+                Row(
+                  children: [
+                    _SummaryCard(
+                      title: "Total Pemasukan",
+                      value: totalPemasukan.toStringAsFixed(0),
+                      subtitle: "Keluarga",
+                      icon: Icons.arrow_upward,
+                      color: Colors.green,
+                    ),
+                    _SummaryCard(
+                      title: "Total Pengeluaran",
+                      value: totalPengeluaran.toStringAsFixed(0),
+                      subtitle: "Anggota",
+                      icon: Icons.arrow_downward,
+                      color: Colors.red,
+                    ),
+                    _SummaryCard(
+                      title: "Jumlah Transaksi",
+                      value: totalTransaksi.toString(),
+                      subtitle: "Anggota",
+                      icon: Icons.receipt_long,
+                      color: Colors.blueGrey,
+                    ),
+                  ],
                 ),
-                _SummaryCard(
-                  title: "Total Pengeluaran",
-                  value: "12",
-                  subtitle: "Anggota",
-                  icon: Icons.arrow_downward,
-                  color: Colors.red,
+
+                const SizedBox(height: 20),
+
+                // ===========================
+                // LINE CHART PEMASUKAN
+                // ===========================
+                const _SectionTitle("Total Pemasukan"),
+                const SizedBox(height: 16),
+
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: _LineChart(
+                      color: Colors.blueAccent,
+                      data: List.generate(
+                          12,
+                          (i) => FlSpot(
+                              i.toDouble(), pemasukanPerBulan[i].toDouble())),
+                    ),
+                  ),
                 ),
-                _SummaryCard(
-                  title: "Jumlah Transaksi",
-                  value: "12",
-                  subtitle: "Anggota",
-                  icon: Icons.receipt_long,
-                  color: Colors.blueGrey,
+
+                const SizedBox(height: 20),
+
+                // ===========================
+                // LINE CHART PENGELUARAN
+                // ===========================
+                const _SectionTitle("Total Pengeluaran"),
+                const SizedBox(height: 16),
+
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: _LineChart(
+                      color: Colors.redAccent,
+                      data: List.generate(
+                          12,
+                          (i) => FlSpot(
+                              i.toDouble(), pengeluaranPerBulan[i].toDouble())),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ===========================
+                // DONUT CHART PEMASUKAN
+                // ===========================
+                const _SectionTitle("Kategori Pemasukan"),
+                const SizedBox(height: 16),
+
+                Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: _DonutChart(
+                      total: totalPemasukan.toStringAsFixed(0),
+                      color: Colors.orange,
+                      label1: "Dana Pemerintah",
+                      label2: "Pendapatan Lainnya",
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ===========================
+                // DONUT CHART PENGELUARAN
+                // ===========================
+                const _SectionTitle("Kategori Pengeluaran"),
+                const SizedBox(height: 16),
+
+                Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: _DonutChart(
+                      total: totalPengeluaran.toStringAsFixed(0),
+                      color: Colors.blueAccent,
+                      label1: "Operasional RT/RW",
+                      label2: "Kegiatan Warga",
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // ===== LINE CHART PEMASUKAN =====
-            const _SectionTitle("Total Pemasukan"),
-            const SizedBox(height: 20),
-            _LineChart(
-              color: Colors.blueAccent,
-              data: const [
-                FlSpot(0, 60),
-                FlSpot(1, 75),
-                FlSpot(2, 70),
-                FlSpot(3, 85),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // ===== LINE CHART PENGELUARAN =====
-            const _SectionTitle("Total Pengeluaran"),
-            const SizedBox(height: 20),
-            _LineChart(
-              color: Colors.redAccent,
-              data: const [
-                FlSpot(0, 60),
-                FlSpot(1, 65),
-                FlSpot(2, 55),
-                FlSpot(3, 90),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // ===== KATEGORI PEMASUKAN =====
-            const _SectionTitle("Kategori Pemasukan"),
-            const SizedBox(height: 16),
-            const _DonutChart(
-              total: "100",
-              color: Colors.blueAccent,
-              label1: "Dana Pemerintah",
-              label2: "Pendapatan Lainnya",
-            ),
-
-            const SizedBox(height: 24),
-
-            // ===== KATEGORI PENGELUARAN =====
-            const _SectionTitle("Kategori Pengeluaran"),
-            const SizedBox(height: 16),
-            const _DonutChart(
-              total: "200",
-              color: Colors.redAccent,
-              label1: "Operasional RT/RW",
-              label2: "Kegiatan Warga",
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
-// =========================
-// ======= WIDGETS =========
-// =========================
-
 class _SummaryCard extends StatelessWidget {
-  final String title, value, subtitle;
+  final String title;
+  final String value;
+  final String subtitle;
   final IconData icon;
   final Color color;
 
@@ -130,24 +190,16 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Icon(icon, color: color, size: 28),
+              Icon(icon, color: color, size: 20),
               const SizedBox(height: 6),
-              Text(title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(value,
-                  style: TextStyle(
-                      color: color,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold)),
-              Text(subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(title),
+              Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
         ),
@@ -155,64 +207,45 @@ class _SummaryCard extends StatelessWidget {
     );
   }
 }
-
 class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle(this.title);
+  final String text;
+  const _SectionTitle(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Text(title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
-
-// ======================
-// LINE CHART
-// ======================
 class _LineChart extends StatelessWidget {
   final Color color;
   final List<FlSpot> data;
 
-  const _LineChart({required this.color, required this.data});
+  const _LineChart({
+    required this.color,
+    required this.data,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200,
+      height: 180,
       child: LineChart(
         LineChartData(
+          minX: 0,
+          maxX: 11,
           minY: 0,
-          maxY: 100,
-          gridData: const FlGridData(show: false),
+          titlesData: FlTitlesData(show: false),
+          gridData: FlGridData(show: true),
           borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 24,
-                getTitlesWidget: (value, meta) {
-                  final months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"];
-                  if (value < months.length) {
-                    return Text(months[value.toInt()],
-                        style: const TextStyle(fontSize: 12));
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
-            leftTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles:
-                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          ),
           lineBarsData: [
             LineChartBarData(
+              spots: data,
               isCurved: true,
               color: color,
               barWidth: 3,
@@ -220,8 +253,6 @@ class _LineChart extends StatelessWidget {
                 show: true,
                 color: color.withOpacity(0.2),
               ),
-              spots: data,
-              dotData: const FlDotData(show: true),
             ),
           ],
         ),
@@ -230,9 +261,6 @@ class _LineChart extends StatelessWidget {
   }
 }
 
-// ======================
-// DONUT CHART
-// ======================
 class _DonutChart extends StatelessWidget {
   final String total;
   final Color color;
@@ -250,65 +278,36 @@ class _DonutChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 150,
-              height: 150,
-              child: PieChart(
-                PieChartData(
-                  centerSpaceRadius: 45,
-                  sectionsSpace: 2,
-                  sections: [
-                    PieChartSectionData(
-                      color: color,
-                      value: 60,
-                      showTitle: false,
-                    ),
-                    PieChartSectionData(
-                      color: Colors.orangeAccent,
-                      value: 40,
-                      showTitle: false,
-                    ),
-                  ],
+        SizedBox(
+          height: 170,
+          child: PieChart(
+            PieChartData(
+              sectionsSpace: 2,
+              centerSpaceRadius: 40,
+              sections: [
+                PieChartSectionData(
+                  value: 50,
+                  color: Colors.blueAccent,
+                  radius: 45,
+                  title: "",
                 ),
-              ),
+                PieChartSectionData(
+                  value: 50,
+                  color: Colors.orange,
+                  radius: 45,
+                  title: "",
+                ),
+              ],
             ),
-            Text(
-              total,
-              style: const TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _LegendDot(color: color, label: label1),
-            const SizedBox(width: 16),
-            _LegendDot(color: Colors.orangeAccent, label: label2),
-          ],
+        const SizedBox(height: 10),
+        Text(
+          total,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-      ],
-    );
-  }
-}
-
-class _LegendDot extends StatelessWidget {
-  final Color color;
-  final String label;
-
-  const _LegendDot({required this.color, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(radius: 5, backgroundColor: color),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(label1),
+        Text(label2),
       ],
     );
   }

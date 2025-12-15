@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
 import 'package:jawaramobile/core/component/bottom_alert.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
-
 
 class CardRumah extends ConsumerWidget {
   final String namaRumah;
@@ -142,6 +142,12 @@ class CardRumah extends ConsumerWidget {
                         /// PANGGIL USECASE DENGAN PROVIDER YANG BENAR
                         final delete = ref.read(deleteRumahProvider);
                         await delete(rumahId);
+
+                        // Log activity
+                        await ref
+                            .read(logActivityNotifierProvider.notifier)
+                            .createLogWithCurrentUser(
+                                title: 'Menghapus rumah: $namaRumah');
 
                         // Refresh list rumah
                         ref.invalidate(rumahListProvider);

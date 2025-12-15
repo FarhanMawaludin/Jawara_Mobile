@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jawaramobile/features/warga/data/models/rumah_model.dart';
 import 'package:jawaramobile/features/warga/domain/entities/rumah.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -79,7 +80,7 @@ final rumahListProvider = FutureProvider<List<Rumah>>((ref) async {
 });
 
 final rumahDetailProvider =
-    FutureProvider.family<Rumah?, int>((ref, id) async {
+    FutureProvider.family<RumahModel?, int>((ref, id) async {
   final usecase = ref.read(getRumahByIdProvider);
   return await usecase(id);
 });

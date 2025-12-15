@@ -87,18 +87,18 @@ class _SearchState extends ConsumerState<Search> {
 
         const SizedBox(width: 8),
 
-        // FILTER ICON
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Icon(
-            HeroiconsOutline.funnel,
-            color: Colors.grey[800],
-          ),
-        ),
+        // // FILTER ICON
+        // Container(
+        //   padding: const EdgeInsets.all(12),
+        //   decoration: BoxDecoration(
+        //     borderRadius: BorderRadius.circular(10),
+        //     border: Border.all(color: Colors.grey.shade300),
+        //   ),
+        //   child: Icon(
+        //     HeroiconsOutline.funnel,
+        //     color: Colors.grey[800],
+        //   ),
+        // ),
       ],
     );
   }

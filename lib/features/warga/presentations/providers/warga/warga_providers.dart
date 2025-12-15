@@ -2,6 +2,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/features/warga/data/models/warga_model.dart';
+import 'package:jawaramobile/features/warga/domain/usecases/warga/count_keluarga.dart';
+import 'package:jawaramobile/features/warga/domain/usecases/warga/count_warga.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Datasource + Repository
@@ -17,6 +19,7 @@ import '../../../domain/usecases/warga/update_warga.dart';
 import '../../../domain/usecases/warga/delete_warga.dart';
 import '../../../domain/usecases/warga/search_warga.dart';
 import '../../../domain/usecases/warga/get_warga_by_keluarga.dart';
+import '../../../domain/usecases/warga/get_statistik_warga.dart';
 
 // =========================================================
 // SUPABASE CLIENT PROVIDER
@@ -78,6 +81,18 @@ final getWargaByKeluargaUseCaseProvider = Provider<GetWargaByKeluarga>((ref) {
   return GetWargaByKeluarga(ref.read(wargaRepositoryProvider));
 });
 
+final getStatistikWargaUseCaseProvider = Provider<GetStatistikWarga>((ref) {
+  return GetStatistikWarga(ref.read(wargaRepositoryProvider));
+});
+
+final countKeluargaUseCaseProvider = Provider<CountKeluarga>((ref) {
+  return CountKeluarga(ref.read(wargaRepositoryProvider));
+});
+
+final countWargaUseCaseProvider = Provider<CountWarga>((ref) {
+  return CountWarga(ref.read(wargaRepositoryProvider));
+});
+
 // =========================================================
 // PROVIDER: Get All Warga
 // =========================================================
@@ -97,12 +112,20 @@ final keluargaListProvider = FutureProvider<List<WargaModel>>((ref) async {
 // =========================================================
 // PROVIDER: Get Warga by ID
 // =========================================================
-final wargaDetailProvider = FutureProvider.family((ref, int id) async {
+final wargaDetailProvider = FutureProvider.family<WargaModel, int>((
+  ref,
+  id,
+) async {
   final usecase = ref.read(getWargaByIdUseCaseProvider);
-  return await usecase(id);
+  final warga = await usecase(id);
+  if (warga == null) {
+    throw Exception("Warga not found");
+  }
+  return warga as WargaModel;
 });
+
 // =========================================================
-// PROVIDER: Get Warga by Keluarga ID
+// PROVIDER: Get Warga by Keluarga
 // =========================================================
 final wargaByKeluargaProvider = FutureProvider.family<List<WargaModel>, int>((
   ref,
@@ -114,32 +137,36 @@ final wargaByKeluargaProvider = FutureProvider.family<List<WargaModel>, int>((
 });
 
 // =========================================================
-// PROVIDERS: SEARCH WARGA
+// SEARCH WARGA
 // =========================================================
-
-// Input user saat mengetik
 final searchInputProvider = StateProvider<String>((ref) => "");
-
-// Keyword yang benar-benar dipakai untuk search (saat klik tombol Cari)
 final searchKeywordProvider = StateProvider<String>((ref) => "");
 
-// FutureProvider hasil search berdasarkan searchKeywordProvider
 final searchWargaProvider = FutureProvider.autoDispose<List<WargaModel>>((
   ref,
 ) async {
   final keyword = ref.watch(searchKeywordProvider);
-
-  // Jika belum ada keyword (belum ditekan tombol Cari)
   if (keyword.isEmpty) return [];
 
   final usecase = ref.read(searchWargaUseCaseProvider);
-  final results = await usecase(keyword);
-
-  return results.cast<WargaModel>();
+  return (await usecase(keyword)).cast<WargaModel>();
 });
 
 // =========================================================
-// STATE UNTUK FORM / CREATE / UPDATE WARGA
+// COUNT PROVIDER
+// =========================================================
+final totalKeluargaProvider = FutureProvider<int>((ref) async {
+  final usecase = ref.read(countKeluargaUseCaseProvider);
+  return await usecase();
+});
+
+final totalWargaProvider = FutureProvider<int>((ref) async {
+  final usecase = ref.read(countWargaUseCaseProvider);
+  return await usecase();
+});
+
+// =========================================================
+// FORM STATE
 // =========================================================
 
 class WargaFormState {
@@ -240,7 +267,6 @@ class WargaFormNotifier extends StateNotifier<WargaFormState> {
   }
 }
 
-// Provider untuk Form
 final wargaFormProvider =
     StateNotifierProvider<WargaFormNotifier, WargaFormState>((ref) {
       return WargaFormNotifier();

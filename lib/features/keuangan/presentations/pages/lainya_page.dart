@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,37 +23,36 @@ class LainnyaPage extends StatelessWidget {
             SectionTitle(title: "Pemasukkan"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': Icons.category, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran'},
-              {'icon': Icons.request_quote, 'label': 'Tagih Iuran', 'route': '/tagih-iuran'},
-              {'icon': Icons.receipt_long, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan'},
-              {'icon': Icons.trending_up, 'label': 'Pemasukkan Lain', 'route': '/keuangan/pemasukan-lain'},
-              {'icon': Icons.add_circle, 'label': 'Tambah Pemasukkan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan'},
+              {'icon': CupertinoIcons.qrcode_viewfinder,'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran', 'color': Colors.black},
+              {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/iuran/tambah-iuran', 'color': Colors.black},
+              {'icon': CupertinoIcons.doc_text, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan', 'color': Colors.black},
+              {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukkan Lain', 'route': '/keuangan/pemasukan-lain', 'color': Colors.green},
+              {'icon': CupertinoIcons.add_circled, 'label': 'Tambah Pemasukkan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'color': Colors.green},
             ]),
             SizedBox(height: 20),
 
             SectionTitle(title: "Pengeluaran"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': Icons.trending_down, 'label': 'Daftar Pengeluaran'},
-              {'icon': Icons.add_circle, 'label': 'Tambah Pengeluaran'},
+              {'icon': CupertinoIcons.arrow_up_right, 'label': 'Daftar Pengeluaran', 'route': '/daftar-pengeluaran', 'color': Colors.red},
+              {'icon': CupertinoIcons.add_circled, 'label': 'Tambah Pengeluaran', 'route': '/keuangan/pengeluaran/tambah-pengeluaran', 'color': Colors.red},
             ]),
             SizedBox(height: 20),
 
             SectionTitle(title: "Laporan Keuangan"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': Icons.trending_up, 'label': 'Laporan Pemasukkan'},
-              {'icon': Icons.trending_down, 'label': 'Laporan Pengeluaran'},
-              {'icon': Icons.picture_as_pdf, 'label': 'Cetak Laporan'},
-              {'icon': Icons.show_chart, 'label': 'Statistik', 'route': '/keuangan/statistik/statistik'},
+              {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi','route': '/keuangan/mutasi/mutasi' ,'color': Colors.black},
+              {'icon': CupertinoIcons.printer, 'label': 'Cetak Laporan', 'route': '/keuangan/mutasi/cetak-laporan-mutasi','color': Colors.black},
+              {'icon': CupertinoIcons.chart_bar, 'label': 'Statistik', 'route': '/keuangan/statistik/statistik', 'color': Colors.black},
             ]),
             SizedBox(height: 20),
 
             SectionTitle(title: "Channel Transfer"),
             SizedBox(height: 10),
             MenuCard(items: [
-              {'icon': Icons.credit_card, 'label': 'Daftar Channel'},
-              {'icon': Icons.add_card, 'label': 'Tambah Channel'},
+              {'icon': CupertinoIcons.rectangle_stack, 'label': 'Daftar Channel', 'route': '/keuangan/metodepembayaran/daftar-metodepembayaran' ,'color': Colors.black},
+              {'icon': CupertinoIcons.creditcard, 'label': 'Tambah Channel', 'route': '/keuangan/metodepembayaran/tambah-metodepembayaran', 'color': Colors.black},
             ]),
           ],
         ),
@@ -122,7 +122,11 @@ class MenuCard extends StatelessWidget {
                 CircleAvatar(
                   backgroundColor: Colors.white,
                   radius: 20,
-                  child: Icon(item['icon'], color: Colors.deepPurple),
+                  child: Icon(
+                    item['icon'],
+                    color: item['color'],
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(

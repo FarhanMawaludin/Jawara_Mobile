@@ -1,14 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StatistikPage extends StatelessWidget {
+import '../../providers/statistik/statistik_warga.dart';
+
+class StatistikPage extends ConsumerStatefulWidget {
   const StatistikPage({super.key});
 
   @override
+  ConsumerState<StatistikPage> createState() => _StatistikPageState();
+}
+
+class _StatistikPageState extends ConsumerState<StatistikPage> {
+  final Map<String, int> _selectedIndex = {};
+
+  @override
   Widget build(BuildContext context) {
-    const totalKeluarga = 6;
-    const totalWarga = 12;
+    final statistikState = ref.watch(statistikWargaControllerProvider);
+
+    if (statistikState.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (statistikState.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Error: ${statistikState.error}'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(statistikWargaControllerProvider.notifier).retry();
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (statistikState.data == null) {
+      return const Scaffold(body: Center(child: Text('No data available')));
+    }
+
+    final data = statistikState.data!;
+    final totalKeluarga = data.totalKeluarga;
+    final totalWarga = data.totalWarga;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -169,44 +209,55 @@ class StatistikPage extends StatelessWidget {
             // CHART SECTIONS
             _buildChartCard(
               title: "Status Penduduk",
-              aktif: 508,
-              nonaktif: 120,
+              aktif: data.aktif,
+              nonaktif: data.nonaktif,
               labelAktif: "Aktif",
               labelNonaktif: "Nonaktif",
             ),
             _buildChartCard(
               title: "Jenis Kelamin",
-              aktif: 200,
-              nonaktif: 180,
+              aktif: data.laki,
+              nonaktif: data.perempuan,
               labelAktif: "Laki-laki",
               labelNonaktif: "Perempuan",
             ),
-            _buildChartCard(
+            _buildChartCardFromMap(
               title: "Pekerjaan",
-              aktif: 500,
-              nonaktif: 150,
-              labelAktif: "Pelajar",
-              labelNonaktif: "Lainnya",
+              dataMap: data.pekerjaan,
+              colors: [
+                Colors.orange,
+                Colors.deepPurpleAccent,
+                Colors.teal,
+                Colors.pinkAccent,
+              ],
             ),
             _buildChartCardTigaKategori(
               title: "Peran Dalam Keluarga",
-              kepala: 700,
-              anak: 300,
-              anggota: 100,
+              kepala: data.kepalaKeluarga,
+              anak: data.anak,
+              anggota: data.ibuRumahTangga,
             ),
-            _buildChartCard(
+            _buildChartCardFromMap(
               title: "Agama",
-              aktif: 800,
-              nonaktif: 100,
-              labelAktif: "Islam",
-              labelNonaktif: "Katolik",
+              dataMap: data.agama,
+              colors: [
+                Colors.orange,
+                Colors.green,
+                Colors.blueAccent,
+                Colors.redAccent,
+                Colors.purpleAccent,
+              ],
             ),
-            _buildChartCard(
+            _buildChartCardFromMap(
               title: "Pendidikan",
-              aktif: 800,
-              nonaktif: 250,
-              labelAktif: "Sarjana/Diploma",
-              labelNonaktif: "SD",
+              dataMap: data.pendidikan,
+              colors: [
+                Colors.orange,
+                Colors.blueAccent,
+                Colors.green,
+                Colors.amber,
+                Colors.cyan,
+              ],
             ),
           ],
         ),
@@ -214,17 +265,49 @@ class StatistikPage extends StatelessWidget {
     );
   }
 
-  // ====================== PIE CHART 2 BAGIAN ======================
-  Widget _buildChartCard({
+  // ====================== PIE CHART DENGAN DATA MAP ======================
+  Widget _buildChartCardFromMap({
     required String title,
-    required int aktif,
-    required int nonaktif,
-    required String labelAktif,
-    required String labelNonaktif,
+    required Map<String, int> dataMap,
+    required List<Color> colors,
   }) {
-    int total = aktif + nonaktif;
-    double aktifPercent = (aktif / total) * 100;
-    double nonaktifPercent = (nonaktif / total) * 100;
+    if (dataMap.isEmpty) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Center(child: Text('Tidak ada data')),
+          ],
+        ),
+      );
+    }
+
+    final int actualTotal = dataMap.values.fold(0, (sum, val) => sum + val);
+    final int denomTotal = actualTotal == 0
+        ? 1
+        : actualTotal; // avoid divide-by-zero for percentages
+
+    final entries = dataMap.entries.toList();
+    final topEntry = entries.first;
+    final topCount = topEntry.value;
+    final int? selected = _selectedIndex[title];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -254,17 +337,191 @@ class StatistikPage extends StatelessWidget {
                     sectionsSpace: 0,
                     centerSpaceRadius: 55,
                     startDegreeOffset: -90,
+                    pieTouchData: PieTouchData(
+                      touchCallback: (event, pieTouchResponse) {
+                        final touched = pieTouchResponse?.touchedSection;
+                        if (event == null ||
+                            !event.isInterestedForInteractions ||
+                            touched == null) {
+                          setState(() {
+                            _selectedIndex.remove(title);
+                          });
+                          return;
+                        }
+                        final idx = touched.touchedSectionIndex;
+                        setState(() {
+                          _selectedIndex[title] = idx;
+                        });
+                      },
+                    ),
+                    sections: entries.asMap().entries.map((e) {
+                      int idx = e.key;
+                      int value = e.value.value;
+                      double percent = (value / denomTotal) * 100;
+                      return PieChartSectionData(
+                        color: colors[idx % colors.length],
+                        value: percent,
+                        radius: (selected == idx) ? 28 : 20,
+                        showTitle: false,
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (selected != null &&
+                        selected >= 0 &&
+                        selected < entries.length) ...[
+                      Text(
+                        entries[selected].value.toString(),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colors[selected % colors.length],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        entries[selected].key,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ] else ...[
+                      Text(
+                        actualTotal.toString(),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: colors[0],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Total',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: entries.asMap().entries.map((e) {
+              int idx = e.key;
+              String label = e.value.key;
+              int count = e.value.value;
+              return _buildLegendItemWithCount(
+                colors[idx % colors.length],
+                label,
+                count,
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItemWithCount(Color color, String text, int count) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text('$text ($count)', style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
+
+  // ====================== PIE CHART 2 BAGIAN ======================
+  Widget _buildChartCard({
+    required String title,
+    required int aktif,
+    required int nonaktif,
+    required String labelAktif,
+    required String labelNonaktif,
+  }) {
+    int total = aktif + nonaktif;
+    final int denomTotal = total == 0 ? 1 : total;
+    double aktifPercent = (aktif / denomTotal) * 100;
+    double nonaktifPercent = (nonaktif / denomTotal) * 100;
+    final int? selected = _selectedIndex[title];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey[300]!, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 180,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PieChart(
+                  PieChartData(
+                    sectionsSpace: 0,
+                    centerSpaceRadius: 55,
+                    startDegreeOffset: -90,
+                    pieTouchData: PieTouchData(
+                      touchCallback: (event, resp) {
+                        final touched = resp?.touchedSection;
+                        if (event == null ||
+                            !event.isInterestedForInteractions ||
+                            touched == null) {
+                          setState(() {
+                            _selectedIndex.remove(title);
+                          });
+                          return;
+                        }
+                        setState(() {
+                          _selectedIndex[title] = touched.touchedSectionIndex;
+                        });
+                      },
+                    ),
                     sections: [
                       PieChartSectionData(
                         color: Colors.orange,
                         value: aktifPercent,
-                        radius: 20,
+                        radius: (selected == 0) ? 28 : 20,
                         showTitle: false,
                       ),
                       PieChartSectionData(
                         color: Colors.deepPurpleAccent,
                         value: nonaktifPercent,
-                        radius: 20,
+                        radius: (selected == 1) ? 28 : 20,
                         showTitle: false,
                       ),
                     ],
@@ -273,20 +530,40 @@ class StatistikPage extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      aktif.toString(),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+                    if (selected != null) ...[
+                      Text(
+                        (selected == 0 ? aktif : nonaktif).toString(),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: (selected == 0
+                              ? Colors.orange
+                              : Colors.deepPurpleAccent),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      labelAktif,
-                      style:
-                          const TextStyle(fontSize: 13, color: Colors.black54),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        (selected == 0 ? labelAktif : labelNonaktif),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ] else ...[
+                      Text(
+                        total.toString(),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Total',
+                        style: TextStyle(fontSize: 13, color: Colors.black54),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -296,9 +573,13 @@ class StatistikPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(Colors.orange, labelAktif),
+              _buildLegendItem(Colors.orange, labelAktif, aktif),
               const SizedBox(width: 20),
-              _buildLegendItem(Colors.deepPurpleAccent, labelNonaktif),
+              _buildLegendItem(
+                Colors.deepPurpleAccent,
+                labelNonaktif,
+                nonaktif,
+              ),
             ],
           ),
         ],
@@ -314,9 +595,11 @@ class StatistikPage extends StatelessWidget {
     required int anggota,
   }) {
     int total = kepala + anak + anggota;
-    double kepalaPercent = (kepala / total) * 100;
-    double anakPercent = (anak / total) * 100;
-    double anggotaPercent = (anggota / total) * 100;
+    final int denomTotal = total == 0 ? 1 : total;
+    double kepalaPercent = (kepala / denomTotal) * 100;
+    double anakPercent = (anak / denomTotal) * 100;
+    double anggotaPercent = (anggota / denomTotal) * 100;
+    final int? selected = _selectedIndex[title];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -346,23 +629,39 @@ class StatistikPage extends StatelessWidget {
                     sectionsSpace: 0,
                     centerSpaceRadius: 55,
                     startDegreeOffset: -90,
+                    pieTouchData: PieTouchData(
+                      touchCallback: (event, resp) {
+                        final touched = resp?.touchedSection;
+                        if (event == null ||
+                            !event.isInterestedForInteractions ||
+                            touched == null) {
+                          setState(() {
+                            _selectedIndex.remove(title);
+                          });
+                          return;
+                        }
+                        setState(() {
+                          _selectedIndex[title] = touched.touchedSectionIndex;
+                        });
+                      },
+                    ),
                     sections: [
                       PieChartSectionData(
                         color: Colors.orange,
                         value: kepalaPercent,
-                        radius: 20,
+                        radius: (selected == 0) ? 28 : 20,
                         showTitle: false,
                       ),
                       PieChartSectionData(
                         color: Colors.blueAccent,
                         value: anakPercent,
-                        radius: 20,
+                        radius: (selected == 1) ? 28 : 20,
                         showTitle: false,
                       ),
                       PieChartSectionData(
                         color: Colors.green,
                         value: anggotaPercent,
-                        radius: 20,
+                        radius: (selected == 2) ? 28 : 20,
                         showTitle: false,
                       ),
                     ],
@@ -371,19 +670,51 @@ class StatistikPage extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      kepala.toString(),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+                    if (selected != null && selected >= 0 && selected <= 2) ...[
+                      Text(
+                        (selected == 0
+                                ? kepala
+                                : selected == 1
+                                ? anak
+                                : anggota)
+                            .toString(),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: (selected == 0
+                              ? Colors.orange
+                              : selected == 1
+                              ? Colors.blueAccent
+                              : Colors.green),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      "Kepala Keluarga",
-                      style: TextStyle(fontSize: 13, color: Colors.black54),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        (selected == 0
+                            ? 'Kepala Keluarga'
+                            : selected == 1
+                            ? 'Anak'
+                            : 'Anggota Lain'),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ] else ...[
+                      Text(
+                        total.toString(),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Total',
+                        style: TextStyle(fontSize: 13, color: Colors.black54),
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -393,11 +724,11 @@ class StatistikPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(Colors.orange, "Kepala Keluarga"),
+              _buildLegendItem(Colors.orange, "Kepala Keluarga", kepala),
               const SizedBox(width: 20),
-              _buildLegendItem(Colors.blueAccent, "Anak"),
+              _buildLegendItem(Colors.blueAccent, "Anak", anak),
               const SizedBox(width: 20),
-              _buildLegendItem(Colors.green, "Anggota Lain"),
+              _buildLegendItem(Colors.green, "Anggota Lain", anggota),
             ],
           ),
         ],
@@ -405,7 +736,7 @@ class StatistikPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLegendItem(Color color, String text) {
+  Widget _buildLegendItem(Color color, String text, int count) {
     return Row(
       children: [
         Container(
@@ -417,7 +748,7 @@ class StatistikPage extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text(text, style: const TextStyle(fontSize: 12)),
+        Text('$text ($count)', style: const TextStyle(fontSize: 12)),
       ],
     );
   }

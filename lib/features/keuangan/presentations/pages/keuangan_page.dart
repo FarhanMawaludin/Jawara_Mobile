@@ -1,40 +1,48 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/router/router.dart';
-
+import 'package:jawaramobile/features/keuangan/domain/entities/mutasi.dart';
+import 'package:jawaramobile/features/keuangan/presentations/providers/mutasi/mutasi_providers.dart';
 
 void main() {
   runApp(MaterialApp.router(routerConfig: router,
   ));
 }
 
-class KeuanganPage extends StatelessWidget {
+class KeuanganPage extends ConsumerWidget {
   const KeuanganPage({super.key});
 
+  String _formatCurrency(double amount) {
+    return amount.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = [
-      {'icon': Icons.category, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran'},
-      {'icon': Icons.request_quote, 'label': 'Tagih Iuran', 'route': '/tagih-iuran'},
-      {'icon': Icons.receipt_long, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan'},
-      {'icon': Icons.trending_up, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain'},
-      {'icon': Icons.add_circle, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan'},
-      {'icon': Icons.trending_down, 'label': 'Daftar Pengeluaran', 'route': '/daftar-pengeluaran'},
-      {'icon': Icons.remove_circle, 'label': 'Tambah Pengeluaran', 'route': '/tambah-pengeluaran'},
-      {'icon': Icons.more_horiz, 'label': 'Lainnya', 'route': '/keuangan/lainnya'},
+      {'icon': CupertinoIcons.qrcode, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran', 'warna': Colors.black},
+      {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/iuran/tambah-iuran', 'warna': Colors.black},
+      {'icon': CupertinoIcons.doc, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan', 'warna': Colors.black},
+      {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain', 'warna': Colors.green},
+      {'icon': CupertinoIcons.add, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'warna': Colors.green},
+      {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi Keuangan', 'route': '/keuangan/mutasi/mutasi', 'warna': Colors.black},
+      {'icon': CupertinoIcons.add, 'label': 'Tambah Pengeluaran', 'route': '/keuangan/pengeluaran/tambah-pengeluaran', 'warna': Colors.red},
+      {'icon': CupertinoIcons.bars, 'label': 'Lainnya', 'route': '/keuangan/lainnya', 'warna': Colors.black},
     ];
 
-    final transaksi = [
-      {'nama': 'Dimas', 'keterangan': 'Pemeliharaan Fasilitas', 'jumlah': 2112, 'warna': Colors.red},
-      {'nama': 'Nafa', 'keterangan': 'Pemeliharaan Fasilitas', 'jumlah': 10000, 'warna': Colors.red},
-      {'nama': 'Subandi', 'keterangan': 'Dana Bantuan Pemerintah', 'jumlah': 500000, 'warna': Colors.green},
-    ];
+    final transaksiAsyncValue = ref.watch(allTransactionsProvider);
+    final saldoAsyncValue = ref.watch(totalSaldoProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header
+            // Header dengan Saldo Dinamis
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -49,15 +57,24 @@ class KeuanganPage extends StatelessWidget {
                   bottomRight: Radius.circular(30),
                 ),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  
-                  SizedBox(height: 25),
-                  Text("Saldo", style: TextStyle(color: Colors.white70, fontSize: 14)),
-                  Text(
-                    "Rp. 50.000.000",
-                    style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 25),
+                  const Text("Saldo", style: TextStyle(color: Colors.white, fontSize: 14)),
+                  saldoAsyncValue.when(
+                    data: (saldo) => Text(
+                      "Rp. ${_formatCurrency(saldo)}",
+                      style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                    loading: () => const Text(
+                      "Rp. 0",
+                      style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                    error: (_, __) => const Text(
+                      "Rp. 0",
+                      style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
@@ -90,8 +107,11 @@ class KeuanganPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircleAvatar(
+                          radius: 25,
                           backgroundColor: Colors.white,
-                          child: Icon(item['icon'] as IconData, color: Colors.deepPurple),
+                          child: Icon(
+                            item['icon'] as IconData?, 
+                            color:  item['warna'] as Color),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -120,38 +140,57 @@ class KeuanganPage extends StatelessWidget {
             // Transaksi List
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: transaksi.map((t) {
-                  return InkWell(
-                    onTap: () => context.push('/transaksi/${t['nama']}'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(children: [
-                            Icon(Icons.arrow_upward, color: t['warna'] as Color),
-                            const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(t['nama'].toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                                Text(t['keterangan'].toString(),
-                                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                              ],
+              child: transaksiAsyncValue.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, stackTrace) => Center(
+                  child: Text("Error: $error"),
+                ),
+                data: (transaksiList) => transaksiList.isEmpty
+                    ? const Center(
+                        child: Text("Tidak ada transaksi"),
+                      )
+                    : Column(
+                        children: transaksiList.take(5).map((t) {
+                          return InkWell(
+                            onTap: () => context.push('/transaksi/${t.nama}'),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(children: [
+                                      Icon(
+                                        (t.jenis == MutasiType.pemasukan)
+                                          ? CupertinoIcons.arrow_down_left 
+                                          : CupertinoIcons.arrow_up_right,
+                                        color: t.jenis == MutasiType.pemasukan
+                                            ? Colors.green
+                                            : Colors.red,
+                                        ),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(t.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        Text(t.kategori ?? '-',
+                                            style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ]),
+                                  Text(
+                                    "Rp ${_formatCurrency(t.jumlah)}",
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ]),
-                          Text(
-                            "Rp ${t['jumlah']}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                       ),
-                    ),
-                  );
-                }).toList(),
               ),
-            )
+            ),
           ],
         ),
       ),
