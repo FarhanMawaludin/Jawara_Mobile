@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart'
+    hide supabaseClientProvider;
+import 'package:jawaramobile/features/warga/domain/entities/rumah.dart'
+    as rumah_entity;
 import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahWargaPage extends ConsumerStatefulWidget {
@@ -28,6 +32,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   String? _selectedRoleKeluarga;
   String? _selectedStatus;
   String? _selectedGolonganDarah;
+  int? _selectedRumahId;
 
   String? _agama;
   String? _pendidikan;
@@ -55,6 +60,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   ];
 
   final List<String> _pendidikanOptions = [
+    'TK',
     'SD',
     'SMP',
     'SMA',
@@ -66,6 +72,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
     'S1',
     'S2',
     'S3',
+    'Lainnya',
   ];
 
   @override
@@ -143,7 +150,11 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   Future<void> _onSimpan() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_selectedKeluargaId == null) return _show("Pilih keluarga");
+    // jika keluarga tidak dipilih, izinkan null dan default role jadi Kepala Keluarga
+    if (_selectedKeluargaId == null) {
+      _selectedRoleKeluarga ??= 'Kepala Keluarga';
+    }
+
     if (_selectedJenisKelamin == null) return _show("Pilih jenis kelamin");
     if (_selectedRoleKeluarga == null) return _show("Pilih peran keluarga");
     if (_selectedStatus == null) return _show("Pilih status");
@@ -153,8 +164,35 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
 
     _formKey.currentState!.save();
 
+    final client = ref.read(supabaseClientProvider);
+
+    // Jika keluarga tidak dipilih dan perannya Kepala Keluarga,
+    // buat entri keluarga baru dan gunakan id-nya untuk warga.
+    int? keluargaId = _selectedKeluargaId;
+    if (keluargaId == null && _selectedRoleKeluarga == 'Kepala Keluarga') {
+      try {
+        // pastikan nama kepala keluarga tersedia sebelum membuat keluarga
+        if (_nama.trim().isEmpty) {
+          return _show('Nama harus diisi untuk membuat keluarga baru');
+        }
+
+        // gunakan nama kepala keluarga sebagai nama_keluarga (konsisten dengan flow register)
+        final resp = await client.from('keluarga').insert({
+          'nama_keluarga': _nama,
+        }).select();
+
+        if (resp is List && resp.isNotEmpty) {
+          keluargaId = resp[0]['id'];
+          // tambahkan ke list lokal agar UI konsisten jika perlu
+          _keluargaList.add({'id': keluargaId, 'nama_keluarga': _nama});
+        }
+      } catch (e) {
+        return _show('Gagal membuat keluarga baru: $e');
+      }
+    }
+
     final data = {
-      'keluarga_id': _selectedKeluargaId,
+      'keluarga_id': keluargaId,
       'nama': _nama,
       'nik': _nik,
       'jenis_kelamin': _mapJenisKelaminToDb(_selectedJenisKelamin),
@@ -168,11 +206,36 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       'pendidikan': _pendidikan,
       'pekerjaan': _pekerjaan,
       'user_id': null,
-      'alamat_rumah_id': null,
+      'alamat_rumah_id': _selectedRumahId,
     };
 
     try {
       final client = ref.read(supabaseClientProvider);
+
+      // jika user memilih rumah ketika menambah kepala keluarga baru,
+      // update rumah.keluarga_id -> keluargaId sebelum menyimpan warga
+      if (_selectedRumahId != null && keluargaId != null) {
+        try {
+          final rumahList = await ref.read(rumahListProvider.future);
+          final rumah = rumahList.firstWhere((r) => r.id == _selectedRumahId);
+
+          final updatedRumah = rumah_entity.Rumah(
+            id: rumah.id,
+            keluargaId: keluargaId,
+            blok: rumah.blok,
+            nomorRumah: rumah.nomorRumah,
+            alamatLengkap: rumah.alamatLengkap,
+            createdAt: rumah.createdAt,
+          );
+
+          final updateRumah = ref.read(updateRumahProvider);
+          await updateRumah(updatedRumah);
+        } catch (_) {
+          // jika update rumah gagal, lanjutkan namun beri tahu user
+          _show('Perhatian: gagal mengaitkan rumah ke keluarga');
+        }
+      }
+
       await client.from('warga').insert(data).select();
 
       // BUAT LOG ACTIVITY SETELAH BERHASIL MENAMBAH WARGA
@@ -200,9 +263,10 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
 
   @override
   Widget build(BuildContext context) {
-    final keluargaNames = _keluargaList
-        .map((e) => e['nama_keluarga'].toString())
-        .toList();
+    // tambahkan opsi kosong di awal agar user bisa memilih "kosong"
+    final keluargaNames =
+        ['Tidak Ada'] +
+        _keluargaList.map((e) => e['nama_keluarga'].toString()).toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -234,11 +298,18 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 onChanged: (val) {
                   setState(() {
                     _selectedKeluargaName = val;
-                    final f = _keluargaList.firstWhere(
-                      (m) => m['nama_keluarga'] == val,
-                      orElse: () => {},
-                    );
-                    _selectedKeluargaId = f['id'];
+
+                    // jika user memilih opsi kosong ('Tidak Ada'), set keluarga id jadi null
+                    if (val == 'Tidak Ada') {
+                      _selectedKeluargaId = null;
+                      // jangan otomatis ubah role di sini -- handled saat simpan
+                    } else {
+                      final f = _keluargaList.firstWhere(
+                        (m) => m['nama_keluarga'] == val,
+                        orElse: () => {},
+                      );
+                      _selectedKeluargaId = f['id'];
+                    }
                   });
                 },
               ),
@@ -285,12 +356,20 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 onTap: _pickTanggalLahir,
                 child: IgnorePointer(
                   child: TextFormField(
+                    // tampilkan tanggal dengan warna hitam ketika sudah dipilih
+                    style: TextStyle(
+                      color: const Color(0xFF1A1A1A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
                     decoration: InputDecoration(
                       hintText: _tanggalLahir == null
                           ? "Pilih Tanggal Lahir"
                           : "${_tanggalLahir!.day}-${_tanggalLahir!.month}-${_tanggalLahir!.year}",
                       hintStyle: TextStyle(
-                        color: Colors.grey[400],
+                        color: _tanggalLahir == null
+                            ? Colors.grey[400]
+                            : const Color(0xFF1A1A1A),
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                       ),
@@ -327,8 +406,74 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
                 label: "Peran Keluarga",
                 hintText: "Pilih peran keluarga",
                 options: _roleKeluargaOptions,
-                onChanged: (v) => _selectedRoleKeluarga = v,
+                onChanged: (v) => setState(() => _selectedRoleKeluarga = v),
               ),
+
+              // Jika role adalah Kepala Keluarga dan keluarga belum dipilih (null),
+              // tampilkan dropdown pilihan alamat rumah dari provider rumahListProvider
+              if (_selectedRoleKeluarga == 'Kepala Keluarga' &&
+                  _selectedKeluargaId == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 14),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final rumahAsync = ref.watch(rumahListProvider);
+                      return rumahAsync.when(
+                        data: (rumahList) {
+                          // hanya tampilkan rumah yang belum punya keluarga (keluargaId == null)
+                          final available = rumahList
+                              .where((r) => r.keluargaId == null)
+                              .toList();
+
+                          if (available.isEmpty) {
+                            return const Text(
+                              'Tidak ada alamat rumah tersedia',
+                            );
+                          }
+
+                          final options = available
+                              .map(
+                                (r) => DropdownMenuItem<int>(
+                                  value: r.id,
+                                  child: Text(
+                                    r.blok != null && r.nomorRumah != null
+                                        ? '${r.blok} - ${r.nomorRumah}'
+                                        : (r.alamatLengkap ?? 'Rumah #${r.id}'),
+                                  ),
+                                ),
+                              )
+                              .toList();
+
+                          return DropdownButtonFormField<int>(
+                            value: _selectedRumahId,
+                            decoration: InputDecoration(
+                              labelText: 'Pilih Alamat Rumah',
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: Colors.grey[400]!,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 16,
+                              ),
+                            ),
+                            items: options,
+                            onChanged: (val) =>
+                                setState(() => _selectedRumahId = val),
+                            hint: const Text('Pilih alamat rumah'),
+                          );
+                        },
+                        loading: () => const SizedBox(
+                          height: 56,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (e, st) => Text('Gagal memuat alamat rumah'),
+                      );
+                    },
+                  ),
+                ),
 
               InputField(
                 label: "Agama",
