@@ -98,7 +98,7 @@ class KeluargaDetail extends ConsumerWidget {
                               ), // Jarak antar card
                               child: CardAnggotaKeluarga(warga: w),
                             );
-                          }).toList(),
+                          }),
                         ],
                       ),
                     ),

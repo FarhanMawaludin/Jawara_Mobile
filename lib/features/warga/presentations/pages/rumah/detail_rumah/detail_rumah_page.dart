@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons_flutter/heroicons_flutter.dart';
+import 'package:jawaramobile/features/warga/presentations/pages/rumah/detail_rumah/methods/riwayat.dart';
 
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
-import 'methods/judul_detail.dart';
 import 'methods/card_rumah.dart';
 
 class DetailRumahPage extends ConsumerWidget {
@@ -53,8 +53,6 @@ class DetailRumahPage extends ConsumerWidget {
                     //   nomorRumah: rumah.nomorRumah ?? "-",
                     // ),
 
-                    const SizedBox(height: 20),
-
                     // Container tetap sama seperti desainmu
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -82,6 +80,12 @@ class DetailRumahPage extends ConsumerWidget {
                             nomorRumah: rumah.nomorRumah ?? "-",
                             alamatLengkap: rumah.alamatLengkap ?? "-",
                           ),
+
+                          SizedBox(height: 12),
+
+                          // Riwayat
+                          Riwayat(namaKeluarga: rumah.keluarga?["nama_keluarga"] ?? "-",),
+
                         ],
                       ),
                     ),

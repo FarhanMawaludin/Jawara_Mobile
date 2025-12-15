@@ -1,7 +1,9 @@
 import '../../domain/entities/warga.dart';
+import '../../domain/entities/statistik.dart';
 import '../../domain/repositories/warga_repository.dart';
 import '../datasources/warga_remote_datasource.dart';
 import '../models/warga_model.dart';
+import '../models/statistik_warga_model.dart';
 
 class WargaRepositoryImpl implements WargaRepository {
   final WargaRemoteDataSource remoteDataSource;
@@ -26,17 +28,14 @@ class WargaRepositoryImpl implements WargaRepository {
   @override
   Future<List<Warga>> searchWarga(String keyword) async {
     final result = await remoteDataSource.searchWarga(keyword);
-
-    // result = List<WargaModel>
-    // Domain butuh List<Warga>, tapi WargaModel extends Warga
     return result;
   }
 
   @override
-Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
-  final response = await remoteDataSource.getWargaByKeluargaId(keluargaId);
-  return response;
-}
+  Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
+    final response = await remoteDataSource.getWargaByKeluargaId(keluargaId);
+    return response;
+  }
 
   @override
   Future<void> createWarga(Warga warga) async {
@@ -89,5 +88,26 @@ Future<List<Warga>> getWargaByKeluargaId(int keluargaId) async {
   @override
   Future<void> deleteWarga(int id) async {
     await remoteDataSource.deleteWarga(id);
+  }
+
+  @override
+  Future<StatistikWarga> getStatistikWarga() async {
+    try {
+      final map = await (remoteDataSource as WargaRemoteDataSourceImpl)
+          .getStatistikWarga();
+      return StatistikWargaModel.fromMap(map);
+    } catch (e) {
+      throw Exception('Gagal mengambil statistik warga: $e');
+    }
+  } // ← KURUNG INI YANG KAMU LUPA
+
+  @override
+  Future<int> countKeluarga() async {
+    return await remoteDataSource.countKeluarga();
+  }
+
+  @override
+  Future<int> countWarga() async {
+    return await remoteDataSource.countWarga();
   }
 }

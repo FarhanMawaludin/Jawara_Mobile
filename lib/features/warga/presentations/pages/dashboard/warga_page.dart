@@ -20,7 +20,7 @@ class WargaPage extends StatelessWidget {
                 CardWarga(),
                 const SizedBox(height: 20),
                 Itemmenu(),
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
                 Aspirasi(),
                 
               ],

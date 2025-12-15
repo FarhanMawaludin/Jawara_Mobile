@@ -1,14 +1,15 @@
 // lib/presentation/providers/register_providers.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/mutasi/mutasi_providers.dart';
 
+import '../../../warga/domain/entities/rumah.dart';
 import '../../domain/usecases/register_account.dart';
 import '../../domain/usecases/create_keluarga_and_warga.dart';
 import '../../domain/usecases/create_rumah.dart';
 
 import '../../data/repositories/register_repository_impl.dart';
 import '../../data/datasources/supabase_remote_datasource.dart';
-
 
 // =========================================================
 // REPOSITORY PROVIDER
@@ -17,7 +18,6 @@ final registerRepositoryProvider = Provider<RegisterRepositoryImpl>((ref) {
   return RegisterRepositoryImpl(SupabaseRemoteDatasource());
 });
 
-
 // =========================================================
 // USECASE PROVIDERS
 // =========================================================
@@ -25,7 +25,8 @@ final registerAccountProvider = Provider<RegisterAccount>((ref) {
   return RegisterAccount(ref.read(registerRepositoryProvider));
 });
 
-final createKeluargaAndWargaProvider = Provider<CreateKeluargaAndWarga>((ref) {
+final createKeluargaAndWargaProvider =
+    Provider<CreateKeluargaAndWarga>((ref) {
   return CreateKeluargaAndWarga(ref.read(registerRepositoryProvider));
 });
 
@@ -33,9 +34,64 @@ final createRumahProvider = Provider<CreateRumah>((ref) {
   return CreateRumah(ref.read(registerRepositoryProvider));
 });
 
+// Provider untuk UPDATE rumah existing
+final updateKeluargaRumahProvider = Provider<UpdateKeluargaRumah>((ref) {
+  return UpdateKeluargaRumah(ref.read(supabaseClientProvider));
+});
+
+// Provider untuk UPDATE alamat_rumah_id di warga
+final updateAlamatRumahWargaProvider =
+    Provider<UpdateAlamatRumahWarga>((ref) {
+  return UpdateAlamatRumahWarga(ref.read(supabaseClientProvider));
+});
+
+// Check email RPC
+final registerCheckEmailProvider =
+    FutureProvider.family<bool, String>((ref, email) async {
+  final supabase = ref.read(supabaseClientProvider);
+
+  final result = await supabase.rpc(
+    'check_email_exists',
+    params: {'email_input': email},
+  );
+
+  return result == true;
+});
 
 // =========================================================
-// STATE FINAL (AKAN DIKIRIM KE SERVER DI STEP 3)
+// USECASE: UPDATE rumah keluarga
+// =========================================================
+class UpdateKeluargaRumah {
+  final supabase;
+  UpdateKeluargaRumah(this.supabase);
+
+  Future<void> call(int keluargaId, int rumahIdBaru) async {
+    await supabase
+        .from('keluarga')
+        .update({'rumah_id': rumahIdBaru}).eq('id', keluargaId);
+  }
+}
+
+// =========================================================
+// USECASE: UPDATE alamat rumah warga
+// =========================================================
+class UpdateAlamatRumahWarga {
+  final supabase;
+  UpdateAlamatRumahWarga(this.supabase);
+
+  Future<void> call({
+    required int keluargaId,
+    required int rumahId,
+  }) async {
+    await supabase
+        .from('warga')
+        .update({'alamat_rumah_id': rumahId})
+        .eq('keluarga_id', keluargaId);
+  }
+}
+
+// =========================================================
+// REGISTER STATE FINAL
 // =========================================================
 class RegisterState {
   final String? email;
@@ -91,15 +147,12 @@ class RegisterState {
   }
 }
 
-
-
 // =========================================================
 // NOTIFIER: FINAL REGISTER PROCESS
 // =========================================================
 class RegisterNotifier extends StateNotifier<RegisterState> {
   RegisterNotifier() : super(RegisterState());
 
-  // Menggabungkan semua cache ke RegisterState final
   void collectAllFromCache(WidgetRef ref) {
     final step1 = ref.read(registerStep1CacheProvider);
     final step2 = ref.read(registerStep2CacheProvider);
@@ -108,54 +161,67 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
     state = state.copyWith(
       email: step1.email,
       password: step1.password,
-
       nama: step2.nama,
       nik: step2.nik,
       jenisKelamin: step2.jenisKelamin,
       tanggalLahir: step2.tanggalLahir,
       roleKeluarga: 'kepala_keluarga',
-
       blok: step3.blok,
       nomorRumah: step3.nomorRumah,
       alamatLengkap: step3.alamatLengkap,
     );
   }
 
-  // 🚀 STEP 3: Submit semua data ke Supabase
-  Future<void> submitAll(WidgetRef ref) async {
-    // Satukan cache → state final
+  // =========================================================
+  // FINAL SUBMIT
+  // =========================================================
+  Future<int> submitAll(WidgetRef ref, {Rumah? selectedRumah}) async {
     collectAllFromCache(ref);
 
     final accountUC = ref.read(registerAccountProvider);
     final keluargaUC = ref.read(createKeluargaAndWargaProvider);
     final rumahUC = ref.read(createRumahProvider);
+    final updateRumahUC = ref.read(updateKeluargaRumahProvider);
+    final updateAlamatUC = ref.read(updateAlamatRumahWargaProvider);
 
-    // 1. Register akun
-    final userId = await accountUC.call(
-      state.email!,
-      state.password!,
-    );
+    // 1. Buat akun user
+    final userId = await accountUC.call(state.email!, state.password!);
 
-    // 2. Insert keluarga + warga pertama
+    // 2. Buat keluarga + warga pertama
     final keluargaId = await keluargaUC.call(
       nama: state.nama!,
       nik: state.nik!,
       jenisKelamin: state.jenisKelamin!,
       tanggalLahir: state.tanggalLahir!,
       roleKeluarga: state.roleKeluarga,
-      userId: userId!,
+      userId: userId, // Removed redundant '!' operator
     );
 
-    // 3. Insert rumah
-    await rumahUC.call(
+    int rumahIdFinal;
+
+    // 3. Rumah logic
+    if (selectedRumah == null) {
+      // INPUT MANUAL → BUAT rumah baru
+      rumahIdFinal = await rumahUC.call(
+        keluargaId: keluargaId,
+        blok: state.blok!,
+        nomorRumah: state.nomorRumah!,
+        alamatLengkap: state.alamatLengkap!,
+      );
+    } else {
+      // PILIH DROPDOWN → PAKAI rumah existing
+      rumahIdFinal = selectedRumah.id; // Removed redundant '!' operator
+      await updateRumahUC(keluargaId, rumahIdFinal);
+    }
+
+    // 4. Update alamat rumah warga
+    await updateAlamatUC(
       keluargaId: keluargaId,
-      blok: state.blok!,
-      nomorRumah: state.nomorRumah!,
-      alamatLengkap: state.alamatLengkap!,
+      rumahId: rumahIdFinal,
     );
 
-    // Bersihkan setelah sukses
     reset();
+    return keluargaId;
   }
 
   void reset() {
@@ -163,18 +229,14 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
   }
 }
 
-
 // Provider final register state
 final registerStateProvider =
     StateNotifierProvider<RegisterNotifier, RegisterState>((ref) {
   return RegisterNotifier();
 });
 
-
-
-
 // =========================================================
-// ============= CACHE: STEP 1 (email & password) ===========
+// ============= CACHE: STEP 1 =============================
 // =========================================================
 
 class RegisterStep1Cache {
@@ -224,13 +286,9 @@ final registerStep1CacheProvider =
   return RegisterStep1CacheNotifier();
 });
 
-
-
-
 // =========================================================
-// ============= CACHE: STEP 2 (data warga) =================
+// ============= CACHE: STEP 2 =============================
 // =========================================================
-
 class RegisterStep2Cache {
   final String nama;
   final String nik;
@@ -284,11 +342,8 @@ final registerStep2CacheProvider =
   return RegisterStep2CacheNotifier();
 });
 
-
-
-
 // =========================================================
-// ============= CACHE: STEP 3 (data rumah) =================
+// ============= CACHE: STEP 3 =============================
 // =========================================================
 
 class RegisterStep3Cache {
@@ -305,12 +360,12 @@ class RegisterStep3Cache {
   RegisterStep3Cache copyWith({
     String? blok,
     String? nomorRumah,
-    String? alamatLengkap,
+    String? alamatLengkap, // Corrected parameter name
   }) {
     return RegisterStep3Cache(
       blok: blok ?? this.blok,
       nomorRumah: nomorRumah ?? this.nomorRumah,
-      alamatLengkap: alamatLengkap ?? this.alamatLengkap,
+      alamatLengkap: alamatLengkap ?? this.alamatLengkap, // Corrected usage
     );
   }
 }

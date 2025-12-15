@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class KategoriIuranPage extends StatelessWidget {
+import '../../providers/ketegoriiuran/ketegoriiuran_providers.dart';
+
+class KategoriIuranPage extends ConsumerWidget {
   const KategoriIuranPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> dataIuran = [
-      {'nama': 'Kerja Bakti', 'harga': 50000, "tipe": "Iuran Bulanan"},
-      {'nama': 'Iuran Kebersihan', 'harga': 20000, "tipe": "Iuran Bulanan"},
-      {'nama': 'Agustusan', 'harga': 30000, "tipe": "Iuran Khusus"},
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final kategoriState = ref.watch(kategoriIuranNotifierProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -61,9 +60,9 @@ class KategoriIuranPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => context.go('/keuangan/iuran/tambah-iuran'),
+                  onPressed: () => context.push('/keuangan/iuran/tambah-iuran'),
                   icon: const Icon(Icons.add),
-                  label: const Text("Tambah"),
+                  label: const Text("Tambah Iuran"),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
@@ -75,53 +74,69 @@ class KategoriIuranPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: dataIuran.length,
-                itemBuilder: (context, index) {
-                  final item = dataIuran[index];
-                  return Card(
-                    elevation: 0,
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.receipt_long),
+              child: kategoriState.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, stackTrace) => Center(
+                  child: Text("Error: $error"),
+                ),
+                data: (dataIuran) => dataIuran.isEmpty
+                    ? const Center(
+                        child: Text("Tidak ada kategori iuran"),
+                      )
+                    : ListView.builder(
+                        itemCount: dataIuran.length,
+                        itemBuilder: (context, index) {
+                          final item = dataIuran[index];
+                          return Card(
+                            elevation: 0,
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepPurple.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.receipt_long),
+                              ),
+                              title: Text(item.namaKategori),
+                              trailing: PopupMenuButton(
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Edit ${item.namaKategori}"),
+                                      ),
+                                    );
+                                  } else if (value == 'delete') {
+                                    ref
+                                        .read(
+                                            kategoriIuranNotifierProvider
+                                                .notifier)
+                                        .deleteKategoriById(item.id);
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Edit'),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text('Hapus'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      title: Text(item["nama"]),
-                      subtitle: Text(
-                        "Rp ${item["harga"]}",
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      trailing: Chip(
-                        label: Text(item["tipe"]),
-                        backgroundColor: item["tipe"] == "Iuran Bulanan"
-                            ? Colors.blue.withOpacity(0.1)
-                            : Colors.orange.withOpacity(0.1),
-                        side: BorderSide(
-                          color: item["tipe"] == "Iuran Bulanan"
-                              ? Colors.blue
-                              : Colors.orange,
-                        ),
-                        labelStyle: TextStyle(
-                          color: item["tipe"] == "Iuran Bulanan"
-                              ? Colors.blue
-                              : Colors.orange,
-                        ),
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
           ],
