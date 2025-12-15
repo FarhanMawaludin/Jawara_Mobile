@@ -63,7 +63,8 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
   // Submit form tambah kegiatan
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Tampilkan loading
+
+      final namaKegiatan = ref.read(kegiatanFormProvider).namaKegiatan;
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -72,32 +73,16 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
         ),
       );
 
-      // Submit form
       final result = await ref.read(kegiatanFormProvider.notifier).submitForm();
-
-      // Tutup loading
       if (mounted) Navigator.pop(context);
-
-      // Tampilkan hasil
       if (result['success']) {
-        // BUAT LOG ACTIVITY
-        final namaKegiatan = ref.read(kegiatanFormProvider).namaKegiatan;
-        final anggaran = ref.read(kegiatanFormProvider).anggaran; // ✅ AMBIL anggaran
-        
-        // ✅ Log dengan info anggaran jika ada
-        final logTitle = anggaran > 0
-            ? 'Menambahkan kegiatan baru: $namaKegiatan (Anggaran: Rp ${anggaran.toStringAsFixed(0)})'
-            : 'Menambahkan kegiatan baru: $namaKegiatan';
-            
+       //buat log
         await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
-          title: logTitle,
+          title: 'Kegiatan baru: $namaKegiatan',
         );
-
-        // ✅ Tampilkan pesan dengan info pengeluaran jika ada
         final successMessage = result['pengeluaran_created'] == true
             ? 'Kegiatan dan pengeluaran berhasil ditambahkan'
             : 'Kegiatan berhasil ditambahkan';
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(successMessage),
@@ -105,7 +90,6 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-
         if (mounted) Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,8 +107,7 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(kegiatanFormProvider); // ✅ Watch state untuk anggaran
-
+    final formState = ref.watch(kegiatanFormProvider); 
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -163,31 +146,18 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nama Kegiatan Field
                   NamaKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Tanggal Kegiatan Field
                   TanggalKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Lokasi Field
                   LokasiKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Penanggung Jawab Field
                   PenanggungJawabField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Kategori Dropdown
                   KategoriKegiatanDropdown(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Deskripsi Field
                   DeskripsiKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // ✅ TAMBAHKAN Form Anggaran
                   AnggaranKegiatanField(
                     anggaran: formState.anggaran,
                     onChanged: (value) {
@@ -196,7 +166,7 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Tombol Submit
+                
                   SizedBox(
                     width: double.infinity,
                     height: 56,

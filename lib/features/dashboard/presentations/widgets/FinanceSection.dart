@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../../keuangan/presentations/providers/mutasi/mutasi_providers.dart';
+import '../../../keuangan/domain/entities/mutasi.dart';
 
-class FinanceSection extends StatelessWidget {
+class FinanceSection extends ConsumerWidget {
   const FinanceSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allTransactionsAsync = ref.watch(allTransactionsProvider);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -23,28 +29,97 @@ class FinanceSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Keuangan Bulan Ini',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildFinanceItem(
-                Icons.trending_up,
-                Colors.green,
-                'Pemasukan',
-                'Rp 100.000.000',
+              const Text(
+                'Keuangan Bulan Ini',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              Container(height: 40, width: 1, color: Colors.grey[200]),
-              _buildFinanceItem(
-                Icons.trending_down,
-                Colors.red,
-                'Pengeluaran',
-                'Rp 100.000.000',
-              ),
+              allTransactionsAsync.isLoading
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.refresh, size: 20),
+                      onPressed: () => ref.invalidate(allTransactionsProvider),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
             ],
+          ),
+          const SizedBox(height: 16),
+          
+          allTransactionsAsync.when(
+            data: (transaksiList) {
+              // Filter transaksi bulan ini
+              final now = DateTime.now();
+              final thisMonth = transaksiList.where((t) {
+                return t.tanggal.year == now.year && 
+                       t.tanggal.month == now.month;
+              }).toList();
+
+              // Hitung total pemasukan dan pengeluaran bulan ini
+              double totalPemasukan = 0;
+              double totalPengeluaran = 0;
+
+              for (var transaksi in thisMonth) {
+                if (transaksi.jenis == MutasiType.pemasukan) {
+                  totalPemasukan += transaksi.jumlah;
+                } else if (transaksi.jenis == MutasiType.pengeluaran) {
+                  totalPengeluaran += transaksi.jumlah;
+                }
+              }
+
+              final formatter = NumberFormat.currency(
+                locale: 'id_ID',
+                symbol: 'Rp ',
+                decimalDigits: 0,
+              );
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildFinanceItem(
+                    Icons.trending_up,
+                    Colors.green,
+                    'Pemasukan',
+                    formatter.format(totalPemasukan),
+                  ),
+                  Container(height: 40, width: 1, color: Colors.grey[200]),
+                  _buildFinanceItem(
+                    Icons.trending_down,
+                    Colors.red,
+                    'Pengeluaran',
+                    formatter.format(totalPengeluaran),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, stack) => Center(
+              child: Column(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 24),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Gagal memuat data',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                  TextButton(
+                    onPressed: () => ref.invalidate(allTransactionsProvider),
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -58,27 +133,28 @@ class FinanceSection extends StatelessWidget {
     String amount,
   ) {
     return Expanded(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          Icon(icon, color: color, size: 16),
-          const SizedBox(width: 4),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 4),
               Text(
                 label,
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
-              const SizedBox(height: 4),
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            amount,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
