@@ -345,6 +345,7 @@ class _TambahMutasiPageState extends ConsumerState<TambahMutasiPage> {
                       ref.invalidate(rumahListProvider);
                       ref.invalidate(mutasiListProvider);
                       ref.invalidate(wargaListProvider);
+                      ref.invalidate(wargaDetailProvider);
 
                       Navigator.pop(context);
                     } catch (e) {
