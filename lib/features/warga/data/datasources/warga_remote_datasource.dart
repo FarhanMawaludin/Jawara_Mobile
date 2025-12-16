@@ -35,7 +35,7 @@ class WargaRemoteDataSourceImpl implements WargaRemoteDataSource {
           blok,
           nomor_rumah
         )
-      ''');
+      ''').order('status', ascending: true); // Order by status, active first
 
       return data.map((json) => WargaModel.fromMap(json)).toList();
     } catch (e) {

@@ -1,0 +1,75 @@
+appId: com.example.jawaramobile
+---
+# =========================
+# RESET & LOGIN
+# =========================
+- clearState
+- launchApp
+
+- assertVisible: "Jawara Pintar"
+- tapOn: "Login"
+
+- assertVisible: "Login"
+- tapOn: "Masukkan email"
+- inputText: admin@gmail.com
+
+- tapOn: "Masukkan password"
+- inputText: password
+
+- hideKeyboard
+- tapOn: "Login"
+
+# =========================
+# HOME PAGE
+# =========================
+- assertVisible: "Selamat pagi,"
+
+# =========================
+# KE HALAMAN WARGA
+# =========================
+- openLink: "jawaramobile://warga"
+- assertVisible: "Lainnya"
+
+# =========================
+# WARGA → LAINNYA
+# =========================
+- openLink: "jawaramobile://warga/lainnya"
+- assertVisible: "Lainnya"
+
+# =========================
+# LAINNYA → TAMBAH RUMAH
+# =========================
+- openLink: "jawaramobile://warga/tambah-rumah"
+- assertVisible: "Tambah Rumah Baru"
+
+# =========================
+# FORM TAMBAH RUMAH
+# =========================
+- tapOn: "Blok"
+- inputText: A
+
+- tapOn: "Nomor Rumah"
+- inputText: 12
+
+- tapOn: "Alamat Lengkap"
+- inputText: "Jl. Kenanga No. 12"
+
+- hideKeyboard
+
+# =========================
+# SIMPAN DATA
+# =========================
+- tapOn: "Simpan"
+
+# =========================
+# ALERT BERHASIL
+# =========================
+- assertVisible: "Rumah Berhasil Ditambahkan"
+- assertVisible: "Data rumah baru telah disimpan ke dalam sistem."
+
+- tapOn: "Kembali"
+
+# =========================
+# KEMBALI KE HALAMAN LAINNYA
+# =========================
+- assertVisible: "Lainnya"

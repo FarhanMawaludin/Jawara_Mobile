@@ -53,7 +53,7 @@ class CardWarga extends ConsumerWidget {
                 Icon(
                   HeroiconsOutline.checkBadge,
                   size: 18,
-                  color: Colors.green[600],
+                  color: isVerified ? Colors.green[600] : Colors.grey[600],
                 ),
             ],
           ),

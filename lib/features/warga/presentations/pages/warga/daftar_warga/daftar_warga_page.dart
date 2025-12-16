@@ -77,7 +77,7 @@ class _DaftarWargaPageState extends ConsumerState<DaftarWargaPage> {
                             nama: w.nama,
                             keluargaNama:
                                 "Keluarga ${w.keluarga?['nama_keluarga'] ?? 'Tidak ada nama keluarga'}",
-                            isVerified: true,
+                            isVerified: w.status == 'aktif',
                             wargaId: w.id,
                           ),
                         );
@@ -116,7 +116,7 @@ class _DaftarWargaPageState extends ConsumerState<DaftarWargaPage> {
                               nama: w.nama,
                               keluargaNama:
                                   "Keluarga ${w.keluarga?['nama_keluarga'] ?? 'Tidak ada nama keluarga'}",
-                              isVerified: true,
+                              isVerified: w.status == 'aktif',
                               wargaId: w.id,
                             ),
                           );
