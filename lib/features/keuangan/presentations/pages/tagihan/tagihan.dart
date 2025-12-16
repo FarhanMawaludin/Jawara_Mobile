@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:jawaramobile/features/keuangan/presentations/providers/iurandetail/iurandetail_providers.dart'; // ✅ Import provider baru
+import 'package:jawaramobile/features/keuangan/presentations/providers/iurandetail/iurandetail_providers.dart';
 import 'package:jawaramobile/features/keuangan/presentations/widgets/pdf/tagihan_pdf_generator.dart';
 
 class TagihanPage extends ConsumerWidget {
@@ -11,23 +11,22 @@ class TagihanPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Debug: Print keluargaId yang diterima
     debugPrint('🏠 TagihanPage opened with keluargaId: $keluargaId');
     
     final asyncTagihan = ref.watch(iuranDetailByKeluargaProvider(keluargaId));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Iuran"),
+        title: const Text("Tagihan Keluarga"),
         centerTitle: true,
-        actions: [
+        actions:  [
           // Tombol Refresh
           IconButton(
             onPressed: () {
               debugPrint('🔄 Refreshing data for keluargaId: $keluargaId');
               ref.invalidate(iuranDetailByKeluargaProvider(keluargaId));
             },
-            icon: const Icon(Icons.refresh),
+            icon:  const Icon(Icons.refresh),
             tooltip: 'Refresh Data',
           ),
           // Tombol Print
@@ -35,7 +34,7 @@ class TagihanPage extends ConsumerWidget {
             onPressed: () {
               asyncTagihan.whenData((list) {
                 if (list.isNotEmpty) {
-                  TagihanPdfGenerator.printPDF(list);
+                  TagihanPdfGenerator. printPDF(list);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -51,15 +50,14 @@ class TagihanPage extends ConsumerWidget {
           ),
           // Tombol Filter
           IconButton(
-            onPressed: () {
-              // TODO: Implement filter functionality
+            onPressed:  () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Filter belum tersedia'),
                 ),
               );
             },
-            icon: const Icon(Icons.filter_list),
+            icon:  const Icon(Icons.filter_list),
             tooltip: 'Filter',
           ),
         ],
@@ -84,7 +82,7 @@ class TagihanPage extends ConsumerWidget {
           debugPrint('❌ Error loading data: $e');
           debugPrint('📍 Stack trace: $st');
           return Center(
-            child: Padding(
+            child:  Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -98,9 +96,9 @@ class TagihanPage extends ConsumerWidget {
                   Text(
                     "Error: $e",
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors. red),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height:  16),
                   ElevatedButton.icon(
                     onPressed: () {
                       ref.invalidate(iuranDetailByKeluargaProvider(keluargaId));
@@ -143,7 +141,7 @@ class TagihanPage extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       "Keluarga ID: $keluargaId",
-                      style: const TextStyle(
+                      style:  const TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
                       ),
@@ -157,7 +155,7 @@ class TagihanPage extends ConsumerWidget {
                       label: const Text('Refresh'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
+                        foregroundColor:  Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
                           vertical: 12,
@@ -173,15 +171,14 @@ class TagihanPage extends ConsumerWidget {
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(iuranDetailByKeluargaProvider(keluargaId));
-              // Wait for the data to reload
               await ref.read(iuranDetailByKeluargaProvider(keluargaId).future);
             },
-            child: ListView.builder(
+            child: ListView. builder(
               padding: const EdgeInsets.all(16),
               itemCount: iuranList.length,
               itemBuilder: (context, index) {
                 final item = iuranList[index];
-                final tagihan = item.tagihIuran;
+                final tagihan = item.tagihIuranData; // ✅ UBAH: Dari tagihIuran jadi tagihIuranData
 
                 debugPrint('📄 Rendering item $index: ${item.id}');
 
@@ -191,14 +188,14 @@ class TagihanPage extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Padding(
+                  child:  Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Nama Tagihan
                         Text(
-                          tagihan?.nama ?? 'Nama tidak tersedia',
+                          tagihan?.nama ??  'Nama tidak tersedia',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -209,21 +206,21 @@ class TagihanPage extends ConsumerWidget {
 
                         // Info Kategori dan Tanggal
                         Row(
-                          children: [
+                          children:  [
                             const Icon(Icons.category, size: 16, color: Colors.grey),
-                            const SizedBox(width: 4),
+                            const SizedBox(width:  4),
                             Text(
-                              'Kategori: ${tagihan?.kategoriId.toString() ?? '-'}',
+                              'Kategori:  ${tagihan?.kategoriId. toString() ?? '-'}',
                               style: const TextStyle(fontSize: 12),
                             ),
                             const SizedBox(width: 16),
-                            const Icon(Icons.date_range, size: 16, color: Colors.grey),
+                            const Icon(Icons.date_range, size: 16, color:  Colors.grey),
                             const SizedBox(width: 4),
                             Text(
                               tagihan != null
-                                  ? "${tagihan.tanggalTagihan.day}/${tagihan.tanggalTagihan.month}/${tagihan.tanggalTagihan.year}"
+                                  ? "${tagihan.tanggalTagihan.day}/${tagihan.tanggalTagihan. month}/${tagihan.tanggalTagihan.year}"
                                   : '-',
-                              style: const TextStyle(fontSize: 12),
+                              style: const TextStyle(fontSize:  12),
                             ),
                           ],
                         ),
@@ -232,7 +229,7 @@ class TagihanPage extends ConsumerWidget {
 
                         // Jumlah Tagihan
                         Text(
-                          "Rp ${_formatCurrency((tagihan?.jumlah ?? 0).toInt())}",
+                          "Rp ${_formatCurrency((tagihan?.jumlah ??  0).toInt())}",
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -249,26 +246,26 @@ class TagihanPage extends ConsumerWidget {
                             Container(
                               decoration: BoxDecoration(
                                 color: _getStatusColor(
-                                  item.statusPembayaran ?? 'belum_bayar',
+                                  item. statusPembayaran,
                                 ).withOpacity(0.1),
                                 border: Border.all(
                                   color: _getStatusColor(
-                                    item.statusPembayaran ?? 'belum_bayar',
+                                    item.statusPembayaran,
                                   ),
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: const EdgeInsets.symmetric(
+                              padding: const EdgeInsets. symmetric(
                                 horizontal: 12,
                                 vertical: 6,
                               ),
                               child: Text(
-                                _getStatusLabel(item.statusPembayaran ?? 'belum_bayar'),
+                                _getStatusLabel(item.statusPembayaran),
                                 style: TextStyle(
                                   color: _getStatusColor(
-                                    item.statusPembayaran ?? 'belum_bayar',
+                                    item.statusPembayaran,
                                   ),
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight:  FontWeight.bold,
                                   fontSize: 12,
                                 ),
                               ),
@@ -286,8 +283,8 @@ class TagihanPage extends ConsumerWidget {
                                 ),
                               ),
                               onPressed: () {
-                                debugPrint('🔍 Opening detail for item: ${item.id}');
-                                context.push(
+                                debugPrint('🔍 Opening detail for item: ${item. id}');
+                                context. push(
                                   '/keuangan/tagihan/detail',
                                   extra: item,
                                 );
@@ -323,7 +320,7 @@ class TagihanPage extends ConsumerWidget {
         return 'LUNAS';
       case 'belum_bayar':
         return 'BELUM BAYAR';
-      case 'terlambat':
+      case 'terlambat': 
         return 'TERLAMBAT';
       default:
         return status.toUpperCase();
@@ -336,7 +333,7 @@ class TagihanPage extends ConsumerWidget {
       case 'lunas':
         return Colors.green;
       case 'belum_bayar':
-        return Colors.orange;
+        return Colors. orange;
       case 'terlambat':
         return Colors.red;
       default:

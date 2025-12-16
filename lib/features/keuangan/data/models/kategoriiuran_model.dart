@@ -1,32 +1,45 @@
-
 class KategoriIuranModel {
-  final int id;
+  final int?  id;
   final String namaKategori;
-  final String kategoriIuran; // enum: 'bulanan', 'khusus'
+  final String kategoriIuran; // ✅ ENUM:  "Iuran Bulanan", "Iuran Khusus", "Iuran Lainnya"
+  final double nominal; // ✅ numeric di Supabase = double di Dart
   final DateTime? createdAt;
 
   KategoriIuranModel({
-    required this.id,
+    this.id,
     required this.namaKategori,
     required this.kategoriIuran,
-    required this.createdAt,
+    required this.nominal,
+    this.createdAt,
   });
 
-   factory KategoriIuranModel.fromJson(Map<String, dynamic> json) {
+  factory KategoriIuranModel.fromJson(Map<String, dynamic> json) {
     return KategoriIuranModel(
-      id: json['id'] as int,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      id: json['id'] as int?,
+      createdAt: json['created_at'] != null 
+          ?  DateTime.parse(json['created_at'] as String)
+          : null,
       namaKategori: json['nama_kategori'] as String? ?? '',
-      kategoriIuran: json['kategori_iuran'] as String? ?? '',
+      kategoriIuran: json['kategori_iuran'] as String? ??  '',
+      nominal: (json['nominal'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
+  Map<String, dynamic> toJsonForInsert() {
+    return {
+      'nama_kategori': namaKategori,
+      'kategori_iuran': kategoriIuran, // ✅ "Iuran Bulanan" / "Iuran Khusus" / "Iuran Lainnya"
+      'nominal': nominal,
+    };
+  }
+
+  // ✅ Untuk UPDATE
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'created_at': createdAt?.toIso8601String(),
+      if (id != null) 'id': id,
       'nama_kategori': namaKategori,
       'kategori_iuran': kategoriIuran,
+      'nominal': nominal,
     };
   }
 }

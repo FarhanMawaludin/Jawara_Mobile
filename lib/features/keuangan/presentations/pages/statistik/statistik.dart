@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart'; // TAMBAHKAN
 import '../../../domain/entities/mutasi.dart';
 import '../../providers/mutasi/mutasi_providers.dart';
 
@@ -10,6 +11,13 @@ class StatistikKeuanganPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mutasiAsync = ref.watch(allTransactionsProvider);
+    
+    // TAMBAHKAN Currency Formatter
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -38,7 +46,7 @@ class StatistikKeuanganPage extends ConsumerWidget {
 
           for (var m in data) {
             if (m.jenis == MutasiType.pemasukan) {
-              pemasukanPerBulan[m.tanggal.month - 1] += m.jumlah;
+              pemasukanPerBulan[m.tanggal. month - 1] += m. jumlah;
             } else {
               pengeluaranPerBulan[m.tanggal.month - 1] += m.jumlah;
             }
@@ -49,20 +57,20 @@ class StatistikKeuanganPage extends ConsumerWidget {
             child: Column(
               children: [
                 // ===========================
-                // SUMMARY CARD
+                // SUMMARY CARD (GUNAKAN currencyFormatter)
                 // ===========================
                 Row(
                   children: [
                     _SummaryCard(
                       title: "Total Pemasukan",
-                      value: totalPemasukan.toStringAsFixed(0),
+                      value: currencyFormatter.format(totalPemasukan), // FORMAT
                       subtitle: "Keluarga",
                       icon: Icons.arrow_upward,
                       color: Colors.green,
                     ),
                     _SummaryCard(
                       title: "Total Pengeluaran",
-                      value: totalPengeluaran.toStringAsFixed(0),
+                      value: currencyFormatter.format(totalPengeluaran), // FORMAT
                       subtitle: "Anggota",
                       icon: Icons.arrow_downward,
                       color: Colors.red,
@@ -70,8 +78,8 @@ class StatistikKeuanganPage extends ConsumerWidget {
                     _SummaryCard(
                       title: "Jumlah Transaksi",
                       value: totalTransaksi.toString(),
-                      subtitle: "Anggota",
-                      icon: Icons.receipt_long,
+                      subtitle: "Transaksi",
+                      icon:  Icons.receipt_long,
                       color: Colors.blueGrey,
                     ),
                   ],
@@ -88,7 +96,7 @@ class StatistikKeuanganPage extends ConsumerWidget {
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(14),
-                    child: _LineChart(
+                    child:  _LineChart(
                       color: Colors.blueAccent,
                       data: List.generate(
                           12,
@@ -109,7 +117,7 @@ class StatistikKeuanganPage extends ConsumerWidget {
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(14),
-                    child: _LineChart(
+                    child:  _LineChart(
                       color: Colors.redAccent,
                       data: List.generate(
                           12,
@@ -122,7 +130,7 @@ class StatistikKeuanganPage extends ConsumerWidget {
                 const SizedBox(height: 20),
 
                 // ===========================
-                // DONUT CHART PEMASUKAN
+                // DONUT CHART PEMASUKAN (GUNAKAN currencyFormatter)
                 // ===========================
                 const _SectionTitle("Kategori Pemasukan"),
                 const SizedBox(height: 16),
@@ -133,7 +141,7 @@ class StatistikKeuanganPage extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: _DonutChart(
-                      total: totalPemasukan.toStringAsFixed(0),
+                      total: currencyFormatter.format(totalPemasukan), // FORMAT
                       color: Colors.orange,
                       label1: "Dana Pemerintah",
                       label2: "Pendapatan Lainnya",
@@ -144,7 +152,7 @@ class StatistikKeuanganPage extends ConsumerWidget {
                 const SizedBox(height: 20),
 
                 // ===========================
-                // DONUT CHART PENGELUARAN
+                // DONUT CHART PENGELUARAN (GUNAKAN currencyFormatter)
                 // ===========================
                 const _SectionTitle("Kategori Pengeluaran"),
                 const SizedBox(height: 16),
@@ -153,9 +161,9 @@ class StatistikKeuanganPage extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets. all(20),
                     child: _DonutChart(
-                      total: totalPengeluaran.toStringAsFixed(0),
+                      total: currencyFormatter.format(totalPengeluaran), // FORMAT
                       color: Colors.blueAccent,
                       label1: "Operasional RT/RW",
                       label2: "Kegiatan Warga",
@@ -179,7 +187,7 @@ class _SummaryCard extends StatelessWidget {
   final Color color;
 
   const _SummaryCard({
-    required this.title,
+    required this. title,
     required this.value,
     required this.subtitle,
     required this.icon,
@@ -190,16 +198,30 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Card(
-        child: Padding(
+        child:  Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               Icon(icon, color: color, size: 20),
               const SizedBox(height: 6),
-              Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(
+                value, 
+                style: const TextStyle(
+                  fontSize: 18, // Dikecilkan sedikit karena ada "Rp"
+                  fontWeight: FontWeight.bold
+                ),
+                textAlign: TextAlign.center, // Agar rapi
+              ),
               const SizedBox(height: 4),
-              Text(title),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12),
+              ),
+              Text(
+                subtitle, 
+                style: const TextStyle(fontSize: 10, color: Colors. grey),
+              ),
             ],
           ),
         ),
@@ -207,6 +229,7 @@ class _SummaryCard extends StatelessWidget {
     );
   }
 }
+
 class _SectionTitle extends StatelessWidget {
   final String text;
   const _SectionTitle(this.text);
@@ -217,11 +240,12 @@ class _SectionTitle extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style:  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
 }
+
 class _LineChart extends StatelessWidget {
   final Color color;
   final List<FlSpot> data;
@@ -234,7 +258,7 @@ class _LineChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 180,
+      height:  180,
       child: LineChart(
         LineChartData(
           minX: 0,
@@ -245,11 +269,11 @@ class _LineChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: data,
+              spots:  data,
               isCurved: true,
               color: color,
               barWidth: 3,
-              belowBarData: BarAreaData(
+              belowBarData:  BarAreaData(
                 show: true,
                 color: color.withOpacity(0.2),
               ),
@@ -270,8 +294,8 @@ class _DonutChart extends StatelessWidget {
   const _DonutChart({
     required this.total,
     required this.color,
-    required this.label1,
-    required this.label2,
+    required this. label1,
+    required this. label2,
   });
 
   @override
@@ -279,7 +303,7 @@ class _DonutChart extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 170,
+          height:  170,
           child: PieChart(
             PieChartData(
               sectionsSpace: 2,
@@ -304,10 +328,12 @@ class _DonutChart extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           total,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize:  20, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
-        Text(label1),
-        Text(label2),
+        const SizedBox(height: 4),
+        Text(label1, textAlign: TextAlign.center),
+        Text(label2, textAlign: TextAlign.center),
       ],
     );
   }
