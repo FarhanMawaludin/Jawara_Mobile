@@ -25,7 +25,7 @@ class TagihIuranRepositoryImpl implements TagihIuranRepository {
 
   @override
   Future<bool> deleteTagihan(int id) async {
-    return await datasource.delete(id);
+    return await datasource. delete(id);
   }
 
   @override
@@ -34,30 +34,45 @@ class TagihIuranRepositoryImpl implements TagihIuranRepository {
     required String nama,
     required int jumlah,
   }) async {
-    // 1. Insert tagih_iuran
-    final tagihResponse = await datasource.insert({
-      'kategori_id': kategoriId,
-      'jumlah': jumlah,
-      'tanggal_tagihan': DateTime.now().toIso8601String().split('T')[0],
-      'nama': nama,
-      'status_tagihan': 'belum bayar',
-    });
+    try {
+      // 1. Insert ke tagih_iuran
+      final tagihResponse = await datasource.insert({
+        'kategori_id': kategoriId,
+        'jumlah': jumlah.toDouble(),
+        'tanggal_tagihan': DateTime.now().toIso8601String().split('T')[0], // ✅ YYYY-MM-DD
+        'nama':  nama,
+        'status_tagihan': 'belum bayar',
+      });
 
-    final tagihId = tagihResponse['id'];
+      print('✅ Tagih Iuran Created: $tagihResponse');
 
-    // 2. Ambil semua keluarga IDs
-    final keluargaIds = await datasource.getAllKeluargaIds(); 
+      final tagihId = tagihResponse['id'] as int;
 
-    // 3. Buat data untuk iuran_detail
-    final iuranDetailList = keluargaIds.map((keluargaId) => {
-      'keluarga_id': keluargaId,
-      'tagih_iuran': tagihId,
-      'metode_pembayaran_id': null, // ✅ Set null (belum ada metode pembayaran)
-    }).toList();
+      // 2. Ambil semua keluarga IDs
+      final keluargaIds = await datasource. getAllKeluargaIds();
+      print('✅ Total Keluarga:  ${keluargaIds.length}');
 
-    // 4. Bulk insert ke iuran_detail
-    if (iuranDetailList.isNotEmpty) {
+      if (keluargaIds.isEmpty) {
+        throw Exception('Tidak ada data keluarga');
+      }
+
+      // 3. Buat data untuk iuran_detail
+      final iuranDetailList = keluargaIds.map((keluargaId) => {
+        'keluarga_id': keluargaId,
+        'tagih_iuran': tagihId, // ✅ Foreign key ke tagih_iuran. id
+        'metode_pembayaran_id': null, // ✅ Null karena belum bayar
+      }).toList();
+
+      print('✅ Iuran Detail to Insert: ${iuranDetailList.length} records');
+
+      // 4. Bulk insert ke iuran_detail
       await datasource.bulkInsertIuranDetail(iuranDetailList);
+
+      print('✅ Bulk Insert Success! ');
+    } catch (e, stackTrace) {
+      print('❌ Error createTagihanForAllKeluarga: $e');
+      print('📍 StackTrace: $stackTrace');
+      rethrow;
     }
   }
 }

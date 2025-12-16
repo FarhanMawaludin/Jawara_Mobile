@@ -25,8 +25,8 @@ class KeuanganPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = [
       {'icon': CupertinoIcons.qrcode, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran', 'warna': Colors.black},
-      {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/iuran/tambah-iuran', 'warna': Colors.black},
-      {'icon': CupertinoIcons.doc, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan', 'warna': Colors.black},
+      {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/tagihan/tagih-iuran', 'warna': Colors.black},
+      {'icon': CupertinoIcons.doc, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan/45', 'warna': Colors.black},
       {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain', 'warna': Colors.green},
       {'icon': CupertinoIcons.add, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'warna': Colors.green},
       {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi Keuangan', 'route': '/keuangan/mutasi/mutasi', 'warna': Colors.black},
