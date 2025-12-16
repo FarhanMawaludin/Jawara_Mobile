@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
 import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../domain/entities/pengeluaran.dart';
+import '../../providers/mutasi/mutasi_providers.dart';
 import '../../providers/pengeluaran/pengeluaran_providers.dart';
+import 'package:jawaramobile/core/utils/currency_formatter.dart';
 
 class TambahPengeluaranPage extends ConsumerStatefulWidget {
   const TambahPengeluaranPage({super.key});
@@ -18,7 +21,6 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _tanggalController = TextEditingController();
   final TextEditingController _nominalController = TextEditingController();
-
   String? _kategori;
   File? _buktiFile;
 
@@ -68,45 +70,58 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
     });
   }
 
-  void _submitForm() async {
-    if (_formKey.currentState!.validate() && _kategori != null) {
-      try {
-        final pengeluaran = Pengeluaran(
-          id: 0,
-          createdAt: DateTime.now(),
-          namaPengeluaran: _namaController.text.trim(),
-          jumlah: double.parse(_nominalController.text),
-          kategoriPengeluaran: _kategori!,
-          tanggalPengeluaran: DateTime.now(),
-          buktiPengeluaran: _buktiFile?.path ?? '',
+ void _submitForm() async {
+  if (_formKey.currentState!.validate() && _kategori != null) {
+    try {
+      // Ambil nilai numerik dari nominal
+      final nominalText = _nominalController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final nominal = double.parse(nominalText);
+
+      final pengeluaran = Pengeluaran(
+        id: 0,
+        createdAt: DateTime.now(),
+        namaPengeluaran: _namaController.text.trim(),
+        jumlah: nominal,
+        kategoriPengeluaran: _kategori!,
+        tanggalPengeluaran: DateTime.now(),
+        buktiPengeluaran: _buktiFile?.path ?? '',
+      );
+
+      // Kirim ke provider
+      await ref.read(pengeluaranNotifierProvider.notifier).create(pengeluaran);
+
+      // Log activity
+      await ref
+        .read(logActivityNotifierProvider.notifier)
+        .createLogWithCurrentUser(
+          title: 'Menambahkan pengeluaran: ${_namaController.text.trim()}'
         );
 
-        // Kirim ke provider
-        await ref.read(pengeluaranNotifierProvider.notifier).create(pengeluaran);
+      // INVALIDATE PROVIDERS untuk refresh otomatis
+      ref.invalidate(allTransactionsProvider);
+      ref.invalidate(totalSaldoProvider);
+      ref.invalidate(statistikProvider);
+      ref.invalidate(fetchPengeluaranProvider);
 
-        // Log activity
-        await ref
-            .read(logActivityNotifierProvider.notifier)
-            .createLogWithCurrentUser(
-                title: 'Menambahkan pengeluaran: ${_namaController.text.trim()}');
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pengeluaran berhasil disimpan!')),
-          );
-          Navigator.pop(context);
-        }
-      } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          const SnackBar(content: Text('Pengeluaran berhasil disimpan!')),
+        );
+        Navigator.pop(context, true); // atau Navigator.pop(context); sesuai kebutuhanmu
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menyimpan pengeluaran: $e')),
         );
       }
-    } else if (_kategori == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kategori wajib dipilih')),
-      );
     }
+  } else if (_kategori == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Kategori wajib dipilih')),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -187,16 +202,28 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
               TextFormField(
                 controller: _nominalController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyInputFormatter(),
+                ],
                 decoration: InputDecoration(
                   hintText: 'Masukkan nominal',
+                  prefixText: 'Rp ',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Nominal wajib diisi' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nominal wajib diisi';
+                  }
+                final nominal = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), ''));
+                  if (nominal == null || nominal <= 0) {
+                  return 'Nominal tidak valid';
+                  }
+                return null;
+                },
               ),
-              const SizedBox(height: 16),
 
               // Bukti Upload
               const Text('Catatan/Bukti Pengeluaran'),
@@ -218,7 +245,7 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
                             Icon(Icons.upload_file, color: Colors.deepPurple),
                             SizedBox(height: 8),
                             Text(
-                              'Upload Bukti Pemasukan (.png/.jpg)',
+                              'Upload Bukti Pengeluaran (.png/.jpg)',
                               style: TextStyle(color: Colors.deepPurple),
                             ),
                           ],

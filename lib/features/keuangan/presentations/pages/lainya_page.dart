@@ -24,8 +24,8 @@ class LainnyaPage extends StatelessWidget {
             SizedBox(height: 10),
             MenuCard(items: [
               {'icon': CupertinoIcons.qrcode_viewfinder,'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran', 'color': Colors.black},
-              {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/iuran/tambah-iuran', 'color': Colors.black},
-              {'icon': CupertinoIcons.doc_text, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan', 'color': Colors.black},
+              {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/tagihan/tagih-iuran', 'color': Colors.black},
+              {'icon': CupertinoIcons.doc_text, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan/45', 'color': Colors.black},
               {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukkan Lain', 'route': '/keuangan/pemasukan-lain', 'color': Colors.green},
               {'icon': CupertinoIcons.add_circled, 'label': 'Tambah Pemasukkan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'color': Colors.green},
             ]),
