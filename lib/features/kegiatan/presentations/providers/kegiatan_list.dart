@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/kegiatan_model.dart';
 import '../../data/repositories/kegiatan_repository.dart';
 import 'kegiatan_statistics_provider.dart';
+import 'kegiatan_repository_provider.dart';
 
 class KegiatanListState {
   final List<KegiatanModel> items;
@@ -41,9 +42,11 @@ class KegiatanListState {
 
 class KegiatanListNotifier extends StateNotifier<KegiatanListState> {
   final KegiatanRepository _repository;
+  final Ref _ref;
   static const int _pageSize = 10;
 
-  KegiatanListNotifier(this._repository) : super(const KegiatanListState()) {
+  KegiatanListNotifier(this._repository, this._ref)
+      : super(const KegiatanListState()) {
     loadInitial();
   }
 
@@ -109,6 +112,7 @@ class KegiatanListNotifier extends StateNotifier<KegiatanListState> {
 
   Future<void> refresh() async {
     await loadInitial();
+    _ref.invalidate(kegiatanStatisticsProvider);
   }
 
   void removeById(int id) {
@@ -120,13 +124,13 @@ class KegiatanListNotifier extends StateNotifier<KegiatanListState> {
     try {
       final result = await _repository.deleteKegiatan(id);
 
-      if (result['success'] != true) {
-        await refresh();
+      if (result['success'] == true) {
+        removeById(id);
+        _ref.invalidate(kegiatanStatisticsProvider);
       }
 
       return result;
     } catch (e) {
-      await refresh();
       return {
         'success': false,
         'message': 'Gagal menghapus: ${e.toString()}',
@@ -138,5 +142,5 @@ class KegiatanListNotifier extends StateNotifier<KegiatanListState> {
 final kegiatanListNotifierProvider =
     StateNotifierProvider<KegiatanListNotifier, KegiatanListState>((ref) {
   final repository = ref.watch(kegiatanRepositoryProvider);
-  return KegiatanListNotifier(repository);
+  return KegiatanListNotifier(repository, ref);
 });

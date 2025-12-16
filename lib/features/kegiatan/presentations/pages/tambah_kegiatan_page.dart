@@ -7,6 +7,7 @@ import 'widgets/form_tambah/lokasi.dart';
 import 'widgets/form_tambah/penganggunjawab.dart';
 import 'widgets/form_tambah/kategori_kegiatan.dart';
 import 'widgets/form_tambah/deskripsi_kegiatan.dart';
+import 'widgets/form_tambah/form_anggaran.dart'; // ✅ TAMBAHKAN
 import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahKegiatanPage extends ConsumerStatefulWidget {
@@ -81,13 +82,25 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
       if (result['success']) {
         // BUAT LOG ACTIVITY
         final namaKegiatan = ref.read(kegiatanFormProvider).namaKegiatan;
+        final anggaran = ref.read(kegiatanFormProvider).anggaran; // ✅ AMBIL anggaran
+        
+        // ✅ Log dengan info anggaran jika ada
+        final logTitle = anggaran > 0
+            ? 'Menambahkan kegiatan baru: $namaKegiatan (Anggaran: Rp ${anggaran.toStringAsFixed(0)})'
+            : 'Menambahkan kegiatan baru: $namaKegiatan';
+            
         await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
-          title: 'Menambahkan kegiatan baru: $namaKegiatan',
+          title: logTitle,
         );
+
+        // ✅ Tampilkan pesan dengan info pengeluaran jika ada
+        final successMessage = result['pengeluaran_created'] == true
+            ? 'Kegiatan dan pengeluaran berhasil ditambahkan'
+            : 'Kegiatan berhasil ditambahkan';
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Kegiatan berhasil ditambahkan'),
+            content: Text(successMessage),
             backgroundColor: _primaryColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -110,6 +123,8 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final formState = ref.watch(kegiatanFormProvider); // ✅ Watch state untuk anggaran
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -170,6 +185,15 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
 
                   // Deskripsi Field
                   DeskripsiKegiatanField(primaryColor: _primaryColor),
+                  const SizedBox(height: 20),
+
+                  // ✅ TAMBAHKAN Form Anggaran
+                  AnggaranKegiatanField(
+                    anggaran: formState.anggaran,
+                    onChanged: (value) {
+                      ref.read(kegiatanFormProvider.notifier).updateAnggaran(value);
+                    },
+                  ),
                   const SizedBox(height: 40),
 
                   // Tombol Submit
