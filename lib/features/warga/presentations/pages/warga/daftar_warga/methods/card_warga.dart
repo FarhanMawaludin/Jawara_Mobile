@@ -24,9 +24,6 @@ class CardWarga extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () {
-        context.push('/warga/aspirasi?wargaId=$wargaId');
-      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

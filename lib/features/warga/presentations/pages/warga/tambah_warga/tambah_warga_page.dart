@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/statistik/statistik_warga.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart'
     hide supabaseClientProvider;
@@ -247,6 +248,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       ref.invalidate(keluargaListProvider);
       ref.invalidate(totalKeluargaProvider);
       ref.invalidate(totalWargaProvider);
+      ref.invalidate(statistikWargaControllerProvider);
 
       if (mounted) {
         _show("Data warga berhasil disimpan");
