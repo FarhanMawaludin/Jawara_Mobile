@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/features/warga/domain/entities/warga.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class EditWargaPage extends ConsumerStatefulWidget {
   final int wargaId;
@@ -34,6 +35,7 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
   final TextEditingController pendidikanController = TextEditingController();
   final TextEditingController goldarController = TextEditingController();
   final TextEditingController statusController = TextEditingController();
+  final TextEditingController keluargaController = TextEditingController();
 
   int keluargaId = 0;
   DateTime? selectedTanggal;
@@ -54,17 +56,19 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
     "Konghucu",
   ];
   final pendidikanOptions = [
-    "SD",
-    "SMP",
-    "SMA",
-    "SMK",
-    "D1",
-    "D2",
-    "D3",
-    "D4",
-    "S1",
-    "S2",
-    "S3",
+    'TK',
+    'SD',
+    'SMP',
+    'SMA',
+    'SMK',
+    'D1',
+    'D2',
+    'D3',
+    'D4',
+    'S1',
+    'S2',
+    'S3',
+    'Lainnya',
   ];
   final golDarahOptions = ["A", "B", "AB", "O"];
   final statusOptions = ["aktif", "tidak aktif"];
@@ -123,6 +127,27 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
         selectedTanggal = data.tanggalLahir!;
         tanggalLahirController.text =
             "${selectedTanggal!.year}-${selectedTanggal!.month.toString().padLeft(2, '0')}-${selectedTanggal!.day.toString().padLeft(2, '0')}";
+      }
+
+      // Load keluarga name to display (read-only)
+      try {
+        final client = ref.read(supabaseClientProvider);
+        if (keluargaId != null && keluargaId != 0) {
+          final resp = await client
+              .from('keluarga')
+              .select('nama_keluarga')
+              .eq('id', keluargaId)
+              .limit(1);
+          if (resp is List && resp.isNotEmpty) {
+            keluargaController.text = resp[0]['nama_keluarga'] ?? 'Tidak Ada';
+          } else {
+            keluargaController.text = 'Tidak Ada';
+          }
+        } else {
+          keluargaController.text = 'Tidak Ada';
+        }
+      } catch (_) {
+        keluargaController.text = 'Tidak Ada';
       }
 
       setState(() {});
@@ -208,6 +233,13 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
                 label: "Nama",
                 hintText: "Masukkan nama",
                 controller: namaController,
+              ),
+              // Tampilkan keluarga saat ini (read-only)
+              InputField(
+                label: "Pilih Keluarga",
+                hintText: "Pilih Keluarga",
+                controller: keluargaController,
+                enabled: false,
               ),
               InputField(
                 label: "NIK",
@@ -310,7 +342,6 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
                       return;
                     }
 
-
                     if (roleController.text.isEmpty) {
                       _showError("Role keluarga wajib dipilih");
                       return;
@@ -362,6 +393,14 @@ class _EditWargaPageState extends ConsumerState<EditWargaPage> {
 
                     try {
                       await updateWarga(warga);
+
+                      // BUAT LOG ACTIVITY SETELAH BERHASIL UPDATE WARGA
+                      await ref
+                          .read(logActivityNotifierProvider.notifier)
+                          .createLogWithCurrentUser(
+                            title:
+                                'Mengubah data warga: ${namaController.text}',
+                          );
 
                       showBottomAlert(
                         context: context,

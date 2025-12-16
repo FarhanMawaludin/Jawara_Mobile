@@ -55,7 +55,10 @@ class DetailWargaPage extends ConsumerWidget {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    JudulDetail(namaWarga: w.nama),
+                    JudulDetail(
+                      namaWarga: w.nama,
+                      isActive: w.status == 'aktif',
+                    ),
                     const SizedBox(height: 20),
 
                     Container(
@@ -99,7 +102,7 @@ class DetailWargaPage extends ConsumerWidget {
                             pendidikan: w.pendidikan ?? "-",
                             pekerjaan: w.pekerjaan ?? "-",
                             peranKeluarga: w.roleKeluarga.toString(),
-                            statusPenduduk: "Aktif",
+                            statusPenduduk: w.status ?? "-",
                           ),
                         ],
                       ),

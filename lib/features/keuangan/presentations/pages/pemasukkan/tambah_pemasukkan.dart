@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../domain/entities/pemasukanlainnya.dart';
 import '../../providers/pemasukanlainnya/pemasukanlainnya_providers.dart';
 import '../../providers/mutasi/mutasi_providers.dart'; // TAMBAHKAN
@@ -103,6 +104,12 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
         ref.invalidate(totalSaldoProvider);
         ref.invalidate(statistikProvider);
         ref.invalidate(fetchPemasukanProvider);
+
+        // Log activity
+        await ref
+            .read(logActivityNotifierProvider.notifier)
+            .createLogWithCurrentUser(
+                title: 'Menambahkan pemasukan: ${_namaController.text.trim()}');
 
         if (mounted) {
           ScaffoldMessenger. of(context).showSnackBar(

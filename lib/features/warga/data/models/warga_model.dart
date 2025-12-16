@@ -84,3 +84,50 @@ class WargaModel extends Warga {
     };
   }
 }
+
+
+extension WargaModelCopy on WargaModel {
+  WargaModel copyWith({
+    int? id,
+    int? keluargaId,
+    String? nama,
+    String? nik,
+    String? jenisKelamin,
+    DateTime? tanggalLahir,
+    String? roleKeluarga,
+    DateTime? createdAt,
+    String? userId, // 🔥 FIX: STRING
+    int? alamatRumahId,
+    String? noTelp,
+    String? tempatLahir,
+    String? agama,
+    String? golonganDarah,
+    String? pekerjaan,
+    String? status,
+    String? pendidikan,
+    Map<String, dynamic>? keluarga,
+    Map<String, dynamic>? rumah,
+  }) {
+    return WargaModel(
+      id: id ?? this.id,
+      keluargaId: keluargaId ?? this.keluargaId,
+      nama: nama ?? this.nama,
+      nik: nik ?? this.nik,
+      jenisKelamin: jenisKelamin ?? this.jenisKelamin,
+      tanggalLahir: tanggalLahir ?? this.tanggalLahir,
+      roleKeluarga: roleKeluarga ?? this.roleKeluarga,
+      createdAt: createdAt ?? this.createdAt,
+      userId: userId ?? this.userId, // ✅ AMAN
+      alamatRumahId: alamatRumahId ?? this.alamatRumahId,
+      noTelp: noTelp ?? this.noTelp,
+      tempatLahir: tempatLahir ?? this.tempatLahir,
+      agama: agama ?? this.agama,
+      golonganDarah: golonganDarah ?? this.golonganDarah,
+      pekerjaan: pekerjaan ?? this.pekerjaan,
+      status: status ?? this.status,
+      pendidikan: pendidikan ?? this.pendidikan,
+      keluarga: keluarga ?? this.keluarga,
+      rumah: rumah ?? this.rumah,
+    );
+  }
+}

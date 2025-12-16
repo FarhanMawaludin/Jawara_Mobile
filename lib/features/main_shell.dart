@@ -22,7 +22,7 @@ class _MainShellState extends State<MainShell> {
 
   void _onTap(int index) {
     setState(() => _currentIndex = index);
-    context.go(_routes[index]); 
+    context.go(_routes[index]);
   }
 
   @override
@@ -31,12 +31,7 @@ class _MainShellState extends State<MainShell> {
       body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Colors.grey[300]!, 
-              width: 1, 
-            ),
-          ),
+          border: Border(top: BorderSide(color: Colors.grey[300]!, width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -52,7 +47,7 @@ class _MainShellState extends State<MainShell> {
               label: "Keuangan",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.people_outline),
+              icon: Icon(Icons.people_outline, key: Key('nav_warga')),
               label: "Warga",
             ),
             BottomNavigationBarItem(

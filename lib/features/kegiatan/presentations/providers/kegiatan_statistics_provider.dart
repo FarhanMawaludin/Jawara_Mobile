@@ -1,28 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/kegiatan_statistics_model.dart';
-import '../../data/repositories/kegiatan_repository.dart';
+import 'kegiatan_repository_provider.dart'; // ✅ Import dari satu tempat
 
-// Provider untuk Supabase client
-final supabaseClientProvider = Provider<SupabaseClient>((ref) {
-  return Supabase.instance.client;
-});
-
-// Provider untuk Repository
-final kegiatanRepositoryProvider = Provider<KegiatanRepository>((ref) {
-  final supabase = ref.watch(supabaseClientProvider);
-  return KegiatanRepository(supabase);
-});
-
-// Provider untuk Statistics
-final kegiatanStatisticsProvider =
-    FutureProvider<KegiatanStatisticsModel>((ref) async {
+// ✅ HANYA gunakan provider, TIDAK define lagi
+final kegiatanStatisticsProvider = FutureProvider<KegiatanStatisticsModel>((ref) async {
   final repository = ref.watch(kegiatanRepositoryProvider);
-  
-  try {
-    final statistics = await repository.getStatistics();
-    return statistics;
-  } catch (e) {
-    return KegiatanStatisticsModel.empty();
-  }
+  return await repository.getStatistics();
 });

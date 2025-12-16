@@ -6,6 +6,7 @@ import 'widgets/form_broadcast/judul_broadcast.dart';
 import 'widgets/form_broadcast/isi_broadcast.dart';
 import 'widgets/form_broadcast/foto_broadcast.dart';
 import 'widgets/form_broadcast/dokumen_broadcast.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahBroadcastPage extends ConsumerStatefulWidget {
   const TambahBroadcastPage({super.key});
@@ -55,6 +56,12 @@ class _TambahBroadcastPageState extends ConsumerState<TambahBroadcastPage> {
       DialogHelper.hideLoading(context);
 
       if (result['success'] == true) {
+        // 🔥 BUAT LOG ACTIVITY SETELAH BERHASIL MEMBUAT BROADCAST
+        final judulBroadcast = ref.read(broadcastFormProvider).judul;
+        await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+          title: 'Membuat broadcast baru: $judulBroadcast',
+        );
+
         DialogHelper.showSuccess(
           context,
           message: result['message'] ?? 'Broadcast berhasil dikirim!',

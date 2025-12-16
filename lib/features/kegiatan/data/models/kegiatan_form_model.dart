@@ -5,6 +5,7 @@ class KegiatanFormModel {
   final String penanggungJawab;
   final String kategori;
   final String deskripsi;
+  final double anggaran; // ✅ Field lokal saja, tidak disimpan di DB kegiatan
 
   KegiatanFormModel({
     this.namaKegiatan = '',
@@ -13,6 +14,7 @@ class KegiatanFormModel {
     this.penanggungJawab = '',
     this.kategori = '',
     this.deskripsi = '',
+    this.anggaran = 0.0,
   });
 
   bool get isEmpty =>
@@ -21,7 +23,10 @@ class KegiatanFormModel {
       lokasi.isEmpty &&
       penanggungJawab.isEmpty &&
       kategori.isEmpty &&
-      deskripsi.isEmpty;
+      deskripsi.isEmpty &&
+      anggaran == 0.0;
+
+  bool get isAnggaranValid => anggaran >= 0;
 
   // Helper untuk mendapatkan kategori dalam format display (Title Case)
   String get kategoriDisplay {
@@ -36,6 +41,7 @@ class KegiatanFormModel {
     String? penanggungJawab,
     String? kategori,
     String? deskripsi,
+    double? anggaran,
   }) {
     return KegiatanFormModel(
       namaKegiatan: namaKegiatan ?? this.namaKegiatan,
@@ -44,9 +50,11 @@ class KegiatanFormModel {
       penanggungJawab: penanggungJawab ?? this.penanggungJawab,
       kategori: kategori ?? this.kategori,
       deskripsi: deskripsi ?? this.deskripsi,
+      anggaran: anggaran ?? this.anggaran,
     );
   }
 
+  // ✅ toJson TIDAK include anggaran (tidak disimpan di DB kegiatan)
   Map<String, dynamic> toJson() {
     return {
       'nama_kegiatan': namaKegiatan,
@@ -55,6 +63,7 @@ class KegiatanFormModel {
       'penanggung_jawab_kegiatan': penanggungJawab,
       'kategori_kegiatan': kategori.toLowerCase(), // Selalu lowercase untuk database
       'deskripsi_kegiatan': deskripsi,
+      // TIDAK ADA 'anggaran' di sini
     };
   }
 
@@ -68,6 +77,7 @@ class KegiatanFormModel {
       penanggungJawab: json['penanggung_jawab_kegiatan'] ?? '',
       kategori: json['kategori_kegiatan'] ?? '',
       deskripsi: json['deskripsi_kegiatan'] ?? '',
+      anggaran: 0.0, // Default 0, karena tidak disimpan di DB
     );
   }
 }

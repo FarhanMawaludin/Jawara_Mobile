@@ -7,6 +7,8 @@ import 'widgets/form_tambah/lokasi.dart';
 import 'widgets/form_tambah/penganggunjawab.dart';
 import 'widgets/form_tambah/kategori_kegiatan.dart';
 import 'widgets/form_tambah/deskripsi_kegiatan.dart';
+import 'widgets/form_tambah/form_anggaran.dart'; // ✅ TAMBAHKAN
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahKegiatanPage extends ConsumerStatefulWidget {
   const TambahKegiatanPage({super.key});
@@ -61,7 +63,8 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
   // Submit form tambah kegiatan
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Tampilkan loading
+
+      final namaKegiatan = ref.read(kegiatanFormProvider).namaKegiatan;
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -70,22 +73,23 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
         ),
       );
 
-      // Submit form
       final result = await ref.read(kegiatanFormProvider.notifier).submitForm();
-
-      // Tutup loading
       if (mounted) Navigator.pop(context);
-
-      // Tampilkan hasil
       if (result['success']) {
+       //buat log
+        await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+          title: 'Kegiatan baru: $namaKegiatan',
+        );
+        final successMessage = result['pengeluaran_created'] == true
+            ? 'Kegiatan dan pengeluaran berhasil ditambahkan'
+            : 'Kegiatan berhasil ditambahkan';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Kegiatan berhasil ditambahkan'),
+            content: Text(successMessage),
             backgroundColor: _primaryColor,
             behavior: SnackBarBehavior.floating,
           ),
         );
-
         if (mounted) Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,6 +107,7 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final formState = ref.watch(kegiatanFormProvider); 
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -141,31 +146,27 @@ class _TambahKegiatanPageState extends ConsumerState<TambahKegiatanPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nama Kegiatan Field
                   NamaKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Tanggal Kegiatan Field
                   TanggalKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Lokasi Field
                   LokasiKegiatanField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Penanggung Jawab Field
                   PenanggungJawabField(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Kategori Dropdown
                   KategoriKegiatanDropdown(primaryColor: _primaryColor),
                   const SizedBox(height: 20),
-
-                  // Deskripsi Field
                   DeskripsiKegiatanField(primaryColor: _primaryColor),
+                  const SizedBox(height: 20),
+                  AnggaranKegiatanField(
+                    anggaran: formState.anggaran,
+                    onChanged: (value) {
+                      ref.read(kegiatanFormProvider.notifier).updateAnggaran(value);
+                    },
+                  ),
                   const SizedBox(height: 40),
 
-                  // Tombol Submit
+                
                   SizedBox(
                     width: double.infinity,
                     height: 56,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../domain/entities/pengeluaran.dart';
 import '../../providers/mutasi/mutasi_providers.dart';
 import '../../providers/pengeluaran/pengeluaran_providers.dart';
@@ -69,7 +70,7 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
     });
   }
 
-  void _submitForm() async {
+ void _submitForm() async {
   if (_formKey.currentState!.validate() && _kategori != null) {
     try {
       // Ambil nilai numerik dari nominal
@@ -86,7 +87,15 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
         buktiPengeluaran: _buktiFile?.path ?? '',
       );
 
+      // Kirim ke provider
       await ref.read(pengeluaranNotifierProvider.notifier).create(pengeluaran);
+
+      // Log activity
+      await ref
+        .read(logActivityNotifierProvider.notifier)
+        .createLogWithCurrentUser(
+          title: 'Menambahkan pengeluaran: ${_namaController.text.trim()}'
+        );
 
       // INVALIDATE PROVIDERS untuk refresh otomatis
       ref.invalidate(allTransactionsProvider);
@@ -98,12 +107,12 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pengeluaran berhasil disimpan!')),
         );
-        Navigator.pop(context, true);
+        Navigator.pop(context, true); // atau Navigator.pop(context); sesuai kebutuhanmu
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('Gagal menyimpan pengeluaran: $e')),
         );
       }
     }
@@ -236,7 +245,7 @@ class _TambahPengeluaranPageState extends ConsumerState<TambahPengeluaranPage> {
                             Icon(Icons.upload_file, color: Colors.deepPurple),
                             SizedBox(height: 8),
                             Text(
-                              'Upload Bukti Pemasukan (.png/.jpg)',
+                              'Upload Bukti Pengeluaran (.png/.jpg)',
                               style: TextStyle(color: Colors.deepPurple),
                             ),
                           ],

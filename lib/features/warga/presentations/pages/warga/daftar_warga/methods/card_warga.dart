@@ -5,6 +5,7 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 import 'package:jawaramobile/core/component/bottom_alert.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class CardWarga extends ConsumerWidget {
   final String nama;
@@ -22,17 +23,21 @@ class CardWarga extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          // -----------------------------------------------------
-          // NAMA + VERIFIED
-          // -----------------------------------------------------
+    return GestureDetector(
+      onTap: () {
+        context.push('/warga/aspirasi?wargaId=$wargaId');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            // -----------------------------------------------------
+            // NAMA + VERIFIED
+            // -----------------------------------------------------
           Row(
             children: [
               Text(
@@ -48,7 +53,7 @@ class CardWarga extends ConsumerWidget {
                 Icon(
                   HeroiconsOutline.checkBadge,
                   size: 18,
-                  color: Colors.green[600],
+                  color: isVerified ? Colors.green[600] : Colors.grey[600],
                 ),
             ],
           ),
@@ -148,6 +153,11 @@ class CardWarga extends ConsumerWidget {
                         final delete = ref.read(deleteWargaUseCaseProvider);
                         await delete(wargaId);
 
+                        // BUAT LOG ACTIVITY
+                        await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+                          title: 'Menghapus warga: $nama',
+                        );
+
                         // Refresh list warga
                         ref.invalidate(wargaListProvider);
                       },
@@ -172,6 +182,7 @@ class CardWarga extends ConsumerWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

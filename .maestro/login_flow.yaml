@@ -1,0 +1,32 @@
+appId: com.example.jawaramobile
+---
+- clearState
+- launchApp
+
+# =========================
+# ONBOARDING
+# =========================
+- assertVisible: "Jawara Pintar"
+
+- tapOn: "Login"
+
+# =========================
+# LOGIN PAGE
+# =========================
+- assertVisible: "Login"
+
+- tapOn: "Masukkan email"
+- inputText: admin@gmail.com
+
+- tapOn: "Masukkan password"
+- inputText: password
+
+- hideKeyboard
+
+- tapOn: "Login"
+
+# =========================
+# HOME PAGE
+# =========================
+- assertVisible: "Selamat pagi,"
+

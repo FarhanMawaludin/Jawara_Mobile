@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../providers/tagihiuran/tagihiuran_providers.dart';
 import '../../providers/ketegoriiuran/ketegoriiuran_providers.dart';
 
@@ -74,12 +75,43 @@ class _TagihIuranState extends ConsumerState<TagihIuran> {
     }
   }
 
-  @override
-  void dispose() {
-    namaIuranController.dispose();
-    nominalIuranController.dispose();
-    super.dispose();
+@override
+void dispose() {
+  namaIuranController.dispose();
+  nominalIuranController.dispose();
+  super.dispose();
+}
+
+/// Fungsi untuk menyimpan data iuran (misal dipanggil saat tombol simpan ditekan)
+Future<void> onSave() async {
+  try {
+    // Gunakan notifier untuk create
+    await ref.read(tagihIuranNotifierProvider.notifier).create(
+      kategoriId: selectedKategoriId!,
+      nama: namaIuranController.text.trim(),
+      jumlah: 0, // atau dari input
+    );
+
+    // Log activity
+    await ref
+        .read(logActivityNotifierProvider.notifier)
+        .createLogWithCurrentUser(
+            title: 'Menambahkan iuran: ${namaIuranController.text.trim()}');
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Iuran berhasil disimpan untuk semua keluarga!")),
+    );
+    context.pop();
+
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Gagal menyimpan: $e")),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

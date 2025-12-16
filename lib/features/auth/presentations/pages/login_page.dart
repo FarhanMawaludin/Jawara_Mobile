@@ -46,7 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               fit: BoxFit.contain,
               controller: _lottieController,
               onLoaded: (composition) {
-                _lottieController.duration = composition.duration ~/ 3; 
+                _lottieController.duration = composition.duration ~/ 10; 
                 _lottieController.forward();
               },
             ),
@@ -96,6 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           ),
           title: Text(
             "Login",
+            key: const Key("loginPageTitle"),
             style: TextStyle(
               color: Colors.grey[950],
               fontWeight: FontWeight.w600,
@@ -213,6 +214,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                               ),
                               child: const Text(
                                 "Login",
+                                key: Key("loginButtonText"),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,

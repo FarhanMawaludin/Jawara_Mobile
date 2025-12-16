@@ -14,21 +14,22 @@ class AspirationSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
+    final greyColor = Colors.grey[600];
+    final boxDecoration = BoxDecoration(
+      color: Colors.grey.shade100,
+      borderRadius: BorderRadius.circular(12),
+    );
 
     return Row(
       children: [
         Expanded(
           child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: boxDecoration,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             constraints: const BoxConstraints(minHeight: 44),
             child: Row(
               children: [
-                Icon(Icons.search, size: 20, color: Colors.grey[600]),
+                Icon(Icons.search, size: 20, color: greyColor),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Theme(
@@ -57,8 +58,7 @@ class AspirationSearchBar extends StatelessWidget {
                 ValueListenableBuilder<TextEditingValue>(
                   valueListenable: controller,
                   builder: (context, value, child) {
-                    final text = value.text;
-                    if (text.isEmpty) return const SizedBox.shrink();
+                    if (value.text.isEmpty) return const SizedBox.shrink();
                     return GestureDetector(
                       onTap: () {
                         controller.clear();
@@ -66,7 +66,7 @@ class AspirationSearchBar extends StatelessWidget {
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(Icons.close, size: 18, color: Colors.grey[600]),
+                        child: Icon(Icons.close, size: 18, color: greyColor),
                       ),
                     );
                   },
@@ -81,16 +81,9 @@ class AspirationSearchBar extends StatelessWidget {
           child: Container(
             height: 44,
             width: 44,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: boxDecoration,
             child: Center(
-              child: Icon(
-                Icons.filter_list,
-                size: 20,
-                color: Colors.grey[600],
-              ),
+              child: Icon(Icons.filter_list, size: 20, color: greyColor),
             ),
           ),
         ),
@@ -98,4 +91,3 @@ class AspirationSearchBar extends StatelessWidget {
     );
   }
 }
-

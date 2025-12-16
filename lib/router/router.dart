@@ -67,9 +67,7 @@ import '../features/register/presentations/pages/register_step3_rumah.dart';
 import 'package:jawaramobile/features/warga/presentations/pages/keluarga/daftar_keluarga/daftar_keluarga_page.dart';
 
 final router = GoRouter(
-  // Di development mode langsung ke /kegiatan, di production ke /login
-  initialLocation: kDebugMode ? '/kegiatan' : '/login',
-  
+
   routes: [
     GoRoute(path: '/', builder: (context, state) => const OnboardingPage()),
     GoRoute(path: '/login', builder: (context, state) => LoginPage()),
@@ -195,10 +193,10 @@ final router = GoRouter(
       path: '/warga/tambah-mutasi',
       builder: (context, state) => const TambahMutasiPage(),
     ),
-    GoRoute(
-      path: '/warga/penerimaan-warga',
-      builder: (context, state) => const PenerimaanWargaPage(),
-    ),
+    // GoRoute(
+    //   path: '/warga/penerimaan-warga',
+    //   builder: (context, state) => const PenerimaanWargaPage(),
+    // ),
 
     GoRoute(
       path: '/warga/tambah-warga',
@@ -206,7 +204,12 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/warga/aspirasi',
-      builder: (context, state) => const AspirationPage(),
+      builder: (context, state) {
+        final wargaId = state.uri.queryParameters['wargaId'];
+        return AspirationPage(
+          wargaId: wargaId != null ? int.tryParse(wargaId) : null,
+        );
+      },
     ),
 
     // Keuangan Routes

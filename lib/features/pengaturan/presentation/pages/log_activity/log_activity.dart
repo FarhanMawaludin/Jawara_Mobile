@@ -105,14 +105,15 @@ class _LogActivityPageState extends ConsumerState<LogActivityPage> {
         final supa = ref.read(supabaseClientProviderForLog);
         final String? currentUid = supa.auth.currentUser?.id;
 
-        // Map DB models to local _ActivityItem for existing UI (no details)
+        // Map DB models to local _ActivityItem for existing UI
         String actorLabelFor(m) {
-          final String actor = m.actor;
           final String? userId = m.userId;
-          if (actor.isNotEmpty) return actor;
+          
+          // Check if it's the current user
           if (userId != null && userId.isNotEmpty) {
-            if (currentUid != null && userId == currentUid) return 'Admin';
-            return userId.length >= 8 ? '${userId.substring(0, 8)}...' : userId;
+            if (currentUid != null && userId == currentUid) return 'Anda';
+            // Show truncated user ID
+            return userId.length >= 8 ? 'User ${userId.substring(0, 8)}...' : 'User $userId';
           }
           return 'Sistem';
         }
@@ -122,7 +123,6 @@ class _LogActivityPageState extends ConsumerState<LogActivityPage> {
                   title: m.title,
                   actor: actorLabelFor(m),
                   time: m.createdAt,
-                  category: m.category.isNotEmpty ? m.category : 'Lainnya',
                 ))
             .toList();
 
@@ -284,9 +284,8 @@ class _ActivityItem {
   final String title;
   final DateTime time;
   final String actor;
-  final String category;
 
-  _ActivityItem({required this.title, required this.time, required this.actor, this.category = 'Lainnya'});
+  _ActivityItem({required this.title, required this.time, required this.actor});
 }
 
 class _FamilyCard extends StatelessWidget {

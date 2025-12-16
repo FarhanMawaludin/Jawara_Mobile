@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/utils/date_formatter.dart';
+import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../data/models/broadcast_model.dart';
 import '../../providers/broadcast_list_provider.dart';
 
@@ -257,6 +258,12 @@ class BroadcastCard extends ConsumerWidget {
     notifier.removeById(broadcast.id);
 
     final result = await notifier.deleteById(broadcast.id);
+
+    // Log activity
+    await ref
+        .read(logActivityNotifierProvider.notifier)
+        .createLogWithCurrentUser(
+            title: 'Menghapus broadcast: ${broadcast.judulBroadcast}');
 
     if (!context.mounted) return;
 
