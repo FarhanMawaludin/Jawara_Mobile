@@ -1,9 +1,11 @@
+// lib/features/dashboard/presentations/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import '../widgets/ActivitiesSection.dart';
 import '../widgets/FinanceSection.dart';
 import '../widgets/HeaderSection.dart';
 import '../widgets/PopulationCard.dart';
-import '../widgets/ResponsiblePersons.dart';
+import '../widgets/log_aktivitas.dart'; 
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -25,7 +27,8 @@ class HomePage extends StatelessWidget {
               SizedBox(height: 20),
               FinanceSection(),
               SizedBox(height: 20),
-              ResponsiblePersons(),
+              RecentActivitiesSection(), 
+              SizedBox(height: 20),
             ],
           ),
         ),
