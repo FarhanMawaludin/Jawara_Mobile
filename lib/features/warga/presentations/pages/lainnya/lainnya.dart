@@ -98,14 +98,14 @@ class Lainnya extends StatelessWidget {
                     MenuItemWidget(
                       icon: HeroiconsOutline.chatBubbleLeftRight,
                       label: "Aspirasi Warga",
-                      onTap: () => context.push('/aspirasi'),
+                      onTap: () => context.push('/warga/aspirasi'),
                     ),
 
-                    MenuItemWidget(
-                      icon: HeroiconsOutline.documentCheck,
-                      label: "Penerimaan Warga",
-                      onTap: () => context.push('/warga/penerimaan-warga'),
-                    ),
+                    // MenuItemWidget(
+                    //   icon: HeroiconsOutline.documentCheck,
+                    //   label: "Penerimaan Warga",
+                    //   onTap: () => context.push('/warga/penerimaan-warga'),
+                    // ),
 
                     MenuItemWidget(
                       icon: HeroiconsOutline.userMinus,

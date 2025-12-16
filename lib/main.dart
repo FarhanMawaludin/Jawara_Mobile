@@ -5,6 +5,7 @@ import 'package:jawaramobile/config/app_config.dart';
 import 'core/supabase_client.dart';
 import 'router/router.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp.router(
       title: 'Jawara Mobile',
       debugShowCheckedModeBanner: false,
@@ -28,3 +30,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+ 

@@ -11,8 +11,8 @@ class Warga {
   // ENUM: 'kepala keluarga' | 'ibu rumah tangga' | 'anak'
   final String? roleKeluarga;
   final DateTime createdAt;
-  final String? userId;           // UUID
-  final int? alamatRumahId;       // BIGINT
+  final String? userId; // UUID
+  final int? alamatRumahId; // BIGINT
   final String? noTelp;
   final String? tempatLahir;
   // ENUM agama
@@ -26,9 +26,8 @@ class Warga {
 
   // ENUM status
   final String? status;
-    final Map<String, dynamic>? keluarga;
+  final Map<String, dynamic>? keluarga;
   final Map<String, dynamic>? rumah;
-  
 
   Warga({
     required this.id,
@@ -49,7 +48,6 @@ class Warga {
     this.status,
     this.keluarga,
     this.rumah,
-    this.pendidikan
-    
+    this.pendidikan,
   });
 }

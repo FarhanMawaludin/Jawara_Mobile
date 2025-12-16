@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart';
 import 'package:jawaramobile/features/warga/domain/entities/rumah.dart';
+import 'package:jawaramobile/features/pengaturan/presentation/providers/log_activity_providers.dart';
 
 class TambahRumahPage extends ConsumerStatefulWidget {
   const TambahRumahPage({super.key});
@@ -94,6 +95,11 @@ class _TambahRumahPageState extends ConsumerState<TambahRumahPage> {
                       );
 
                       await createRumah(rumah);
+
+                      // BUAT LOG ACTIVITY
+                      await ref.read(logActivityNotifierProvider.notifier).createLogWithCurrentUser(
+                        title: 'Menambahkan rumah baru: Blok ${blokController.text} No. ${nomorRumahController.text}',
+                      );
 
                       ref.invalidate(rumahListProvider);
 

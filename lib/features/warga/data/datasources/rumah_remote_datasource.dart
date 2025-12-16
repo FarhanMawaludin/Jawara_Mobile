@@ -29,7 +29,7 @@ class RumahRemoteDataSourceImpl implements RumahRemoteDataSource {
           nama_keluarga
         )
       ''')
-          .order('id', ascending: true);
+          .order('blok', ascending: true);
 
       return data.map((json) => RumahModel.fromMap(json)).toList();
     } catch (e) {
@@ -104,7 +104,7 @@ class RumahRemoteDataSourceImpl implements RumahRemoteDataSource {
         .select(); // <-- WAJIB (tanpa ini return-nya null)
 
     // Kalau select() gagal → akan throw otomatis
-    if (response == null || response.isEmpty) {
+    if (response.isEmpty) {
       throw Exception("Gagal memperbarui data Rumah");
     }
   }

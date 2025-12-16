@@ -10,8 +10,7 @@ class DaftarKeluargaPage extends ConsumerStatefulWidget {
   const DaftarKeluargaPage({super.key});
 
   @override
-  ConsumerState<DaftarKeluargaPage> createState() =>
-      _DaftarKeluargaPageState();
+  ConsumerState<DaftarKeluargaPage> createState() => _DaftarKeluargaPageState();
 }
 
 class _DaftarKeluargaPageState extends ConsumerState<DaftarKeluargaPage> {
@@ -67,18 +66,22 @@ class _DaftarKeluargaPageState extends ConsumerState<DaftarKeluargaPage> {
                     const SizedBox(height: 20),
 
                     if (keyword.isNotEmpty && list.isEmpty)
-                      const Text("Tidak ditemukan...",
-                          style: TextStyle(color: Colors.grey)),
+                      const Text(
+                        "Tidak ditemukan...",
+                        style: TextStyle(color: Colors.grey),
+                      ),
 
                     ...list.map(
                       (w) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: CardKeluarga(
                           keluargaId: w.keluargaId,
-                          namaKeluarga: w.keluarga?['nama_keluarga'] ??
+                          namaKeluarga:
+                              w.keluarga?['nama_keluarga'] ??
                               'Tidak ada nama keluarga',
-                          alamat: w.rumah?['alamat_lengkap'] ??
-                              'Alamat tidak ada',
+                          alamat: w.rumah?['alamat_lengkap'] != null
+                              ? "${w.rumah?['alamat_lengkap']}, Blok ${w.rumah?['blok'] ?? '-'} No. ${w.rumah?['nomor_rumah'] ?? '-'}"
+                              : "Alamat tidak ada",
                           role: w.roleKeluarga ?? 'Tidak diketahui',
                         ),
                       ),

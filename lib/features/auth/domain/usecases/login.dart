@@ -19,4 +19,15 @@ class LoginParams {
     required this.email,
     required this.password,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is LoginParams &&
+        other.email == email &&
+        other.password == password;
+  }
+
+  @override
+  int get hashCode => Object.hash(email, password);
 }

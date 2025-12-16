@@ -18,7 +18,7 @@ class RumahRepositoryImpl implements RumahRepository {
   }
 
   @override
-  Future<Rumah?> getRumahById(int id) async {
+  Future<RumahModel?> getRumahById(int id) async {
     try {
       return await remoteDataSource.getRumahById(id);
     } catch (e) {

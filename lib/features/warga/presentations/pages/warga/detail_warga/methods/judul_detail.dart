@@ -3,8 +3,9 @@ import 'package:heroicons_flutter/heroicons_flutter.dart';
 
 class JudulDetail extends StatelessWidget {
   String namaWarga;
+  bool isActive;
 
-  JudulDetail({super.key, required this.namaWarga});
+  JudulDetail({super.key, required this.namaWarga, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class JudulDetail extends StatelessWidget {
               Icon(
                 HeroiconsOutline.checkBadge,
                 size: 18,
-                color: Colors.green[600],
+                color: isActive ? Colors.green[600] : Colors.grey[600],
               ),
             ],
           ),
