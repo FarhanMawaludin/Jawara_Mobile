@@ -44,7 +44,6 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
 
   final List<String> _jenisKelaminOptions = ['Laki-Laki', 'Perempuan'];
   final List<String> _roleKeluargaOptions = [
-    'Kepala Keluarga',
     'Ibu Rumah Tangga',
     'Anak',
   ];
@@ -267,7 +266,6 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   Widget build(BuildContext context) {
     // tambahkan opsi kosong di awal agar user bisa memilih "kosong"
     final keluargaNames =
-        ['Tidak Ada'] +
         _keluargaList.map((e) => e['nama_keluarga'].toString()).toList();
 
     return Scaffold(

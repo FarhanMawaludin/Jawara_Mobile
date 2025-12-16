@@ -13,8 +13,7 @@ class RegisterStep3Rumah extends ConsumerStatefulWidget {
   const RegisterStep3Rumah({super.key});
 
   @override
-  ConsumerState<RegisterStep3Rumah> createState() =>
-      _RegisterStep3RumahState();
+  ConsumerState<RegisterStep3Rumah> createState() => _RegisterStep3RumahState();
 }
 
 class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
@@ -126,6 +125,7 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               ),
               const SizedBox(height: 16),
+
               /// ==========================
               /// DROPDOWN RUMAH
               /// ==========================
@@ -154,19 +154,21 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(10),
-                              border:
-                                  Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: Colors.grey.shade300),
                             ),
                             child: DropdownButton<Rumah>(
                               value: selectedRumah,
                               isExpanded: true,
                               underline: const SizedBox(),
-                              hint: const Text("Pilih rumah dari daftar tersedia"),
+                              hint: const Text(
+                                "Pilih rumah dari daftar tersedia",
+                              ),
                               items: listRumah.map((rumah) {
                                 return DropdownMenuItem(
                                   value: rumah,
                                   child: Text(
-                                      "${rumah.blok} - ${rumah.nomorRumah}"),
+                                    "${rumah.blok} - ${rumah.nomorRumah}",
+                                  ),
                                 );
                               }).toList(),
                               onChanged: (val) {
@@ -180,8 +182,7 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                                       .updateCache(
                                         blok: val.blok ?? "",
                                         nomorRumah: val.nomorRumah ?? "",
-                                        alamatLengkap:
-                                            val.alamatLengkap ?? "",
+                                        alamatLengkap: val.alamatLengkap ?? "",
                                       );
                                 }
                               },
@@ -200,6 +201,7 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                   );
                 },
               ),
+
               /// ==========================
               /// INPUT MANUAL (aktif jika tidak pilih dropdown)
               /// ==========================
@@ -210,7 +212,8 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                 enabled: selectedRumah == null,
                 validator: (_) => null,
                 onChanged: (v) {
-                  ref.read(registerStep3CacheProvider.notifier)
+                  ref
+                      .read(registerStep3CacheProvider.notifier)
                       .updateCache(blok: v);
                 },
               ),
@@ -221,7 +224,8 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                 enabled: selectedRumah == null,
                 validator: (_) => null,
                 onChanged: (v) {
-                  ref.read(registerStep3CacheProvider.notifier)
+                  ref
+                      .read(registerStep3CacheProvider.notifier)
                       .updateCache(nomorRumah: v);
                 },
               ),
@@ -232,11 +236,13 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                 enabled: selectedRumah == null,
                 validator: (_) => null,
                 onChanged: (v) {
-                  ref.read(registerStep3CacheProvider.notifier)
+                  ref
+                      .read(registerStep3CacheProvider.notifier)
                       .updateCache(alamatLengkap: v);
                 },
               ),
               const SizedBox(height: 20),
+
               /// ================= SUBMIT =================
               TextButton(
                 onPressed: () async {
@@ -249,27 +255,32 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                       yesText: "Mengerti",
                       onlyYes: true,
                       icon: SizedBox(
-                        height:
-                            MediaQuery.of(context).size.height * 0.22,
+                        height: MediaQuery.of(context).size.height * 0.22,
                         child: Lottie.asset("assets/lottie/Failed.json"),
                       ),
                       onYes: () => Navigator.pop(context),
                     );
                     return;
                   }
-                  final blok = selectedRumah?.blok ?? _blokController.text.trim();
+                  final blok =
+                      selectedRumah?.blok ?? _blokController.text.trim();
                   final nomorRumah =
-                      selectedRumah?.nomorRumah ?? _nomorRumahController.text.trim();
+                      selectedRumah?.nomorRumah ??
+                      _nomorRumahController.text.trim();
                   final alamat =
-                      selectedRumah?.alamatLengkap ?? _alamatLengkapController.text.trim();
+                      selectedRumah?.alamatLengkap ??
+                      _alamatLengkapController.text.trim();
+
                   /// VALIDASI DUPLIKASI UNTUK INPUT MANUAL SAJA
                   if (selectedRumah == null) {
                     final listRumahAll =
                         ref.read(rumahListProvider).value ?? [];
-                    final exists = listRumahAll.any((rumah) =>
-                        rumah.blok?.toLowerCase() == blok.toLowerCase() &&
-                        rumah.nomorRumah?.toLowerCase() ==
-                            nomorRumah.toLowerCase());
+                    final exists = listRumahAll.any(
+                      (rumah) =>
+                          rumah.blok?.toLowerCase() == blok.toLowerCase() &&
+                          rumah.nomorRumah?.toLowerCase() ==
+                              nomorRumah.toLowerCase(),
+                    );
                     if (exists) {
                       showBottomAlert(
                         context: context,
@@ -279,8 +290,7 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                         yesText: "Tutup",
                         onlyYes: true,
                         icon: SizedBox(
-                          height:
-                              MediaQuery.of(context).size.height * 0.22,
+                          height: MediaQuery.of(context).size.height * 0.22,
                           child: Lottie.asset("assets/lottie/Failed.json"),
                         ),
                         onYes: () => Navigator.pop(context),
@@ -288,15 +298,20 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                       return;
                     }
                   }
+
                   /// SIMPAN KE PROVIDER REGISTER
-                  ref.read(registerStep3CacheProvider.notifier).updateCache(
+                  ref
+                      .read(registerStep3CacheProvider.notifier)
+                      .updateCache(
                         blok: blok,
                         nomorRumah: nomorRumah,
                         alamatLengkap: alamat,
                       );
                   try {
-                    await ref.read(registerStateProvider.notifier)
+                    await ref
+                        .read(registerStateProvider.notifier)
                         .submitAll(ref, selectedRumah: selectedRumah);
+                    ref.invalidate(rumahListProvider);
                     ref.invalidate(registerStep1CacheProvider);
                     ref.invalidate(registerStep2CacheProvider);
                     ref.invalidate(registerStep3CacheProvider);
@@ -307,8 +322,7 @@ class _RegisterStep3RumahState extends ConsumerState<RegisterStep3Rumah> {
                       yesText: "Lanjut Login",
                       onlyYes: true,
                       icon: SizedBox(
-                        height:
-                            MediaQuery.of(context).size.height * 0.22,
+                        height: MediaQuery.of(context).size.height * 0.22,
                         child: Lottie.asset("assets/lottie/Done.json"),
                       ),
                       onYes: () {
