@@ -80,8 +80,8 @@ class _DaftarMutasiPageState extends ConsumerState<DaftarMutasiPage> {
                     data: (list) {
                       if (list.isEmpty) {
                         return const Padding(
-                          padding: EdgeInsets.only(top: 40),
-                          child: Text("Belum ada data rumah."),
+                          padding: EdgeInsets.only(top: 0),
+                          child: Text("Belum ada data mutasi."),
                         );
                       }
 

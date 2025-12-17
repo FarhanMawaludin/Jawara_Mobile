@@ -25,8 +25,7 @@ final registerAccountProvider = Provider<RegisterAccount>((ref) {
   return RegisterAccount(ref.read(registerRepositoryProvider));
 });
 
-final createKeluargaAndWargaProvider =
-    Provider<CreateKeluargaAndWarga>((ref) {
+final createKeluargaAndWargaProvider = Provider<CreateKeluargaAndWarga>((ref) {
   return CreateKeluargaAndWarga(ref.read(registerRepositoryProvider));
 });
 
@@ -40,14 +39,15 @@ final updateKeluargaRumahProvider = Provider<UpdateKeluargaRumah>((ref) {
 });
 
 // Provider untuk UPDATE alamat_rumah_id di warga
-final updateAlamatRumahWargaProvider =
-    Provider<UpdateAlamatRumahWarga>((ref) {
+final updateAlamatRumahWargaProvider = Provider<UpdateAlamatRumahWarga>((ref) {
   return UpdateAlamatRumahWarga(ref.read(supabaseClientProvider));
 });
 
 // Check email RPC
-final registerCheckEmailProvider =
-    FutureProvider.family<bool, String>((ref, email) async {
+final registerCheckEmailProvider = FutureProvider.family<bool, String>((
+  ref,
+  email,
+) async {
   final supabase = ref.read(supabaseClientProvider);
 
   final result = await supabase.rpc(
@@ -65,10 +65,13 @@ class UpdateKeluargaRumah {
   final supabase;
   UpdateKeluargaRumah(this.supabase);
 
-  Future<void> call(int keluargaId, int rumahIdBaru) async {
+  Future<void> call({required int rumahId, required int keluargaId}) async {
     await supabase
-        .from('keluarga')
-        .update({'rumah_id': rumahIdBaru}).eq('id', keluargaId);
+        .from('rumah') // ✅ TABEL BENAR
+        .update({
+          'keluarga_id': keluargaId, // ✅ KOLOM BENAR
+        })
+        .eq('id', rumahId);
   }
 }
 
@@ -79,10 +82,7 @@ class UpdateAlamatRumahWarga {
   final supabase;
   UpdateAlamatRumahWarga(this.supabase);
 
-  Future<void> call({
-    required int keluargaId,
-    required int rumahId,
-  }) async {
+  Future<void> call({required int keluargaId, required int rumahId}) async {
     await supabase
         .from('warga')
         .update({'alamat_rumah_id': rumahId})
@@ -209,16 +209,13 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
         alamatLengkap: state.alamatLengkap!,
       );
     } else {
-      // PILIH DROPDOWN → PAKAI rumah existing
-      rumahIdFinal = selectedRumah.id; // Removed redundant '!' operator
-      await updateRumahUC(keluargaId, rumahIdFinal);
+      rumahIdFinal = selectedRumah.id;
+
+      await updateRumahUC(rumahId: rumahIdFinal, keluargaId: keluargaId);
     }
 
     // 4. Update alamat rumah warga
-    await updateAlamatUC(
-      keluargaId: keluargaId,
-      rumahId: rumahIdFinal,
-    );
+    await updateAlamatUC(keluargaId: keluargaId, rumahId: rumahIdFinal);
 
     reset();
     return keluargaId;
@@ -232,8 +229,8 @@ class RegisterNotifier extends StateNotifier<RegisterState> {
 // Provider final register state
 final registerStateProvider =
     StateNotifierProvider<RegisterNotifier, RegisterState>((ref) {
-  return RegisterNotifier();
-});
+      return RegisterNotifier();
+    });
 
 // =========================================================
 // ============= CACHE: STEP 1 =============================
@@ -266,11 +263,7 @@ class RegisterStep1Cache {
 class RegisterStep1CacheNotifier extends StateNotifier<RegisterStep1Cache> {
   RegisterStep1CacheNotifier() : super(RegisterStep1Cache());
 
-  void updateCache({
-    String? email,
-    String? password,
-    String? confirmPassword,
-  }) {
+  void updateCache({String? email, String? password, String? confirmPassword}) {
     state = state.copyWith(
       email: email,
       password: password,
@@ -282,9 +275,11 @@ class RegisterStep1CacheNotifier extends StateNotifier<RegisterStep1Cache> {
 }
 
 final registerStep1CacheProvider =
-    StateNotifierProvider<RegisterStep1CacheNotifier, RegisterStep1Cache>((ref) {
-  return RegisterStep1CacheNotifier();
-});
+    StateNotifierProvider<RegisterStep1CacheNotifier, RegisterStep1Cache>((
+      ref,
+    ) {
+      return RegisterStep1CacheNotifier();
+    });
 
 // =========================================================
 // ============= CACHE: STEP 2 =============================
@@ -338,9 +333,11 @@ class RegisterStep2CacheNotifier extends StateNotifier<RegisterStep2Cache> {
 }
 
 final registerStep2CacheProvider =
-    StateNotifierProvider<RegisterStep2CacheNotifier, RegisterStep2Cache>((ref) {
-  return RegisterStep2CacheNotifier();
-});
+    StateNotifierProvider<RegisterStep2CacheNotifier, RegisterStep2Cache>((
+      ref,
+    ) {
+      return RegisterStep2CacheNotifier();
+    });
 
 // =========================================================
 // ============= CACHE: STEP 3 =============================
@@ -373,11 +370,7 @@ class RegisterStep3Cache {
 class RegisterStep3CacheNotifier extends StateNotifier<RegisterStep3Cache> {
   RegisterStep3CacheNotifier() : super(RegisterStep3Cache());
 
-  void updateCache({
-    String? blok,
-    String? nomorRumah,
-    String? alamatLengkap,
-  }) {
+  void updateCache({String? blok, String? nomorRumah, String? alamatLengkap}) {
     state = state.copyWith(
       blok: blok,
       nomorRumah: nomorRumah,
@@ -389,6 +382,8 @@ class RegisterStep3CacheNotifier extends StateNotifier<RegisterStep3Cache> {
 }
 
 final registerStep3CacheProvider =
-    StateNotifierProvider<RegisterStep3CacheNotifier, RegisterStep3Cache>((ref) {
-  return RegisterStep3CacheNotifier();
-});
+    StateNotifierProvider<RegisterStep3CacheNotifier, RegisterStep3Cache>((
+      ref,
+    ) {
+      return RegisterStep3CacheNotifier();
+    });

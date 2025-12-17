@@ -9,10 +9,10 @@ class KategoriIuranPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final kategoriState = ref.watch(kategoriIuranNotifierProvider);
+    final kategoriState = ref. watch(kategoriIuranNotifierProvider);
     
     return Scaffold(
-      appBar: AppBar(
+      appBar:  AppBar(
         title: const Text('Kategori Iuran'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -30,8 +30,8 @@ class KategoriIuranPage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.deepPurple.shade200),
               ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child:  const Column(
+                crossAxisAlignment:  CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
@@ -48,35 +48,36 @@ class KategoriIuranPage extends ConsumerWidget {
                   SizedBox(height: 8),
                   Text(
                     "Iuran Khusus:",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style:  TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
                       "Dibayar sesuai kebutuhan tertentu, misalnya acara khusus, renovasi, dsb."),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height:  16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                // ✅ UBAH: Route ke halaman tambah kategori (bukan tagih iuran)
                 ElevatedButton.icon(
-                  onPressed: () => context.push('/keuangan/iuran/tambah-iuran'),
+                  onPressed: () => context.push('/keuangan/iuran/tambah-kategori-iuran'),
                   icon: const Icon(Icons.add),
-                  label: const Text("Tambah Iuran"),
+                  label: const Text("Tambah Kategori"), // ✅ UBAH: Label jadi "Tambah Kategori"
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () {},
-                  icon: const Icon(Icons.filter_list),
+                  icon: const Icon(Icons. filter_list),
                   label: const Text("Filter"),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height:  16),
             Expanded(
-              child: kategoriState.when(
+              child: kategoriState. when(
                 loading: () => const Center(
-                  child: CircularProgressIndicator(),
+                  child:  CircularProgressIndicator(),
                 ),
                 error: (error, stackTrace) => Center(
                   child: Text("Error: $error"),
@@ -103,23 +104,64 @@ class KategoriIuranPage extends ConsumerWidget {
                                   color: Colors.deepPurple.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(Icons.receipt_long),
+                                child: const Icon(Icons. receipt_long),
                               ),
                               title: Text(item.namaKategori),
+                              subtitle: Text(
+                                '${item.kategoriIuran} • Rp ${item.nominal.toStringAsFixed(0)}', // ✅ Tampilkan info kategori dan nominal
+                              ),
                               trailing: PopupMenuButton(
                                 onSelected: (value) {
                                   if (value == 'edit') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                    ScaffoldMessenger. of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text("Edit ${item.namaKategori}"),
+                                        content:  Text("Edit ${item.namaKategori}"),
                                       ),
                                     );
                                   } else if (value == 'delete') {
-                                    ref
-                                        .read(
-                                            kategoriIuranNotifierProvider
-                                                .notifier)
-                                        .deleteKategoriById(item.id);
+                                    if (item.id != null) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext dialogContext) {
+                                          return AlertDialog(
+                                            title: const Text('Konfirmasi Hapus'),
+                                            content: Text(
+                                              'Apakah Anda yakin ingin menghapus "${item.namaKategori}"?',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(dialogContext),
+                                                child: const Text('Batal'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator. pop(dialogContext);
+                                                  ref
+                                                      .read(kategoriIuranNotifierProvider.notifier)
+                                                      .deleteKategoriById(item.id!);
+                                                  
+                                                  ScaffoldMessenger. of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('${item.namaKategori} berhasil dihapus'),
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Text(
+                                                  'Hapus',
+                                                  style:  TextStyle(color: Colors.red),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      ScaffoldMessenger. of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('ID kategori tidak valid'),
+                                        ),
+                                      );
+                                    }
                                   }
                                 },
                                 itemBuilder: (BuildContext context) => [

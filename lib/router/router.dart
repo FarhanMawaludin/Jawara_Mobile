@@ -1,9 +1,10 @@
 // lib/route.dart (updated with register flow)
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/iuran/kategori_iuran_page.dart';
-import 'package:jawaramobile/features/keuangan/presentations/pages/iuran/tambah_iuran_page.dart';
+import 'package:jawaramobile/features/keuangan/presentations/pages/iuran/tambah_kategori_page.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/keuangan_page.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/lainya_page.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/detail_pemasukan.dart';
@@ -12,6 +13,7 @@ import 'package:jawaramobile/features/keuangan/presentations/pages/pemasukkan/ta
 import 'package:jawaramobile/features/keuangan/presentations/pages/pengeluaran/tambah_pengeluaran.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/tagihan.dart';
 import 'package:jawaramobile/features/keuangan/presentations/pages/mutasi/mutasi_page.dart';
+import 'package:jawaramobile/features/keuangan/presentations/pages/tagihan/tagih_iuran.dart';
 import 'package:jawaramobile/features/onboarding/onboarding_page.dart';
 import 'package:jawaramobile/features/pengaturan/presentation/pages/settings_page.dart';
 import 'package:jawaramobile/features/kegiatan/presentations/pages/kegiatan.dart';
@@ -51,10 +53,12 @@ import 'package:jawaramobile/features/main_shell.dart';
 
 // Register
 
+import '../features/keuangan/data/models/iurandetail_model.dart';
 import '../features/keuangan/presentations/pages/metodepembayaran/daftar_channel_metodepembayaran.dart' show DaftarChannelMetodepembayaran;
 import '../features/keuangan/presentations/pages/metodepembayaran/tambah_metodepembayaran.dart';
 import '../features/keuangan/presentations/pages/mutasi/cetak_laporan_mutasi.dart';
 import '../features/keuangan/presentations/pages/statistik/statistik.dart';
+import '../features/keuangan/presentations/pages/tagihan/detail_tagihan.dart';
 import '../features/register/presentations/pages/register_step1_account.dart';
 import '../features/register/presentations/pages/register_step2_warga.dart';
 import '../features/register/presentations/pages/register_step3_rumah.dart';
@@ -218,20 +222,39 @@ final router = GoRouter(
       builder: (context, state) => const KategoriIuranPage(),
     ),
     GoRoute(
-      path: '/keuangan/iuran/tambah-iuran',
-      builder: (context, state) => const TambahIuranPage(),
+      path: '/keuangan/tagihan/tagih-iuran',
+      builder: (context, state) => const TagihIuran(),
     ),
-    GoRoute(
-      path: '/keuangan/tagihan/tagihan',
-      builder: (context, state) =>  TagihanPage(keluargaId: 1,),
-    ),
-    GoRoute(
+   GoRoute(
       path: '/keuangan/tagihan/tagihan/:keluargaId',
       builder: (context, state) {
-        final id = int.parse(state.pathParameters['keluargaId']!);
-        return TagihanPage(keluargaId: id);
+        final keluargaId = int.tryParse(state.pathParameters['keluargaId'] ?? '0') ?? 0;
+        return TagihanPage(keluargaId: keluargaId);
       },
     ),
+    GoRoute(
+      path: '/keuangan/iuran/tambah-kategori-iuran',
+      builder: (context, state) => const TambahKategoriIuranPage (),
+    ),
+
+    GoRoute(
+  path: '/keuangan/tagihan/detail',
+  name: 'tagihan-detail',
+  builder: (context, state) {
+    final item = state.extra as IuranDetail? ;
+    
+    if (item == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: const Center(
+          child: Text('Data tagihan tidak ditemukan'),
+        ),
+      );
+    }
+    
+    return DetailTagihanPage(data: item); // ✅ Pass IuranDetail
+  },
+),
     GoRoute(
       path: '/keuangan/pemasukan-lain',
       builder: (context, state) => const PemasukanLainPage(),

@@ -10,7 +10,7 @@ class TagihanPdfGenerator {
     final pdf = pw.Document();
 
     pdf.addPage(
-      pw.Page(
+      pw. Page(
         pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
           return pw.Column(
@@ -34,22 +34,22 @@ class TagihanPdfGenerator {
                   fontSize: 12,
                 ),
                 cellStyle: const pw.TextStyle(fontSize: 10),
-                headerDecoration: const pw.BoxDecoration(
+                headerDecoration: const pw. BoxDecoration(
                   color: PdfColors.grey300,
                 ),
-                cellAlignment: pw.Alignment.centerLeft,
+                cellAlignment:  pw.Alignment.centerLeft,
                 data: iuranDetailList.map((item) {
-                  // ✅ Akses data dari relasi tagihIuran
-                  final tagihan = item.tagihIuran;
+                  // ✅ Akses data dari relasi tagihIuranData
+                  final tagihan = item.tagihIuranData;
                   
                   return [
-                    tagihan?.nama ?? '-', // ✅ Dari tagihIuran
-                    tagihan?.kategoriId.toString() ?? '-', // ✅ Dari tagihIuran
+                    tagihan?.nama ?? '-',
+                    tagihan?.kategoriId.toString() ?? '-',
                     tagihan?.tanggalTagihan != null
-                        ? '${tagihan!.tanggalTagihan.day}/${tagihan.tanggalTagihan.month}/${tagihan.tanggalTagihan.year}'
-                        : '-', // ✅ Dari tagihIuran
-                    'Rp ${_formatRupiah((tagihan?.jumlah ?? 0).toInt())}', // ✅ Dari tagihIuran
-                    item.statusPembayaran, // ✅ Dari iuranDetail
+                        ?  '${tagihan!.tanggalTagihan.day}/${tagihan.tanggalTagihan. month}/${tagihan.tanggalTagihan.year}'
+                        : '-',
+                    'Rp ${_formatRupiah((tagihan?.jumlah ?? 0).toInt())}',
+                    item.statusPembayaran,
                   ];
                 }).toList(),
               ),
@@ -58,7 +58,7 @@ class TagihanPdfGenerator {
 
               // Footer
               pw.Text(
-                'Total Tagihan: ${iuranDetailList.length} item',
+                'Total Tagihan:  ${iuranDetailList.length} item',
                 style: pw.TextStyle(
                   fontSize: 12,
                   fontWeight: pw.FontWeight.bold,
@@ -67,7 +67,7 @@ class TagihanPdfGenerator {
 
               pw.SizedBox(height: 10),
 
-              pw.Text(
+              pw. Text(
                 'Total Nominal: Rp ${_formatRupiah(_calculateTotal(iuranDetailList))}',
                 style: pw.TextStyle(
                   fontSize: 14,
@@ -94,11 +94,11 @@ class TagihanPdfGenerator {
     );
   }
 
-  // ✅ Helper untuk hitung total
- static int _calculateTotal(List<IuranDetail> list) {
-  return list.fold<int>(
-    0, 
-    (sum, item) => sum + ((item.tagihIuran?.jumlah ?? 0).toInt()),
+  // ✅ Helper untuk hitung total - DIPERBAIKI
+  static int _calculateTotal(List<IuranDetail> list) {
+    return list.fold<int>(
+      0, 
+      (sum, item) => sum + ((item.tagihIuranData?.jumlah ?? 0).toInt()), // ✅ UBAH:  tagihIuran → tagihIuranData
     );
   }
 }

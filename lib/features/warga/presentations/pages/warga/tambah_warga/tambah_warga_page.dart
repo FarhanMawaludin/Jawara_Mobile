@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jawaramobile/core/component/InputField.dart';
+import 'package:jawaramobile/features/warga/presentations/providers/statistik/statistik_warga.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/warga/warga_providers.dart';
 import 'package:jawaramobile/features/warga/presentations/providers/rumah/rumah_providers.dart'
     hide supabaseClientProvider;
@@ -43,7 +44,6 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
 
   final List<String> _jenisKelaminOptions = ['Laki-Laki', 'Perempuan'];
   final List<String> _roleKeluargaOptions = [
-    'Kepala Keluarga',
     'Ibu Rumah Tangga',
     'Anak',
   ];
@@ -247,6 +247,7 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
       ref.invalidate(keluargaListProvider);
       ref.invalidate(totalKeluargaProvider);
       ref.invalidate(totalWargaProvider);
+      ref.invalidate(statistikWargaControllerProvider);
 
       if (mounted) {
         _show("Data warga berhasil disimpan");
@@ -265,7 +266,6 @@ class _TambahWargaPageState extends ConsumerState<TambahWargaPage> {
   Widget build(BuildContext context) {
     // tambahkan opsi kosong di awal agar user bisa memilih "kosong"
     final keluargaNames =
-        ['Tidak Ada'] +
         _keluargaList.map((e) => e['nama_keluarga'].toString()).toList();
 
     return Scaffold(
