@@ -7,31 +7,72 @@ import 'package:jawaramobile/features/keuangan/domain/entities/mutasi.dart';
 import 'package:jawaramobile/features/keuangan/presentations/providers/mutasi/mutasi_providers.dart';
 
 void main() {
-  runApp(MaterialApp.router(routerConfig: router,
-  ));
+  runApp(MaterialApp.router(routerConfig: router));
 }
 
 class KeuanganPage extends ConsumerWidget {
   const KeuanganPage({super.key});
 
   String _formatCurrency(double amount) {
-    return amount.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    );
+    return amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = [
-      {'icon': CupertinoIcons.qrcode, 'label': 'Kategori Iuran', 'route': '/keuangan/iuran/kategori-iuran', 'warna': Colors.black},
-      {'icon': CupertinoIcons.creditcard, 'label': 'Tagih Iuran', 'route': '/keuangan/tagihan/tagih-iuran', 'warna': Colors.black},
-      {'icon': CupertinoIcons.doc, 'label': 'Tagihan', 'route': '/keuangan/tagihan/tagihan/45', 'warna': Colors.black},
-      {'icon': CupertinoIcons.arrow_down_left, 'label': 'Pemasukan Lain', 'route': '/keuangan/pemasukan-lain', 'warna': Colors.green},
-      {'icon': CupertinoIcons.add, 'label': 'Tambah Pemasukan', 'route': '/keuangan/pemasukkan/tambah-pemasukkan', 'warna': Colors.green},
-      {'icon': CupertinoIcons.arrow_right_arrow_left, 'label': 'Mutasi Keuangan', 'route': '/keuangan/mutasi/mutasi', 'warna': Colors.black},
-      {'icon': CupertinoIcons.add, 'label': 'Tambah Pengeluaran', 'route': '/keuangan/pengeluaran/tambah-pengeluaran', 'warna': Colors.red},
-      {'icon': CupertinoIcons.bars, 'label': 'Lainnya', 'route': '/keuangan/lainnya', 'warna': Colors.black},
+      {
+        'icon': CupertinoIcons.qrcode,
+        'label': 'Kategori Iuran',
+        'route': '/keuangan/iuran/kategori-iuran',
+        'warna': Colors.black,
+      },
+      {
+        'icon': CupertinoIcons.creditcard,
+        'label': 'Tagih Iuran',
+        'route': '/keuangan/tagihan/tagih-iuran',
+        'warna': Colors.black,
+      },
+      {
+        'icon': CupertinoIcons.doc,
+        'label': 'Tagihan',
+        'route': '/keuangan/tagihan/tagihan/45',
+        'warna': Colors.black,
+      },
+      {
+        'icon': CupertinoIcons.arrow_down_left,
+        'label': 'Pemasukan Lain',
+        'route': '/keuangan/pemasukan-lain',
+        'warna': Colors.green,
+      },
+      {
+        'icon': CupertinoIcons.add,
+        'label': 'Tambah Pemasukan',
+        'route': '/keuangan/pemasukkan/tambah-pemasukkan',
+        'warna': Colors.green,
+      },
+      {
+        'icon': CupertinoIcons.arrow_right_arrow_left,
+        'label': 'Mutasi Keuangan',
+        'route': '/keuangan/mutasi/mutasi',
+        'warna': Colors.black,
+      },
+      {
+        'icon': CupertinoIcons.add,
+        'label': 'Tambah Pengeluaran',
+        'route': '/keuangan/pengeluaran/tambah-pengeluaran',
+        'warna': Colors.red,
+      },
+      {
+        'icon': CupertinoIcons.bars,
+        'label': 'Lainnya',
+        'route': '/keuangan/lainnya',
+        'warna': Colors.black,
+      },
     ];
 
     final transaksiAsyncValue = ref.watch(allTransactionsProvider);
@@ -61,19 +102,34 @@ class KeuanganPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 25),
-                  const Text("Saldo", style: TextStyle(color: Colors.white, fontSize: 14)),
+                  const Text(
+                    "Saldo",
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
                   saldoAsyncValue.when(
                     data: (saldo) => Text(
                       "Rp. ${_formatCurrency(saldo)}",
-                      style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     loading: () => const Text(
                       "Rp. 0",
-                      style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     error: (_, __) => const Text(
                       "Rp. 0",
-                      style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -110,8 +166,9 @@ class KeuanganPage extends ConsumerWidget {
                           radius: 25,
                           backgroundColor: Colors.white,
                           child: Icon(
-                            item['icon'] as IconData?, 
-                            color:  item['warna'] as Color),
+                            item['icon'] as IconData?,
+                            color: item['warna'] as Color,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -131,8 +188,13 @@ class KeuanganPage extends ConsumerWidget {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text("Transaksi Terakhir",
-                    style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
+                child: Text(
+                  "Transaksi Terakhir",
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -141,16 +203,11 @@ class KeuanganPage extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: transaksiAsyncValue.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                error: (error, stackTrace) => Center(
-                  child: Text("Error: $error"),
-                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stackTrace) =>
+                    Center(child: Text("Error: $error")),
                 data: (transaksiList) => transaksiList.isEmpty
-                    ? const Center(
-                        child: Text("Tidak ada transaksi"),
-                      )
+                    ? const Center(child: Text("Tidak ada transaksi"))
                     : Column(
                         children: transaksiList.take(5).map((t) {
                           return InkWell(
@@ -158,30 +215,46 @@ class KeuanganPage extends ConsumerWidget {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(children: [
+                                  Row(
+                                    children: [
                                       Icon(
                                         (t.jenis == MutasiType.pemasukan)
-                                          ? CupertinoIcons.arrow_down_left 
-                                          : CupertinoIcons.arrow_up_right,
+                                            ? CupertinoIcons.arrow_down_left
+                                            : CupertinoIcons.arrow_up_right,
                                         color: t.jenis == MutasiType.pemasukan
                                             ? Colors.green
                                             : Colors.red,
-                                        ),
-                                    const SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(t.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        Text(t.kategori ?? '-',
-                                            style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ]),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            t.nama,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            t.kategori ?? '-',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                   Text(
                                     "Rp ${_formatCurrency(t.jumlah)}",
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),

@@ -1,0 +1,46 @@
+appId: com.example.jawaramobile
+---
+# Launch the app fresh
+- clearState
+- launchApp
+- waitForAnimationToEnd
+
+# Handle onboarding or landing variations (tap if present, skip if not)
+- tapOn:
+    text: "Lewati"
+    optional: true
+- tapOn:
+    text: "Mulai"
+    optional: true
+- waitForAnimationToEnd
+
+# Navigate to tab/list that shows Pesan Warga section
+- tapOn:
+    text: "Warga"
+- waitForAnimationToEnd
+
+# Open full Aspirasi list
+- tapOn:
+    text: "Lihat Semua"
+- waitForAnimationToEnd
+
+# Assertions on Aspirasi page
+- assertVisible:
+    text: "Aspirasi"
+
+- assertVisible:
+    text: "Cari pengirim atau judul..."
+
+- assertVisible:
+    text: "Terbaru"
+    optional: true
+
+- assertVisible:
+    text: "7 Hari Terakhir"
+    optional: true
+
+# Optional: open a badge labeled Baru if exists, then back
+- tapOn:
+    text: "Baru"
+    optional: true
+- back
