@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/kegiatan_form_model.dart';
 import '../../data/repositories/kegiatan_repository.dart';
-import '../../../../core/providers/supabase_provider.dart';
+import 'kegiatan_repository_provider.dart';
 
 class KegiatanFormNotifier extends StateNotifier<KegiatanFormModel> {
   final KegiatanRepository _repository;
@@ -32,6 +32,10 @@ class KegiatanFormNotifier extends StateNotifier<KegiatanFormModel> {
     state = state.copyWith(kategori: value);
   }
 
+  void updateAnggaran(double value) {
+    state = state.copyWith(anggaran: value);
+  }
+
   void reset() {
     state = KegiatanFormModel();
   }
@@ -58,6 +62,6 @@ class KegiatanFormNotifier extends StateNotifier<KegiatanFormModel> {
 final kegiatanFormProvider =
     StateNotifierProvider<KegiatanFormNotifier, KegiatanFormModel>(
   (ref) => KegiatanFormNotifier(
-    KegiatanRepository(ref.read(supabaseClientProvider)),
+    ref.watch(kegiatanRepositoryProvider),
   ),
 );

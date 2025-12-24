@@ -436,20 +436,30 @@ class _StatistikPageState extends ConsumerState<StatistikPage> {
   }
 
   Widget _buildLegendItemWithCount(Color color, String text, int count) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
+    final maxWidth = MediaQuery.of(context).size.width * 0.45;
+    return SizedBox(
+      width: maxWidth,
+      child: Row(
+        children: [
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text('$text ($count)', style: const TextStyle(fontSize: 12)),
-      ],
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              '$text ($count)',
+              style: const TextStyle(fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -570,11 +580,12 @@ class _StatistikPageState extends ConsumerState<StatistikPage> {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
             children: [
               _buildLegendItem(Colors.orange, labelAktif, aktif),
-              const SizedBox(width: 20),
               _buildLegendItem(
                 Colors.deepPurpleAccent,
                 labelNonaktif,
@@ -721,13 +732,13 @@ class _StatistikPageState extends ConsumerState<StatistikPage> {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
             children: [
               _buildLegendItem(Colors.orange, "Kepala Keluarga", kepala),
-              const SizedBox(width: 20),
               _buildLegendItem(Colors.blueAccent, "Anak", anak),
-              const SizedBox(width: 20),
               _buildLegendItem(Colors.green, "Anggota Lain", anggota),
             ],
           ),
@@ -737,19 +748,30 @@ class _StatistikPageState extends ConsumerState<StatistikPage> {
   }
 
   Widget _buildLegendItem(Color color, String text, int count) {
-    return Row(
-      children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
+    final maxWidth = MediaQuery.of(context).size.width * 0.45;
+    return SizedBox(
+      width: maxWidth,
+      child: Row(
+        children: [
+          Container(
+            width: 14,
+            height: 14,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Text('$text ($count)', style: const TextStyle(fontSize: 12)),
-      ],
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              '$text ($count)',
+              style: const TextStyle(fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

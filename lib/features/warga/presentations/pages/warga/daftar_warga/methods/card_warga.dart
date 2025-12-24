@@ -24,9 +24,6 @@ class CardWarga extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () {
-        context.push('/warga/aspirasi?wargaId=$wargaId');
-      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -53,7 +50,7 @@ class CardWarga extends ConsumerWidget {
                 Icon(
                   HeroiconsOutline.checkBadge,
                   size: 18,
-                  color: Colors.green[600],
+                  color: isVerified ? Colors.green[600] : Colors.grey[600],
                 ),
             ],
           ),

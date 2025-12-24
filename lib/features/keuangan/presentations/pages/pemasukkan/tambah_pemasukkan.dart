@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as img_picker;
 import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../domain/entities/pemasukanlainnya.dart';
 import '../../providers/pemasukanlainnya/pemasukanlainnya_providers.dart';
+import '../../providers/mutasi/mutasi_providers.dart'; // TAMBAHKAN
+import 'package:jawaramobile/core/utils/currency_formatter.dart';
+
 
 class TambahPemasukanPage extends ConsumerStatefulWidget {
   const TambahPemasukanPage({super.key});
@@ -33,22 +37,22 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
 
   Future<void> _pickTanggal() async {
     DateTime? picked = await showDatePicker(
-      context: context,
+      context:  context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
       setState(() {
-        _tanggalController.text = "${picked.day}/${picked.month}/${picked.year}";
+        _tanggalController. text = "${picked.day}/${picked.month}/${picked.year}";
       });
     }
   }
 
   Future<void> _pickImage() async {
-    final picker = img_picker.ImagePicker();
+    final picker = img_picker. ImagePicker();
     final pickedFile =
-        await picker.pickImage(source: img_picker.ImageSource.gallery, imageQuality: 80);
+        await picker. pickImage(source: img_picker.ImageSource.gallery, imageQuality: 80);
 
     if (pickedFile != null) {
       setState(() {
@@ -69,7 +73,6 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Pastikan ada kategori
       if (_kategori == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Kategori belum dipilih')),
@@ -78,20 +81,29 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
       }
 
       try {
-        // Buat entity
+        // Ambil nilai numerik dari nominal (hilangkan format)
+        final nominalText = _nominalController.text. replaceAll(RegExp(r'[^0-9]'), '');
+        final nominal = double.parse(nominalText);
+
         final pemasukan = PemasukanLainnya(
           id: 0,
           createdAt: DateTime.now(),
           namaPemasukan: _namaController.text.trim(),
           kategoriPemasukan: _kategori!,
           tanggalPemasukan: DateTime.now(),
-          jumlah: double.parse(_nominalController.text),
-          buktiPemasukan: _buktiPemasukan?.path ?? '',
+          jumlah: nominal,
+          buktiPemasukan: _buktiPemasukan?.path ??  '',
         );
 
-        // Kirim ke Notifier → Usecase → Repository → Supabase
+        // Simpan data
         final notifier = ref.read(pemasukanNotifierProvider.notifier);
-        await notifier.createData(pemasukan);
+        await notifier. createData(pemasukan);
+
+        // INVALIDATE PROVIDERS untuk refresh otomatis
+        ref.invalidate(allTransactionsProvider);
+        ref.invalidate(totalSaldoProvider);
+        ref.invalidate(statistikProvider);
+        ref.invalidate(fetchPemasukanProvider);
 
         // Log activity
         await ref
@@ -100,19 +112,21 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
                 title: 'Menambahkan pemasukan: ${_namaController.text.trim()}');
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger. of(context).showSnackBar(
             const SnackBar(content: Text('Pemasukan berhasil disimpan!')),
           );
-          Navigator.pop(context);
+          // Return true untuk trigger refresh di halaman sebelumnya
+          Navigator.pop(context, true);
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -133,16 +147,16 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
               const SizedBox(height: 5),
               TextFormField(
                 controller: _namaController,
-                decoration: InputDecoration(
+                decoration:  InputDecoration(
                   hintText: 'Nama Pemasukan',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) =>
+                validator:  (value) =>
                     value!.isEmpty ? 'Nama pemasukan wajib diisi' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height:  16),
 
               // Tanggal
               const Text('Tanggal Pemasukan'),
@@ -153,13 +167,13 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
                 onTap: _pickTanggal,
                 decoration: InputDecoration(
                   hintText: 'Pilih Tanggal',
-                  suffixIcon: const Icon(Icons.calendar_today_outlined),
-                  border: OutlineInputBorder(
+                  suffixIcon:  const Icon(Icons.calendar_today_outlined),
+                  border:  OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 validator: (value) =>
-                    value!.isEmpty ? 'Tanggal wajib dipilih' : null,
+                    value!. isEmpty ? 'Tanggal wajib dipilih' :  null,
               ),
               const SizedBox(height: 16),
 
@@ -167,17 +181,17 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
               const Text('Kategori Pemasukan'),
               const SizedBox(height: 5),
               DropdownButtonFormField<String>(
-                initialValue: _kategori,
+                value: _kategori,
                 items: _kategoriList
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 decoration: InputDecoration(
                   hintText: 'Pilih Kategori',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius. circular(12),
                   ),
                 ),
-                onChanged: (value) {
+                onChanged:  (value) {
                   setState(() {
                     _kategori = value;
                   });
@@ -187,20 +201,33 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
               ),
               const SizedBox(height: 16),
 
-              // Nominal
-              const Text('Nominal'),
+              // Nominal dengan Format Currency
+              const Text('Nominal Pemasukan'),
               const SizedBox(height: 5),
               TextFormField(
                 controller: _nominalController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyInputFormatter(), // Format otomatis
+                ],
                 decoration: InputDecoration(
                   hintText: 'Masukkan nominal',
+                  prefixText: 'Rp ',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Nominal wajib diisi' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nominal wajib diisi';
+                  }
+                  final nominal = int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), ''));
+                  if (nominal == null || nominal <= 0) {
+                    return 'Nominal tidak valid';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
@@ -219,7 +246,7 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
                   ),
                   child: _buktiPemasukan == null
                       ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment:  MainAxisAlignment.center,
                           children: const [
                             Icon(Icons.upload_file, color: Colors.deepPurple),
                             SizedBox(height: 8),
@@ -233,7 +260,7 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(
                             _buktiPemasukan!,
-                            fit: BoxFit.cover,
+                            fit:  BoxFit.cover,
                             width: double.infinity,
                           ),
                         ),
@@ -246,8 +273,8 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                  style: ElevatedButton. styleFrom(
+                    backgroundColor:  Colors.deepPurple,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -255,7 +282,7 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
                   onPressed: _submitForm,
                   child: const Text(
                     'Submit',
-                    style: TextStyle(color: Colors.white),
+                    style:  TextStyle(color: Colors.white),
                   ),
                 ),
               ),
@@ -263,13 +290,13 @@ class _TambahPemasukanPageState extends ConsumerState<TambahPemasukanPage> {
 
               // Tombol Reset
               SizedBox(
-                width: double.infinity,
+                width:  double.infinity,
                 height: 45,
                 child: OutlinedButton(
                   onPressed: _resetForm,
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  style: OutlinedButton. styleFrom(
+                    shape:  RoundedRectangleBorder(
+                      borderRadius:  BorderRadius.circular(12),
                     ),
                   ),
                   child: const Text('Reset'),

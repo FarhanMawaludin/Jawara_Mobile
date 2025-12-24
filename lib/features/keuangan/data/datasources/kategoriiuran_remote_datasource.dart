@@ -4,9 +4,7 @@ import '../models/kategoriiuran_model.dart';
 class KategoriIuranDatasource {
   final SupabaseClient supabase = Supabase.instance.client;
 
-  // -----------------------------
   // GET ALL
-  // -----------------------------
   Future<List<KategoriIuranModel>> getAll() async {
     final response = await supabase
         .from('kategori_iuran')
@@ -18,9 +16,7 @@ class KategoriIuranDatasource {
         .toList();
   }
 
-  // -----------------------------
   // GET BY ID
-  // -----------------------------
   Future<KategoriIuranModel?> getById(int id) async {
     final response = await supabase
         .from('kategori_iuran')
@@ -32,26 +28,23 @@ class KategoriIuranDatasource {
     return KategoriIuranModel.fromJson(response);
   }
 
-  // -----------------------------
-  // CREATE
-  // -----------------------------
+  // CREATE ✅ Gunakan toJsonForInsert()
   Future<KategoriIuranModel?> create(KategoriIuranModel data) async {
     try {
       final response = await supabase
           .from('kategori_iuran')
-          .insert(data.toJson())
+          .insert(data.toJsonForInsert()) // ✅ Tanpa id dan created_at
           .select()
           .single();
 
       return KategoriIuranModel.fromJson(response);
     } catch (e) {
-      return null;
+      print('❌ Error insert kategori: $e');
+      rethrow;
     }
   }
 
-  // -----------------------------
   // UPDATE
-  // -----------------------------
   Future<KategoriIuranModel?> update(int id, KategoriIuranModel data) async {
     try {
       final response = await supabase
@@ -64,18 +57,18 @@ class KategoriIuranDatasource {
       if (response == null) return null;
       return KategoriIuranModel.fromJson(response);
     } catch (e) {
-      return null;
+      print('❌ Error update kategori: $e');
+      rethrow;
     }
   }
 
-  // -----------------------------
   // DELETE
-  // -----------------------------
   Future<bool> delete(int id) async {
     try {
       await supabase.from('kategori_iuran').delete().eq('id', id);
       return true;
     } catch (e) {
+      print('❌ Error delete kategori: $e');
       return false;
     }
   }

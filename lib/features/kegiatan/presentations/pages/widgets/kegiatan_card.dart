@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../../../core/utils/date_formatter.dart';
 import '../../../../../features/pengaturan/presentation/providers/log_activity_providers.dart';
 import '../../../data/models/kegiatan_model.dart';
 import '../../providers/kegiatan_list.dart'; // PASTIKAN IMPORT INI
+import '../../providers/kegiatan_repository_provider.dart';
 
 // Ensure kegiatanListNotifierProvider is exported in kegiatan_list_provider.dart
 
@@ -51,7 +53,7 @@ class KegiatanCard extends ConsumerWidget {
                   _buildIconContainer(primaryColor),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildContent(),
+                    child: _buildContent(ref),
                   ),
                   _buildStatusBadge(),
                 ],
@@ -121,7 +123,7 @@ class KegiatanCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -166,6 +168,39 @@ class KegiatanCard extends ConsumerWidget {
             ],
           ),
         ],
+        // ✅ TAMBAHKAN: Tampilkan anggaran jika ada
+        FutureBuilder<double>(
+          future: ref.read(kegiatanRepositoryProvider).getAnggaranByKegiatanId(kegiatan.id),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data! > 0) {
+              final formatter = NumberFormat.currency(
+                locale: 'id_ID',
+                symbol: 'Rp ',
+                decimalDigits: 0,
+              );
+              return Column(
+                children: [
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.account_balance_wallet, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 6),
+                      Text(
+                        formatter.format(snapshot.data!),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ],
     );
   }

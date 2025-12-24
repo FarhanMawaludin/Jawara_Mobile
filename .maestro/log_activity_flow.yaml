@@ -1,0 +1,186 @@
+appId: com.example.jawaramobile
+---
+# E2E Test - Fitur Log Activity
+
+# ===== LAUNCH APP =====
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ===== LOGIN (Skip if already logged in) =====
+- runFlow:
+    when:
+      visible: "Login"
+    commands:
+      - tapOn: "Login"
+      - tapOn: "Masukkan email"
+      - inputText: admin@gmail.com
+      - tapOn: "Masukkan password"
+      - inputText: password
+      - hideKeyboard
+      - tapOn: "Login"
+      - waitForAnimationToEnd
+
+# ===== NAVIGASI MANUAL =====
+# INSTRUKSI: Setelah login, MANUAL buka halaman Log Activity:
+# 1. Tap "Pengaturan" di bottom nav
+# 2. Tap "Log Aktivitas"
+# 3. Tekan ENTER di terminal untuk melanjutkan test
+- inputText: ""
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ===== VERIFIKASI DI HALAMAN LOG ACTIVITY =====
+- assertVisible: "Log Aktivitas"
+- waitForAnimationToEnd
+
+# ===== TEST PENCARIAN LOG =====
+# Test search dengan kata kunci "warga"
+- tapOn:
+    text: "Cari..."
+    optional: true
+- inputText: "warga"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Warga|warga"
+    optional: true
+- waitForAnimationToEnd
+
+# ===== TEST SCROLL LOG ACTIVITY =====
+# Scroll untuk melihat lebih banyak log
+- scroll
+- waitForAnimationToEnd
+
+# ===== VERIFIKASI GROUPING BY DATE =====
+# Memastikan log dikelompokkan berdasarkan tanggal
+- assertVisible:
+    text: "Hari ini|Kemarin|Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des"
+    optional: true
+
+# ===== TEST MEMBUAT LOG BARU VIA FITUR WARGA =====
+# INSTRUKSI MANUAL: Navigasi ke halaman Warga, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
+
+# Verifikasi di halaman Warga
+- assertVisible: "Warga"
+- waitForAnimationToEnd
+
+# Buka halaman tambah warga
+- tapOn:
+    id: "fab_add_warga"
+    optional: true
+- assertVisible: "Tambah Warga"
+- waitForAnimationToEnd
+
+# Isi form warga untuk membuat log baru
+- tapOn: "Nama Lengkap"
+- inputText: "Test E2E Warga"
+- hideKeyboard
+
+- tapOn: "NIK"
+- inputText: "1234567890123456"
+- hideKeyboard
+
+- tapOn: "Nomor Kartu Keluarga"
+- inputText: "1234567890123456"
+- hideKeyboard
+
+# Pilih jenis kelamin
+- tapOn:
+    id: "gender_dropdown"
+    optional: true
+- tapOn: "Laki-laki"
+
+# Pilih status perkawinan
+- tapOn:
+    id: "status_perkawinan_dropdown"
+    optional: true
+- tapOn: "Belum Kawin"
+
+# Pilih status hidup
+- tapOn:
+    id: "status_hidup_dropdown"
+    optional: true
+- tapOn: "Hidup"
+
+# Scroll ke bawah untuk melihat tombol simpan
+- scroll
+
+# Simpan warga (ini akan membuat log baru)
+- tapOn: "Simpan"
+- waitForAnimationToEnd
+
+# ===== VERIFIKASI LOG BARU TERCATAT =====
+# INSTRUKSI MANUAL: Navigasi ke Pengaturan > Log Aktivitas, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
+
+# Verifikasi di halaman Log Aktivitas
+- assertVisible: "Log Aktivitas"
+- waitForAnimationToEnd
+
+# Verifikasi log baru tercatat
+- assertVisible:
+    text: "Menambahkan warga baru: Test E2E Warga"
+    optional: true
+
+# ===== TEST SEARCH LOG YANG BARU DIBUAT =====
+- tapOn:
+    text: "Cari..."
+    optional: true
+- inputText: "Test E2E Warga"
+- waitForAnimationToEnd
+- assertVisible: "Test E2E Warga"
+
+# ===== TEST LOG VIA BROADCAST =====
+# INSTRUKSI MANUAL: Navigasi ke Home > Broadcast, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
+
+# Verifikasi di halaman Broadcast
+- assertVisible: "Broadcast"
+- waitForAnimationToEnd
+
+# Buka form tambah broadcast
+- tapOn:
+    id: "fab_add_broadcast"
+    optional: true
+- assertVisible: "Tambah Broadcast"
+- waitForAnimationToEnd
+
+# Isi form broadcast
+- tapOn: "Judul"
+- inputText: "E2E Test Broadcast"
+- hideKeyboard
+
+- tapOn: "Isi Broadcast"
+- inputText: "Ini adalah broadcast untuk testing end-to-end log activity"
+- hideKeyboard
+
+# Scroll untuk melihat tombol kirim
+- scroll
+
+# Kirim broadcast (ini akan membuat log baru)
+- tapOn: "Kirim"
+- waitForAnimationToEnd
+
+# ===== VERIFIKASI LOG BROADCAST TERCATAT =====
+# INSTRUKSI MANUAL: Navigasi ke Pengaturan > Log Aktivitas, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
+
+# Verifikasi di halaman Log Aktivitas
+- assertVisible: "Log Aktivitas"
+- waitForAnimationToEnd
+
+# Search log broadcast yang baru dibuat
+- tapOn:
+    text: "Cari..."
+    optional: true
+- inputText: "E2E Test Broadcast"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "E2E Test Broadcast"
+    optional: true
+# ===== TEST SELESAI =====

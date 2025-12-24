@@ -46,17 +46,17 @@ final mutasiRepositoryProvider = Provider<MutasiRepositoryImpl>((ref) {
 /// Provider untuk GetAllTransactions usecase
 final getAllTransactionsProvider = Provider<GetAllMutasi>((ref) {
   final repository = ref.watch(mutasiRepositoryProvider);
-  return GetAllMutasi(repository);
+  return GetAllMutasi(repository); // pastikan await di sini
 });
 
 /// Provider untuk fetch semua transaksi (FutureProvider)
-final allTransactionsProvider = FutureProvider<List<Mutasi>>((ref) async {
+final allTransactionsProvider = FutureProvider.autoDispose<List<Mutasi>>((ref) async {
   final usecase = ref.watch(getAllTransactionsProvider);
   return await usecase.call();
 });
 
 /// Provider untuk hitung total saldo (pemasukan - pengeluaran)
-final totalSaldoProvider = FutureProvider<double>((ref) async {
+final totalSaldoProvider = FutureProvider.autoDispose<double>((ref) async {
   final transaksiBukuAsync = ref.watch(allTransactionsProvider);
   
   return transaksiBukuAsync.when(

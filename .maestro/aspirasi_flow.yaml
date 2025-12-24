@@ -1,0 +1,110 @@
+appId: com.example.jawaramobile
+---
+# E2E Test - Fitur Aspirasi Warga
+
+# =========================
+# LAUNCH & LOGIN
+# =========================
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- runFlow:
+    when:
+      visible: "Login"
+    commands:
+      - tapOn: "Login"
+      - tapOn: "Masukkan email"
+      - inputText: admin@gmail.com
+      - tapOn: "Masukkan password"
+      - inputText: password
+      - hideKeyboard
+      - tapOn: "Login"
+      - waitForAnimationToEnd
+
+# =========================
+# TUNGGU DI DASHBOARD
+# =========================
+# INSTRUKSI: Setelah login, MANUAL buka ke halaman Aspirasi:
+# 1. Tap "Warga" di bottom nav
+# 2. Tap "Lihat Semua"
+# 3. Tekan ENTER di terminal untuk melanjutkan test
+- inputText: ""
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# =========================
+# VERIFIKASI DI HALAMAN ASPIRASI
+# =========================
+- assertVisible: "Aspirasi"
+
+# =========================
+# TEST SEARCH
+# =========================
+- tapOn:
+    id: "aspiration_search_bar"
+    optional: true
+- inputText: "jalan"
+- waitForAnimationToEnd
+- tapOn:
+    id: "aspiration_search_bar"
+    optional: true
+- eraseText
+- waitForAnimationToEnd
+
+# =========================
+# TEST FILTER - PENDING
+# =========================
+- tapOn:
+    id: "filter_button"
+    optional: true
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Filter Aspirasi"
+    optional: true
+- tapOn: "Pending"
+- tapOn: "Terapkan"
+- waitForAnimationToEnd
+
+# =========================
+# TEST FILTER - IN PROGRESS
+# =========================
+- tapOn:
+    id: "filter_button"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "In Progress"
+    optional: true
+- tapOn:
+    text: "Terapkan"
+    optional: true
+- waitForAnimationToEnd
+
+# =========================
+# RESET FILTER - ALL
+# =========================
+- tapOn:
+    id: "filter_button"
+    optional: true
+- waitForAnimationToEnd
+- tapOn: "All"
+- tapOn: "Terapkan"
+- waitForAnimationToEnd
+
+# =========================
+# TEST BUKA DETAIL ASPIRASI
+# =========================
+- tapOn:
+    index: 0
+    id: "aspiration_list_item"
+    optional: true
+- waitForAnimationToEnd
+- assertVisible: "Aspirasi"
+
+# =========================
+# BACK KE LIST
+# =========================
+- back
+- waitForAnimationToEnd
+- assertVisible: "Aspirasi"
