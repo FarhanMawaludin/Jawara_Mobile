@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jawaramobile/features/warga/domain/entities/rumah.dart';
+import 'package:jawaramobile/features/warga/data/models/rumah_model.dart';
 import 'package:jawaramobile/features/warga/domain/repositories/rumah_repository.dart';
 import 'package:jawaramobile/features/warga/domain/usecases/rumah/get_rumah_by_id.dart';
 import 'package:mocktail/mocktail.dart';
@@ -16,19 +16,21 @@ void main() {
     usecase = GetRumahById(mockRepository);
   });
 
-  // Sample entity
-  final rumah = Rumah(
-    id: 1,
-    keluargaId: 12,
-    blok: "A",
-    nomorRumah: "10",
-    alamatLengkap: "Jl. Melati No. 10",
-    createdAt: DateTime.now(),
-  );
-
   test("GetRumahById returns data from repository", () async {
+    // Sample entity
+    final rumah = RumahModel(
+      id: 1,
+      keluargaId: 12,
+      blok: "A",
+      nomorRumah: "10",
+      alamatLengkap: "Jl. Melati No. 10",
+      createdAt: DateTime.now(),
+    );
+
     // Arrange
-    when(() => mockRepository.getRumahById(1)).thenAnswer((_) async => rumah);
+    when(
+      () => mockRepository.getRumahById(1),
+    ).thenAnswer((_) => Future.value(rumah));
 
     // Act
     final result = await usecase(1);
