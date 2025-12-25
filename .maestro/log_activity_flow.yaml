@@ -74,37 +74,69 @@ appId: com.example.jawaramobile
 - waitForAnimationToEnd
 
 # Isi form warga untuk membuat log baru
-- tapOn: "Nama Lengkap"
+# Pilih Keluarga (optional, bisa skip)
+- tapOn: "Pilih Keluarga"
+- tapOn: "Tidak Ada"
+
+# Input Nama
+- tapOn: "Masukkan Nama Lengkap"
 - inputText: "Test E2E Warga"
 - hideKeyboard
 
-- tapOn: "NIK"
+# Input NIK
+- tapOn: "Masukkan NIK"
 - inputText: "1234567890123456"
 - hideKeyboard
 
-- tapOn: "Nomor Kartu Keluarga"
-- inputText: "1234567890123456"
+# Input No. Telepon
+- tapOn: "08xxxxxxxxxx"
+- inputText: "081234567890"
 - hideKeyboard
 
-# Pilih jenis kelamin
-- tapOn:
-    id: "gender_dropdown"
-    optional: true
-- tapOn: "Laki-laki"
+# Input Tempat Lahir
+- tapOn: "Masukkan tempat lahir"
+- inputText: "Jakarta"
+- hideKeyboard
 
-# Pilih status perkawinan
+# Pilih Tanggal Lahir
+- tapOn: "Pilih Tanggal Lahir"
 - tapOn:
-    id: "status_perkawinan_dropdown"
+    text: "OK"
     optional: true
-- tapOn: "Belum Kawin"
 
-# Pilih status hidup
-- tapOn:
-    id: "status_hidup_dropdown"
-    optional: true
-- tapOn: "Hidup"
+# Pilih Golongan Darah
+- tapOn: "Pilih golongan darah"
+- tapOn: "A"
 
-# Scroll ke bawah untuk melihat tombol simpan
+# Pilih Peran Keluarga
+- tapOn: "Pilih peran keluarga"
+- tapOn: "Anak"
+
+# Scroll ke bawah untuk field lainnya
+- scroll
+
+# Pilih Agama
+- tapOn: "Pilih agama"
+- tapOn: "Islam"
+
+# Pilih Pendidikan
+- tapOn: "Pilih pendidikan"
+- tapOn: "SMA"
+
+# Input Pekerjaan
+- tapOn: "Masukkan pekerjaan"
+- inputText: "Mahasiswa"
+- hideKeyboard
+
+# Pilih Status
+- tapOn: "Pilih status"
+- tapOn: "aktif"
+
+# Pilih Jenis Kelamin
+- tapOn: "Pilih jenis kelamin"
+- tapOn: "Laki-Laki"
+
+# Scroll ke bawah untuk tombol simpan
 - scroll
 
 # Simpan warga (ini akan membuat log baru)
