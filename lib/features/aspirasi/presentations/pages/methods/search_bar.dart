@@ -41,6 +41,7 @@ class AspirationSearchBar extends StatelessWidget {
                       ),
                     ),
                     child: TextField(
+                      key: const Key('aspiration_search_bar'),
                       controller: controller,
                       cursorColor: Colors.grey.shade800,
                       decoration: InputDecoration(
@@ -77,6 +78,7 @@ class AspirationSearchBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         GestureDetector(
+          key: const Key('filter_button'),
           onTap: onFilterTap,
           child: Container(
             height: 44,

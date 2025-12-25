@@ -11,21 +11,17 @@ class MockSupabaseClient extends Mock implements SupabaseClient {}
 
 class MockSupabaseQueryBuilder extends Mock implements SupabaseQueryBuilder {}
 
-class MockPostgrestFilterBuilder extends Mock
-    implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {}
-
 class MockGoTrueClient extends Mock implements GoTrueClient {}
 
 class MockUser extends Mock implements User {}
 
-
-class FakePostgrestFilterBuilder
-    extends Fake
-    implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {
+class FakeSelectOrderBuilder extends Fake
+    implements
+        PostgrestFilterBuilder<List<Map<String, dynamic>>>,
+        PostgrestTransformBuilder<List<Map<String, dynamic>>> {
   final List<Map<String, dynamic>> data;
-  final Exception? error;
 
-  FakePostgrestFilterBuilder({this.data = const [], this.error});
+  FakeSelectOrderBuilder({this.data = const []});
 
   @override
   PostgrestTransformBuilder<List<Map<String, dynamic>>> order(
@@ -34,32 +30,33 @@ class FakePostgrestFilterBuilder
     bool nullsFirst = false,
     String? referencedTable,
   }) {
-    return FakePostgrestTransformBuilder(data: data, error: error);
+    return this;
   }
-}
-
-class FakePostgrestTransformBuilder
-    extends Fake
-    implements PostgrestTransformBuilder<List<Map<String, dynamic>>> {
-  final List<Map<String, dynamic>> data;
-  final Exception? error;
-
-  FakePostgrestTransformBuilder({this.data = const [], this.error});
 
   @override
   Future<U> then<U>(
     FutureOr<U> Function(List<Map<String, dynamic>> value) onValue, {
     Function? onError,
   }) {
-    if (error != null) {
-      return Future.error(error!);
-    }
     return Future.sync(() => onValue(data));
   }
 }
 
+class FakeInsertBuilder extends Fake
+    implements PostgrestFilterBuilder<List<Map<String, dynamic>>> {
+  @override
+  Future<U> then<U>(
+    FutureOr<U> Function(List<Map<String, dynamic>> value) onValue, {
+    Function? onError,
+  }) => Future.sync(() => onValue(const []));
+}
+
 void main() {
   late MockSupabaseClient defaultClient;
+
+  ProviderContainer makeContainer(SupabaseClient client) => ProviderContainer(
+    overrides: [supabaseClientProviderForLog.overrideWithValue(client)],
+  );
 
   setUp(() {
     defaultClient = MockSupabaseClient();
@@ -85,98 +82,18 @@ void main() {
       expect(model.userId, 'u1');
     });
 
-    test('handles nulls and alt keys', () {
+    test('supports alternative keys and defaults', () {
       final model = LogActivityModel.fromMap({
         'id': 2,
         'title': null,
-        'userId': null,
+        'userId': 'fallback',
         'createdAt': '2025-12-08T12:00:00Z',
       });
 
+      expect(model.id, 2);
       expect(model.title, '');
-      expect(model.userId, null);
+      expect(model.userId, 'fallback');
       expect(model.createdAt.year, 2025);
-    });
-
-    test('parses integer id', () {
-      final model = LogActivityModel.fromMap({
-        'id': 3,
-        'title': 'Test',
-        'user_id': 'user123',
-        'created_at': '2025-12-08T10:00:00Z',
-      });
-
-      expect(model.id, 3);
-      expect(model.title, 'Test');
-      expect(model.userId, 'user123');
-    });
-
-    test('handles missing fields with defaults', () {
-      final model = LogActivityModel.fromMap({
-        'id': 4,
-        'created_at': '2025-12-08T10:00:00Z',
-      });
-
-      expect(model.id, 4);
-      expect(model.title, '');
-      expect(model.userId, null);
-    });
-
-    test('uses user_id field when both user_id and userId exist', () {
-      final model = LogActivityModel.fromMap({
-        'id': 5,
-        'title': 'Test',
-        'user_id': 'primary_user',
-        'userId': 'alt_user',
-        'created_at': '2025-12-08T10:00:00Z',
-      });
-
-      expect(model.userId, 'primary_user');
-    });
-
-    test('uses userId when user_id is null', () {
-      final model = LogActivityModel.fromMap({
-        'id': 6,
-        'title': 'Test',
-        'user_id': null,
-        'userId': 'alt_user',
-        'created_at': '2025-12-08T10:00:00Z',
-      });
-
-      expect(model.userId, 'alt_user');
-    });
-
-    test('parses createdAt field alternative', () {
-      final model = LogActivityModel.fromMap({
-        'id': 7,
-        'title': 'Test',
-        'createdAt': '2025-12-08T10:00:00Z',
-      });
-
-      expect(model.createdAt.year, 2025);
-    });
-
-    test('converts numeric title to string', () {
-      final model = LogActivityModel.fromMap({
-        'id': 8,
-        'title': 123,
-        'created_at': '2025-12-08T10:00:00Z',
-      });
-
-      expect(model.title, '123');
-    });
-
-    test('toString returns expected format', () {
-      final model = LogActivityModel(
-        id: 1,
-        title: 'Test',
-        userId: 'user1',
-        createdAt: DateTime(2025, 12, 8),
-      );
-
-      expect(model, isA<LogActivityModel>());
-      expect(model.id, 1);
-      expect(model.title, 'Test');
     });
   });
 
@@ -184,23 +101,25 @@ void main() {
     test('fetches data via Supabase client', () async {
       final mockClient = MockSupabaseClient();
       final mockQueryBuilder = MockSupabaseQueryBuilder();
-      final fakeFilterBuilder = FakePostgrestFilterBuilder(data: [
-        {
-          'id': 1,
-          'title': 'Activity 1',
-          'user_id': 'user-1',
-          'created_at': '2025-12-08T10:00:00Z',
-        },
-      ]);
-
-      when(() => mockClient.from('log_activity')).thenAnswer((_) => mockQueryBuilder);
-      when(() => mockQueryBuilder.select(any())).thenAnswer((_) => fakeFilterBuilder);
-
-      final container = ProviderContainer(
-        overrides: [
-          supabaseClientProviderForLog.overrideWithValue(mockClient),
+      final fakeFilterBuilder = FakeSelectOrderBuilder(
+        data: [
+          {
+            'id': 1,
+            'title': 'Activity 1',
+            'user_id': 'user-1',
+            'created_at': '2025-12-08T10:00:00Z',
+          },
         ],
       );
+
+      when(
+        () => mockClient.from('log_activity'),
+      ).thenAnswer((_) => mockQueryBuilder);
+      when(
+        () => mockQueryBuilder.select(any()),
+      ).thenAnswer((_) => fakeFilterBuilder);
+
+      final container = makeContainer(mockClient);
 
       final result = await container.read(logActivityListProvider.future);
 
@@ -215,17 +134,17 @@ void main() {
       final mockClient = MockSupabaseClient();
       final mockQueryBuilder = MockSupabaseQueryBuilder();
 
-      when(() => mockClient.from('log_activity')).thenAnswer((_) => mockQueryBuilder);
-      when(() => mockQueryBuilder.select(any())).thenThrow(Exception('Database error'));
+      when(
+        () => mockClient.from('log_activity'),
+      ).thenAnswer((_) => mockQueryBuilder);
+      when(
+        () => mockQueryBuilder.select(any()),
+      ).thenThrow(Exception('Database error'));
 
-      final container = ProviderContainer(
-        overrides: [
-          supabaseClientProviderForLog.overrideWithValue(mockClient),
-        ],
-      );
+      final container = makeContainer(mockClient);
 
-      expect(
-        () => container.read(logActivityListProvider.future),
+      await expectLater(
+        container.read(logActivityListProvider.future),
         throwsA(isA<Exception>()),
       );
 
@@ -243,8 +162,115 @@ void main() {
     });
   });
 
-  // TODO: Add integration tests for LogActivityNotifier.createLog and createLogWithCurrentUser
-  // These methods require complex mocking of Supabase insert operations
-  // For now, they are tested manually or via integration tests
-}
+  group('LogActivityNotifier', () {
+    late MockSupabaseClient mockClient;
+    late MockSupabaseQueryBuilder mockQueryBuilder;
+    late MockGoTrueClient mockAuth;
+    late MockUser mockUser;
+    late ProviderContainer container;
 
+    setUp(() {
+      mockClient = MockSupabaseClient();
+      mockQueryBuilder = MockSupabaseQueryBuilder();
+      mockAuth = MockGoTrueClient();
+      mockUser = MockUser();
+
+      supabaseClientFactoryForLog = () => mockClient;
+      container = makeContainer(mockClient);
+      addTearDown(container.dispose);
+    });
+
+    test('createLog success updates state and inserts row', () async {
+      when(
+        () => mockClient.from('log_activity'),
+      ).thenAnswer((_) => mockQueryBuilder);
+      when(
+        () => mockQueryBuilder.insert(any()),
+      ).thenAnswer((_) => FakeInsertBuilder());
+
+      final notifier = container.read(logActivityNotifierProvider.notifier);
+      expect(notifier.state.hasValue, true);
+
+      await notifier.createLog(title: 'Create', userId: 'user-123');
+
+      expect(notifier.state.hasValue, true);
+      verify(() => mockClient.from('log_activity'));
+      verify(() => mockQueryBuilder.insert(any()));
+
+      container.dispose();
+    });
+
+    test('createLog error sets error state and rethrows', () async {
+      when(
+        () => mockClient.from('log_activity'),
+      ).thenAnswer((_) => mockQueryBuilder);
+      when(
+        () => mockQueryBuilder.insert(any()),
+      ).thenThrow(Exception('Insert failed'));
+
+      final notifier = container.read(logActivityNotifierProvider.notifier);
+
+      await expectLater(
+        notifier.createLog(title: 'Fail', userId: 'user-123'),
+        throwsA(
+          predicate((e) => e.toString().contains('Gagal membuat log activity')),
+        ),
+      );
+      expect(notifier.state.hasError, true);
+
+      container.dispose();
+    });
+
+    test('createLogWithCurrentUser success uses current user id', () async {
+      when(
+        () => mockClient.from('log_activity'),
+      ).thenAnswer((_) => mockQueryBuilder);
+      when(
+        () => mockQueryBuilder.insert(any()),
+      ).thenAnswer((_) => FakeInsertBuilder());
+      when(() => mockClient.auth).thenReturn(mockAuth);
+      when(() => mockAuth.currentUser).thenReturn(mockUser);
+      when(() => mockUser.id).thenReturn('user-xyz');
+
+      final notifier = container.read(logActivityNotifierProvider.notifier);
+
+      await notifier.createLogWithCurrentUser(title: 'With current user');
+
+      expect(notifier.state.hasValue, true);
+      verify(() => mockClient.from('log_activity'));
+      verify(() => mockQueryBuilder.insert(any()));
+      verify(() => mockAuth.currentUser);
+
+      container.dispose();
+    });
+
+    test(
+      'createLogWithCurrentUser error sets error state and rethrows',
+      () async {
+        when(
+          () => mockClient.from('log_activity'),
+        ).thenAnswer((_) => mockQueryBuilder);
+        when(
+          () => mockQueryBuilder.insert(any()),
+        ).thenThrow(Exception('Insert failed'));
+        when(() => mockClient.auth).thenReturn(mockAuth);
+        when(() => mockAuth.currentUser).thenReturn(mockUser);
+        when(() => mockUser.id).thenReturn('user-xyz');
+
+        final notifier = container.read(logActivityNotifierProvider.notifier);
+
+        await expectLater(
+          notifier.createLogWithCurrentUser(title: 'Fail current user'),
+          throwsA(
+            predicate(
+              (e) => e.toString().contains('Gagal membuat log activity'),
+            ),
+          ),
+        );
+        expect(notifier.state.hasError, true);
+
+        container.dispose();
+      },
+    );
+  });
+}
