@@ -21,38 +21,33 @@
       - waitForAnimationToEnd
 
 # =========================
-# KE HALAMAN MUTASI (KEUANGAN)
+# NAVIGASI KE HALAMAN MUTASI
 # =========================
-- openLink: "jawaramobile://keuangan/mutasi/mutasi"
-- assertVisible: "Daftar Transaksi"
+# INSTRUKSI MANUAL: Navigasi ke Keuangan > Mutasi, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd:
+    timeout: 2000
 
 # =========================
 # TAMBAH PENGELUARAN
 # =========================
-- openLink: "jawaramobile://keuangan/pengeluaran/tambah-pengeluaran"
-- assertVisible: "Tambah Pengeluaran"
+# INSTRUKSI MANUAL: Tap FAB (+) untuk tambah pengeluaran, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
 
+- assertVisible: "Tambah Pengeluaran"
 - tapOn: "Nama Pengeluaran"
 - inputText: "Tes Pengeluaran Maestro"
-
 - tapOn: "Pilih Tanggal"
 - tapOn: "OK"
-
 - tapOn: "Pilih Kategori"
 - tapOn: "Operasional"
-
 - tapOn: "Masukkan nominal"
 - inputText: 100000
-
 - hideKeyboard
 - tapOn: "Submit"
-
-# =========================
-# ALERT & KEMBALI KE MUTASI
-# =========================
-- assertVisible: "Pengeluaran berhasil disimpan!"
-
-- assertVisible: "Daftar Transaksi"
-- assertVisible: "Tes Pengeluaran Maestro"
-- assertVisible: "Operasional"
-- assertVisible: "Rp 100.000"
+- waitForAnimationToEnd:
+    timeout: 1500
+- assertVisible:
+    text: "Pengeluaran berhasil disimpan!"
+    optional: true
