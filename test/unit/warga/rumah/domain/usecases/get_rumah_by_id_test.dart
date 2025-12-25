@@ -16,19 +16,21 @@ void main() {
     usecase = GetRumahById(mockRepository);
   });
 
-  // Sample model
-  final rumah = RumahModel(
-    id: 1,
-    keluargaId: 12,
-    blok: "A",
-    nomorRumah: "10",
-    alamatLengkap: "Jl. Melati No. 10",
-    createdAt: DateTime.now(),
-  );
-
   test("GetRumahById returns data from repository", () async {
+    // Sample entity
+    final rumah = RumahModel(
+      id: 1,
+      keluargaId: 12,
+      blok: "A",
+      nomorRumah: "10",
+      alamatLengkap: "Jl. Melati No. 10",
+      createdAt: DateTime.now(),
+    );
+
     // Arrange
-    when(() => mockRepository.getRumahById(1)).thenAnswer((_) async => rumah);
+    when(
+      () => mockRepository.getRumahById(1),
+    ).thenAnswer((_) => Future.value(rumah));
 
     // Act
     final result = await usecase(1);

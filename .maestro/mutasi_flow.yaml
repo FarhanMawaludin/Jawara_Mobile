@@ -1,0 +1,62 @@
+﻿appId: com.example.jawaramobile
+---
+# =========================
+# RESET & LOGIN
+# =========================
+- clearState
+- launchApp
+
+- assertVisible: "Jawara Pintar"
+- tapOn: "Login"
+
+- assertVisible: "Login"
+- tapOn: "Masukkan email"
+- inputText: admin@gmail.com
+
+- tapOn: "Masukkan password"
+- inputText: password
+
+- hideKeyboard
+- tapOn: "Login"
+
+# =========================
+# HOME PAGE
+# =========================
+- assertVisible: "Selamat pagi,"
+
+# =========================
+# KE HALAMAN MUTASI (KEUANGAN)
+# =========================
+- openLink: "jawaramobile://keuangan/mutasi/mutasi"
+- assertVisible: "Daftar Transaksi"
+
+# =========================
+# TAMBAH PENGELUARAN
+# =========================
+- openLink: "jawaramobile://keuangan/pengeluaran/tambah-pengeluaran"
+- assertVisible: "Tambah Pengeluaran"
+
+- tapOn: "Nama Pengeluaran"
+- inputText: "Tes Pengeluaran Maestro"
+
+- tapOn: "Pilih Tanggal"
+- tapOn: "OK"
+
+- tapOn: "Pilih Kategori"
+- tapOn: "Operasional"
+
+- tapOn: "Masukkan nominal"
+- inputText: 100000
+
+- hideKeyboard
+- tapOn: "Submit"
+
+# =========================
+# ALERT & KEMBALI KE MUTASI
+# =========================
+- assertVisible: "Pengeluaran berhasil disimpan!"
+
+- assertVisible: "Daftar Transaksi"
+- assertVisible: "Tes Pengeluaran Maestro"
+- assertVisible: "Operasional"
+- assertVisible: "Rp 100.000"
