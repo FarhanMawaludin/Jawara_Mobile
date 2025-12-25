@@ -1,0 +1,90 @@
+appId: com.example.jawaramobile
+---
+# =========================
+# RESET & LOGIN
+# =========================
+- clearState
+- launchApp
+
+- assertVisible: "Jawara Pintar"
+- tapOn: "Login"
+
+- assertVisible: "Login"
+- tapOn: "Masukkan email"
+- inputText: admin@gmail.com
+
+- tapOn: "Masukkan password"
+- inputText: password
+
+- hideKeyboard
+- tapOn: "Login"
+
+# =========================
+# HOME PAGE
+# =========================
+- assertVisible: "Selamat pagi,"
+
+# =========================
+# NAVIGATE TO KEGIATAN VIA BOTTOM NAV
+# =========================
+# Tap on Kegiatan in bottom nav (4th icon from left)
+- tapOn:
+    point: "70%,95%"
+
+# =========================
+# KEGIATAN → TAMBAH KEGIATAN
+# =========================
+# Wait for kegiatan page to load
+- assertVisible: "40"
+
+
+# Tap on "Tambah Kegiatan" card (left card in first row)
+- tapOn: "Tambah Kegiatan"
+
+- assertVisible: "Tambah Kegiatan"
+
+# =========================
+# FORM TAMBAH KEGIATAN
+# =========================
+# Nama Kegiatan
+- tapOn: "Nama Kegiatan"
+- inputText: "Kerja Bakti RT 01"
+
+# Tanggal - tap on "Pilih Tanggal"
+-  tapOn:
+    point: "50%,22%"
+- tapOn: "OK"
+# Detail Lokasi
+- tapOn: "Detail Lokasi"
+- inputText: "Balai Warga RT 01"
+
+# Penanggung Jawab
+- tapOn: "Penanggung Jawab"
+- inputText: "Pak RT"
+
+- hideKeyboard
+
+# Kategori dropdown
+- tapOn: "Kategori"
+- tapOn: "Komunitas"
+
+# Scroll to see more fields
+- scroll
+
+# Deskripsi Lengkap
+- tapOn: "Deskripsi Lengkap"
+- inputText: "Kegiatan kerja bakti membersihkan lingkungan RT 01"
+
+- hideKeyboard
+
+# Anggaran Kegiatan
+- tapOn: "Masukkan anggaran (opsional)"
+- inputText: "500000"
+
+- hideKeyboard
+- scroll
+
+# =========================
+# SIMPAN DATA
+# =========================
+- tapOn: "Simpan Kegiatan"
