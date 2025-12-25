@@ -1,28 +1,24 @@
 ﻿appId: com.example.jawaramobile
 ---
 # =========================
-# RESET & LOGIN
+# LAUNCH & LOGIN
 # =========================
-- clearState
 - launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
 
-- assertVisible: "Jawara Pintar"
-- tapOn: "Login"
-
-- assertVisible: "Login"
-- tapOn: "Masukkan email"
-- inputText: admin@gmail.com
-
-- tapOn: "Masukkan password"
-- inputText: password
-
-- hideKeyboard
-- tapOn: "Login"
-
-# =========================
-# HOME PAGE
-# =========================
-- assertVisible: "Selamat pagi,"
+- runFlow:
+    when:
+      visible: "Login"
+    commands:
+      - tapOn: "Login"
+      - tapOn: "Masukkan email"
+      - inputText: admin@gmail.com
+      - tapOn: "Masukkan password"
+      - inputText: password
+      - hideKeyboard
+      - tapOn: "Login"
+      - waitForAnimationToEnd
 
 # =========================
 # KE HALAMAN MUTASI (KEUANGAN)
