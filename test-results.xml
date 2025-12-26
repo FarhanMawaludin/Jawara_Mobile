@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="93d6a322" tests="1" failures="1" time="59.0">
+    <testcase id="log_activity_flow" name="log_activity_flow" classname="log_activity_flow" time="59.0" status="ERROR">
+      <failure>Assertion is false: "Pengaturan" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

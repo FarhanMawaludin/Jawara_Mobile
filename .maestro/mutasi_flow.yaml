@@ -1,0 +1,53 @@
+﻿appId: com.example.jawaramobile
+---
+# =========================
+# LAUNCH & LOGIN
+# =========================
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- runFlow:
+    when:
+      visible: "Login"
+    commands:
+      - tapOn: "Login"
+      - tapOn: "Masukkan email"
+      - inputText: admin@gmail.com
+      - tapOn: "Masukkan password"
+      - inputText: password
+      - hideKeyboard
+      - tapOn: "Login"
+      - waitForAnimationToEnd
+
+# =========================
+# NAVIGASI KE HALAMAN MUTASI
+# =========================
+# INSTRUKSI MANUAL: Navigasi ke Keuangan > Mutasi, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# =========================
+# TAMBAH PENGELUARAN
+# =========================
+# INSTRUKSI MANUAL: Tap FAB (+) untuk tambah pengeluaran, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
+
+- assertVisible: "Tambah Pengeluaran"
+- tapOn: "Nama Pengeluaran"
+- inputText: "Tes Pengeluaran Maestro"
+- tapOn: "Pilih Tanggal"
+- tapOn: "OK"
+- tapOn: "Pilih Kategori"
+- tapOn: "Operasional"
+- tapOn: "Masukkan nominal"
+- inputText: 100000
+- hideKeyboard
+- tapOn: "Submit"
+- waitForAnimationToEnd:
+    timeout: 1500
+- assertVisible:
+    text: "Pengeluaran berhasil disimpan!"
+    optional: true

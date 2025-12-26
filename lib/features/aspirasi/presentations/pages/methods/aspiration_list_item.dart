@@ -4,7 +4,6 @@ import 'package:jawaramobile/features/aspirasi/presentations/pages/aspiration_de
 import 'package:jawaramobile/features/aspirasi/presentations/pages/methods/aspiration_model.dart';
 import 'package:jawaramobile/features/aspirasi/presentations/providers/aspirasi_providers.dart';
 
-
 class AspirationListItem extends ConsumerWidget {
   final AspirationItem item;
   final VoidCallback? onMarkedRead;
@@ -17,14 +16,17 @@ class AspirationListItem extends ConsumerWidget {
     final displayName = item.sender.split('@')[0].trim();
 
     return InkWell(
+      key: const Key('aspiration_list_item'),
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
         // Mark as read in database
         if (item.id != null && !item.isRead) {
-          await ref.read(aspirationRemoteDataSourceProvider).markAsRead(item.id!);
+          await ref
+              .read(aspirationRemoteDataSourceProvider)
+              .markAsRead(item.id!);
           ref.invalidate(aspirationListProvider);
         }
-        
+
         onMarkedRead?.call();
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => AspirationDetailPage(item: item)),
@@ -43,7 +45,10 @@ class AspirationListItem extends ConsumerWidget {
                   backgroundColor: Colors.grey.shade200,
                   child: Text(
                     displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-                    style: TextStyle(color: Colors.grey.shade800, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 if (!item.isRead)
@@ -89,7 +94,9 @@ class AspirationListItem extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: item.isRead ? Colors.grey[600] : Colors.grey[800],
-                      fontWeight: item.isRead ? FontWeight.w400 : FontWeight.w500,
+                      fontWeight: item.isRead
+                          ? FontWeight.w400
+                          : FontWeight.w500,
                     ),
                   ),
                 ],
@@ -100,17 +107,21 @@ class AspirationListItem extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  formatDate(item.date), 
+                  formatDate(item.date),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: item.isRead ? Colors.grey[500] : Colors.deepPurpleAccent[400],
+                    color: item.isRead
+                        ? Colors.grey[500]
+                        : Colors.deepPurpleAccent[400],
                     fontWeight: item.isRead ? FontWeight.w400 : FontWeight.w600,
                   ),
                 ),
-                if (!item.isRead)
-                  const SizedBox(height: 4),
+                if (!item.isRead) const SizedBox(height: 4),
                 if (!item.isRead)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.deepPurpleAccent[400],
                       borderRadius: BorderRadius.circular(10),

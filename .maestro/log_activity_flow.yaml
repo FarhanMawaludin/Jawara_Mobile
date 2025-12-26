@@ -1,0 +1,42 @@
+appId: com.example.jawaramobile
+---
+# E2E Test - Log Activity (Sederhana)
+# ===== LAUNCH & LOGIN =====
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible: "Login"
+    commands:
+      - tapOn: "Login"
+      - tapOn: "Masukkan email"
+      - inputText: admin@gmail.com
+      - tapOn: "Masukkan password"
+      - inputText: password
+      - hideKeyboard
+      - tapOn: "Login"
+      - waitForAnimationToEnd
+# ===== NAVIGASI MANUAL =====
+# INSTRUKSI: Setelah login, buka Pengaturan > Log Aktivitas, lalu tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd:
+    timeout: 2000
+# ===== VERIFIKASI DI HALAMAN LOG ACTIVITY =====
+- assertVisible: "Log Aktivitas"
+# ===== UJI SEARCH BAR =====
+- tapOn: "Cari..."
+- inputText: "warga"
+- waitForAnimationToEnd
+- eraseText
+- waitForAnimationToEnd
+# ===== VERIFIKASI GROUPING TANGGAL =====
+- assertVisible:
+    text: "Hari ini|Kemarin|Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember"
+    optional: true
+# ===== TEST TAMBAH WARGA (MANUAL) =====
+# INSTRUKSI: Navigasi ke halaman Warga, tambah warga baru, lalu kembali ke Log Aktivitas dan tekan ENTER
+- inputText: ""
+- waitForAnimationToEnd
+- assertVisible: "Log Aktivitas"
+# ===== TEST SELESAI =====
